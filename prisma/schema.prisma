@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// PARTIALS -
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// USER SCHEMA -
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  firstName      String
+  lastName       String
+  email          String    @unique
+  image          String?
+  hashedPassword String
+  cnic           String    @unique
+  city           String
+  dob            String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  bloodBankId    String    @db.ObjectId
+  bloodBank      bloodBank @relation(fields: [bloodBankId], references: [id], onDelete: Cascade)
+}
+
+// BLOOD BANK SCHEMA -
+
+model bloodBank {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  city           String
+  licenseNo      String @unique
+  email          String @unique
+  hashedPassword String
+  address        String
+  users          User[] 
+}
