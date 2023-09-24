@@ -22,10 +22,12 @@ model User {
   email          String   @unique
   cnic           String   @unique
   city           String
-  dob            DateTime
+  dob            String
   image          String?
   hashedPassword String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   role           Role     @default(user)
 }
+
+// npx prisma db push

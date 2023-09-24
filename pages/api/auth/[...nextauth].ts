@@ -52,7 +52,8 @@ const authOptions: AuthOptions = {
   ],
 
   pages: {
-    signIn: "/",
+    signIn: "/auth/signIn",
+    signOut: "/",
   },
 
   debug: process.env.NODE_ENV === "development",
@@ -62,4 +63,6 @@ const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export default NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };
