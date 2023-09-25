@@ -35,15 +35,6 @@ export async function POST(req: Request) {
     );
   }
 
-  if (password !== confirmPassword) {
-    return new NextResponse(
-      JSON.stringify({ error: "Passwords do not match" }),
-      {
-        status: 400,
-      }
-    );
-  }
-
   const hashedPassword = await bcrypt.hash(password, 12);
   try {
     await prisma.user.create({
