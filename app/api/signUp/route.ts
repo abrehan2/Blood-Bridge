@@ -68,5 +68,5 @@ export async function POST(req: Request) {
   return new NextResponse(
     JSON.stringify({ message: "Your account has been created successfully!" }),
     { status: 200 }
-  );
+  )
 }
