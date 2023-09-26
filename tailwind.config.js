@@ -18,6 +18,10 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        LatoRegular: ['LatoRegular', 'sans'],
+        LatoBold: ['LatoBold', 'sans'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

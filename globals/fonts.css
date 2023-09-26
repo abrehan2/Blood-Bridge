@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'LatoRegular';
+    src: url("./fonts/Lato-Regular.ttf") format("opentype");
+  }
+
+@font-face {
+    font-family: 'LatoBold';
+    src: url('./fonts/Lato-Bold.ttf') format('opentype');
+}
