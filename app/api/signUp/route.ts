@@ -1,8 +1,9 @@
 // IMPORTS -
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { Prisma as PrismaClient } from "@prisma/client";
 import prisma from "@/config/prismaConfig";
 import bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
 
   const hashedPassword = await bcrypt.hash(password, 12);
   try {
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email,
         firstName,
@@ -46,6 +47,13 @@ export async function POST(req: Request) {
         dob,
         city,
         hashedPassword,
+      },
+    });
+
+    const token = await prisma.activateToken.create({
+      data: {
+        token: `${randomUUID()}${randomUUID()}`.replace(/-/g, ""),
+        userId: user.id,
       },
     });
   } catch (error) {
