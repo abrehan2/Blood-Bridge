@@ -37,6 +37,10 @@ const authOptions: AuthOptions = {
           throw new Error("Invalid email or password");
         }
 
+        if (!user.active) {
+          throw new Error("Please verify your account");
+        }
+
         const isCorrectPassword = await bcrypt.compare(
           credentials?.password,
           user?.hashedPassword
@@ -63,6 +67,4 @@ const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST };
+export default NextAuth(authOptions);
