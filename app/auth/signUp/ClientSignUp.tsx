@@ -9,12 +9,12 @@ const ClientSignUp = () => {
         <TabsTrigger value="BloodBank" className="!uppercase !bg-white data-[state=active]:!bg-[#BE382A] !text-zinc-500 data-[state=active]:!text-white !font-LatoRegular tracking-[5px]">Blood Bank</TabsTrigger>
       </TabsList>
       <TabsContent value="BloodRecipient">
-        <div className="w-full min-h-[80vh] border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden flex justify-center items-center">
+        <div className="w-full py-16 border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden flex justify-center items-center">
           <ClientSignupForm />
         </div>
       </TabsContent>
       <TabsContent value="BloodBank">
-        <div className="w-full min-h-[80vh] border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden">
+        <div className="w-full py-16 border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden">
 
         </div>
       </TabsContent>

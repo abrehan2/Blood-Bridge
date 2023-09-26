@@ -6,28 +6,36 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ZodType, z } from 'zod'
 import { Constants } from '@/globals/constants'
 import { Button } from '@/components/ui/button'
-import { toast } from 'react-toastify'
+import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
+import ValidatePassword from './ValidatePassword'
+import axios from 'axios'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
 
 export interface SignupData {
     firstName: string;
     lastName: string;
     email: string;
-    dateOfBirth: string;
+    dob: string;
     city: string;
-    password: string;
-    confirmPassword: string;
+    password?: string;
+    confirmPassword?: string;
     cnic?: string;
 }
 
-export type fieldTypes = "email" | "password" | "firstName" | "lastName" | "dateOfBirth" | "confirmPassword" | "cnic";
+export type fieldTypes = "email" | "password" | "firstName" | "lastName" | "dob" | "confirmPassword" | "cnic";
 
 const ClientSignupForm = () => {
 
     const [cnic, setCnic] = useState<string>('')
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [agreeConditions, setAgreeConditions] = useState<boolean>(false)
+    const [password, setPassword] = useState<string>('')
+    const [confirmPassword, setConfirmPassword] = useState<string>('')
+    const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false)
 
     const today = new Date();
     const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
@@ -36,18 +44,13 @@ const ClientSignupForm = () => {
         firstName: z.string().nonempty({ message: 'First Name is required' }).min(3, 'First Name must be at least 3 characters long'),
         lastName: z.string().nonempty({ message: 'Last Name is required' }).min(3, 'Last Name must be at least 3 characters long'),
         email: z.string().email({ message: 'Email is invalid' }),
-        dateOfBirth: z.string().nonempty('Date of Birth is Required').refine((data) => {
-            const dateOfBirth = new Date(data);
-            return dateOfBirth < today && data !== formattedDate
+        dob: z.string().nonempty('Date of Birth is Required').refine((data) => {
+            const dob = new Date(data);
+            return dob < today && data !== formattedDate
         }, {
             message: `Date of Birth must not exceed ${formattedDate}`
         }),
         city: z.string().nonempty({ message: 'City is required' }),
-        password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
-        confirmPassword: z.string().min(8, { message: 'Password must be at least 8 characters long' })
-    }).refine(data => data.password === data.confirmPassword, {
-        message: 'Passwords do not match',
-        path: ['confirmPassword'],
     })
 
     const { register, handleSubmit, formState: { errors } } = useForm<SignupData>({
@@ -65,28 +68,49 @@ const ClientSignupForm = () => {
         }
     }
 
+    const onValidatorChangeHandler = (result: boolean) => {
+        if (result) {
+            setIsPasswordValid(true)
+        }
+        else {
+            setIsPasswordValid(false)
+        }
+    }
+
+    const { push } = useRouter();
+
     const SubmitData = (data: SignupData) => {
         if (cnic.length === 0) {
-            toast.error('CNIC is required', {
-                position: toast.POSITION.TOP_LEFT,
-            });
+            toast.error('CNIC is required');
             return
         }
         if (!agreeConditions) {
-            toast.error('Please agree to the terms and conditions', {
-                position: toast.POSITION.TOP_LEFT,
-            });
+            toast.error('Please agree to the terms and conditions');
+            return
+        }
+        if (!isPasswordValid) {
+            toast.error('Password is invalid');
             return
         }
         const regex = new RegExp(Constants.CNIC_REGEXP);
         if (regex.test(cnic)) {
-            data.cnic = cnic.replaceAll("-", "");
-            console.log(data)
+            data.cnic = cnic;
+            data.password = password;
+            data.confirmPassword = confirmPassword;
+            console.log(data);
+            axios.post('/api/signUp', data)
+            .then((res) => {
+                console.log(res);
+                toast.success(res.data.message);
+                push('/auth/signIn');
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(err.response.data.error);
+            })
         }
         else {
-            toast.error('CNIC is invalid', {
-                position: toast.POSITION.TOP_LEFT,
-            });
+            toast.error('CNIC is invalid');
         }
     }
 
@@ -98,9 +122,7 @@ const ClientSignupForm = () => {
     }, [errors]);
 
     const notifyError = (errorMessage: any) => {
-        toast.error(errorMessage, {
-            position: toast.POSITION.TOP_LEFT,
-        });
+        toast.error(errorMessage);
     };
 
     return (
@@ -119,7 +141,7 @@ const ClientSignupForm = () => {
                     fieldTitle='Email' fieldLabel={"aliakbar@gmail.com"}
                     register={register} titleCase='lowercase' />
                 <InputField
-                    fieldName='dateOfBirth' fieldType='date'
+                    fieldName='dob' fieldType='date'
                     fieldTitle='Date of Birth' fieldLabel={`Must be older than ${formattedDate}`}
                     register={register} titleCase='capitalize' />
 
@@ -132,11 +154,6 @@ const ClientSignupForm = () => {
                     </select>
                 </div>
 
-                {/* <InputField
-                    fieldName='city' fieldType='text'
-                    fieldTitle='City' fieldLabel={"Islamabad"}
-                    register={register} /> */}
-
                 {/* CNIC field */}
                 <div className='w-full flex flex-col-reverse'>
                     <label htmlFor="firstName" className='text-zinc-500 text-xs font-normal font-LatoRegular uppercase tracking-[3.50px] pl-3 pt-0.5'>12345-6582314-2</label>
@@ -144,30 +161,38 @@ const ClientSignupForm = () => {
                 </div>
 
                 <div className='w-full relative'>
-                    <InputField
-                        fieldName='password' fieldType={isShowPassword ? 'text' : 'password'}
-                        fieldTitle='Password' fieldLabel={"Combination of alphanumerics & symbols"}
-                        register={register} titleCase='capitalize' />
+                    <div className='w-full flex flex-col-reverse'>
+                        <label htmlFor="password" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
+                        <input onChange={(e) => setPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={password} id='password' />
+                    </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
                 <div className='w-full relative'>
-                    <InputField
-                        fieldName='confirmPassword' fieldType={isShowPassword ? 'text' : 'password'}
-                        fieldTitle='Confirm Password' fieldLabel={"Combination of alphanumerics & symbols"}
-                        register={register} titleCase='capitalize' />
+                    <div className='w-full flex flex-col-reverse'>
+                        <label htmlFor="confirmPassword" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
+                        <input onChange={(e) => setConfirmPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={confirmPassword} id='confirmPassword' />
+                    </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
+
+                <div className='w-full col-span-2'>
+                    <ValidatePassword password={password} confirmPassword={confirmPassword} onValidatorChangeHandler={onValidatorChangeHandler} />
+                </div>
             </div>
             <div className='w-3/4 mx-auto'>
                 <div className='flex items-center gap-x-2'>
-                    <input id='agreeTerms' type="checkbox" onChange={(e) => setAgreeConditions(!agreeConditions)} checked={agreeConditions} />
-                    <label htmlFor='agreeTerms' className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] my-7'>I agree to <span className='text-blue-600 cursor-pointer'>terms & conditions</span></label>
+                    <input id='agreeTerms' type="checkbox"
+                        onChange={() => setAgreeConditions(!agreeConditions)}
+                        checked={agreeConditions} />
+                    <label htmlFor='agreeTerms' className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] my-7'>I agree to <Link href={'/terms-and-conditions'} className='text-blue-600 cursor-pointer'>terms & conditions</Link></label>
                 </div>
                 <Button className='w-full rounded-3xl bg-red-700 font-LatoBold uppercase tracking-[3.50px] hover:bg-red-800' type='submit'>Sign Up</Button>
+
+                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-4'>already have an account? <Link href={'/auth/signIn'} className='text-blue-600 cursor-pointer'>Sign In</Link></p>
             </div>
         </form>
     )
