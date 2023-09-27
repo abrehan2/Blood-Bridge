@@ -1,11 +1,13 @@
 // IMPORTS -
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { Prisma as PrismaClient } from "@prisma/client";
 import prisma from "@/config/prismaConfig";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
+import Mailgun from "mailgun.js";
+import formData from "form-data";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     email,
@@ -56,6 +58,21 @@ export async function POST(req: Request) {
         userId: user.id,
       },
     });
+
+    const mailgun = new Mailgun(formData);
+    const client = mailgun.client({
+      username: "api",
+      key: `${process.env.API_KEY}`,
+    });
+
+    const messageData = {
+      from: `Blood Bridge <hello@${process.env.DOMAIN}>`,
+      to: user.email,
+      subject: "Account verification",
+      text: `Dear ${user.firstName} ${user.lastName},\n\nPlease activate your account by clicking this link: http://localhost:3000/api/activate/${token.token}\n\nBest, \nBlood Bridge Team.`,
+    };
+
+    await client.messages.create(`${process.env.DOMAIN}`, messageData);
   } catch (error) {
     if (error instanceof PrismaClient.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
