@@ -14,7 +14,7 @@ const ClientSignUp = () => {
         </div>
       </TabsContent>
       <TabsContent value="BloodBank">
-        <div className="w-full py-16 border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden">
+        <div className="w-full py-16 min-h-[80vh] border border-zinc-300 rounded-md shadow-md bg-white overflow-hidden">
 
         </div>
       </TabsContent>
