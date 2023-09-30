@@ -7,7 +7,6 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const errorMiddleware = require("./middlewares/error");
 
-
 // CONFIG -
 if (process.env.NODE_ENV !== "PRODUCTION") {
   dotenv.config({ path: "./config/config.env" });
@@ -17,10 +16,17 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(fileUpload());
 
-// ROUTES TO IMPLEMENT -
+// IMPORT ROUTES -
+const userRoute = require("./routes/userRoute");
 
+
+// ROUTES -
+app.use('/api', userRoute);
+
+// MIDDLEWARE FOR ERROR-HANDLING -
 app.use(errorMiddleware);
 
 module.exports = app;

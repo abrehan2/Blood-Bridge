@@ -1,10 +1,11 @@
 {
-  "name": "server",
+  "name": "main-server",
   "version": "1.0.0",
-  "main": "index.ts",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "start": "SET NODE_ENV=production & ts-node index.ts",
-    "dev": "SET NODE_ENV=development & nodemon index.ts"
+    "start": "SET NODE_ENV=production & node server.js",
+    "dev": "SET NODE_ENV=development & nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -21,8 +22,6 @@
     "mongoose": "^7.5.3",
     "nodemailer": "^6.9.5",
     "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2",
     "validator": "^13.11.0"
   }
 }
