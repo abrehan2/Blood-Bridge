@@ -11,15 +11,13 @@ const sendEmail = require("../utils/email");
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
   const { firstName, lastName, email, cnic, city, dob, password } = req.body;
 
-  let user = await userModel.findOne({email});
- 
+  let user = await userModel.findOne({ email });
+
   if (user) {
     return next(
       new ErrorHandler("The email address you entered is already in use", 409)
     );
-  }
-
-  else {
+  } else {
     user = await userModel.create({
       firstName,
       lastName,
@@ -36,7 +34,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     }).save();
 
     const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
-   
+
     await sendEmail({
       email: user.email,
       subject: "Blood Bridge Email Verification",
@@ -49,5 +47,30 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
         "Your account has been created! Please verify your email address to log in",
     });
   }
-  
+});
+
+// VERIFY USER -
+exports.verifyUser = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findOne({ _id: req.params.id });
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  const token = await tokenModel.findOne({
+    userId: user._id,
+    token: req.params.token,
+  });
+
+  if (!token) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  await userModel.updateOne({ _id: user._id, verified: true });
+  await token.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Thank you for verifying your email address",
+  });
 });

@@ -12,8 +12,6 @@ const sendEmail = async (options) => {
     },
   });
 
-  console.log(options)
-
   const mailOptions = {
     from: process.env.SMPT_MAIL,
     to: options.email,
