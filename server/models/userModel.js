@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema({
   cnic: {
     type: String,
     required: [true, "Please enter your cnic"],
+    unique: true
   },
 
   avatar: {
@@ -62,6 +63,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user",
+  },
+
+  verified: {
+    type: Boolean,
+    default: false,
   },
 
   createdAt: {
