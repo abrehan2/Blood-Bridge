@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+/server/node_modules
 /.pnp
 .pnp.js
 
@@ -27,6 +28,7 @@ yarn-error.log*
 # local env files
 .env*.local
 /.env
+/server/config/config.env
 
 # vercel
 .vercel
