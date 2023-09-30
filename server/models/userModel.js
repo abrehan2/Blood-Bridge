@@ -45,17 +45,15 @@ const userSchema = new mongoose.Schema({
   cnic: {
     type: String,
     required: [true, "Please enter your cnic"],
-    unique: true
+    unique: true,
   },
 
   avatar: {
     public_id: {
       type: String,
-      required: true,
     },
     url: {
       type: String,
-      required: true,
     },
   },
 
