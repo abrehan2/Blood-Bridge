@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "node index.ts",
-    "dev": "nodemon index.ts"
+    "start": "SET NODE_ENV=production & ts-node index.ts",
+    "dev": "SET NODE_ENV=development & nodemon index.ts"
   },
   "keywords": [],
   "author": "",

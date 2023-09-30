@@ -1,5 +1,5 @@
 // IMPORTS -
-const dotenv = require("dotenv").config({ path: "./config/config.env" });
+const dotenv = require("dotenv");
 const application = require("./app");
 const connectDatabase = require("./config/database");
 
@@ -9,6 +9,11 @@ process.on("uncaughtException", (err: any) => {
   console.log("SHUTTING DOWN SERVER DUE TO UNCAUGHT EXCEPTION");
   process.exit(1);
 });
+
+// CONFIG -
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config({ path: "./config/config.env" });
+}
 
 // CONNECTING DATABASE -
 connectDatabase();

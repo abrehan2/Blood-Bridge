@@ -6,7 +6,7 @@ export type errorProps = {
 
 // error.ts -
 export type errorMiddlewareProp = {
-  err: any;
+  error: any;
   req?: any;
   res?: any;
   next?: any;
