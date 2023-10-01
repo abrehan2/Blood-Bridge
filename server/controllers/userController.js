@@ -74,3 +74,5 @@ exports.verifyUser = catchAsyncErr(async (req, res, next) => {
     message: "Thank you for verifying your email address",
   });
 });
+
+// LOGIN USER -

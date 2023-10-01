@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const errorMiddleware = require("./middlewares/error");
+const cors = require("cors");
 
 // CONFIG -
 if (process.env.NODE_ENV !== "PRODUCTION") {
@@ -18,6 +19,13 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.BASE_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 // IMPORT ROUTES -
 const userRoute = require("./routes/userRoute");
