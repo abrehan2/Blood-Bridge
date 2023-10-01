@@ -76,3 +76,48 @@ exports.verifyUser = catchAsyncErr(async (req, res, next) => {
 });
 
 // LOGIN USER -
+exports.loginUser = catchAsyncErr(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new ErrorHandler("Please enter the email and password", 400));
+  }
+
+  const user = await userModel.findOne({ email }).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler("Your email or password is incorrect", 401));
+  }
+
+  if (!user.verified) {
+    let token = await tokenModel.findOne({ userId: user._id });
+
+    if (!token) {
+      token = await new tokenModel({
+        userId: user._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+
+      const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
+
+      await sendEmail({
+        email: user.email,
+        subject: "Blood Bridge Email Verification",
+        message: `Click the given link to verify your account: ${url}`,
+      });
+    }
+    return next(
+      new ErrorHandler(
+        "Activate your account by clicking the link in the email",
+        400
+      )
+    );
+  }
+
+  const isPasswordMatched = await user.comparePassword(password);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Your email or password is incorrect", 401));
+  }
+  setToken(user, 200, res);
+});

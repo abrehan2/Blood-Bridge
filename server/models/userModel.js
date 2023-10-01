@@ -77,6 +77,7 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpire: Date,
 });
 
+// Check if the password is already hashed -
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
@@ -84,6 +85,11 @@ userSchema.pre("save", async function (next) {
 
   this.password = await bcrypt.hash(this.password, 10);
 });
+
+// Compare passwords -
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 // Json web token -
 userSchema.methods.getJsonWebToken = function () {
