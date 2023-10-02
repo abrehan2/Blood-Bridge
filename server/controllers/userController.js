@@ -121,3 +121,16 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   }
   setToken(user, 200, res);
 });
+
+// LOGOUT -
+exports.logoutUser = catchAsyncErr(async (req, res, next) => {
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "You have been logged out of your account",
+  });
+});
