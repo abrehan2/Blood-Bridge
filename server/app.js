@@ -29,10 +29,11 @@ app.use(
 
 // IMPORT ROUTES -
 const userRoute = require("./routes/userRoute");
-
+const bloodBank = require("./routes/bloodBankRoute");
 
 // ROUTES -
-app.use('/api', userRoute);
+app.use("/api", userRoute);
+app.use("/api", bloodBank);
 
 // MIDDLEWARE FOR ERROR-HANDLING -
 app.use(errorMiddleware);

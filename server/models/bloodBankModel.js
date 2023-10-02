@@ -13,7 +13,6 @@ const bloodBankSchema = new mongoose.Schema({
       30,
       "Please keep your blood bank name to 30 characters or less",
     ],
-    unique: true,
   },
 
   email: {
@@ -73,3 +72,39 @@ const bloodBankSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
+
+// Check if the password is already hashed -
+bloodBankSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+// Compare passwords -
+bloodBankSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Json web token -
+bloodBankSchema.methods.getJsonWebToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
+
+// Reset forgot password -
+bloodBankSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString("hex");
+  this.resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+
+  return resetToken;
+};
+
+const bloodBankModel = mongoose.model("Blood Bank", bloodBankSchema);
+module.exports = bloodBankModel;
