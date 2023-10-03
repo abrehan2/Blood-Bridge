@@ -174,3 +174,48 @@ exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler(err.message, 500));
   }
 });
+
+// RESET PASSWORD -
+exports.resetPassword = catchAsyncErr(async (req, res, next) => {
+  const { password, confirmPassword } = req.body;
+  const token = req.params.token;
+
+  if (!password || !confirmPassword) {
+    return next(
+      new ErrorHandler("Please enter your password and confirm password", 400)
+    );
+  }
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await userModel.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: {
+      $gt: Date.now(),
+    },
+  });
+
+  if (!user) {
+    return next(
+      new ErrorHandler("Your password reset link is invalid or expired", 400)
+    );
+  }
+
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Your password has been changed",
+  });
+  // setToken(user, 200, res);
+});
