@@ -18,6 +18,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("The email address you entered is already in use", 409)
     );
   } else {
+    z;
     user = await userModel.create({
       firstName,
       lastName,
@@ -133,4 +134,43 @@ exports.logoutUser = catchAsyncErr(async (req, res, next) => {
     success: true,
     message: "You have been logged out of your account",
   });
+});
+
+// GENERATE TOKEN FOR FORGOT PASSWORD -
+exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return next(new ErrorHandler("Please enter the email", 400));
+  }
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  const resetToken = user.getResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+
+  const url = `${process.env.BASE_URL}/password/reset/${resetToken}`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Blood Bridge password reset verification",
+      message: `Click the given link to change your password: ${url}`,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully`,
+    });
+  } catch (err) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler(err.message, 500));
+  }
 });
