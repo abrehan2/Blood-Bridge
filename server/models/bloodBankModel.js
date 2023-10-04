@@ -5,17 +5,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const userSchema = new mongoose.Schema({
-  firstName: {
+const bloodBankSchema = new mongoose.Schema({
+  name: {
     type: String,
-    required: [true, "Please enter your first name"],
-    maxLength: [30, "Please keep your first name to 30 characters or less"],
-  },
-
-  lastName: {
-    type: String,
-    required: [true, "Please enter your last name"],
-    maxLength: [30, "Please keep your last name to 30 characters or less"],
+    required: [true, "Please enter the name of your blood bank"],
+    maxLength: [
+      30,
+      "Please keep your blood bank name to 30 characters or less",
+    ],
   },
 
   email: {
@@ -32,9 +29,10 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 
-  dob: {
-    type: Date,
-    required: [true, "Please enter your date of birth"],
+  licenseNo: {
+    type: Number,
+    required: [true, "Please enter your license number"],
+    unique: true,
   },
 
   city: {
@@ -42,10 +40,9 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please enter your city"],
   },
 
-  cnic: {
+  address: {
     type: String,
-    required: [true, "Please enter your cnic"],
-    unique: true,
+    required: [true, "Please enter your address"],
   },
 
   avatar: {
@@ -59,8 +56,7 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user",
+    default: "bloodBank",
   },
 
   verified: {
@@ -78,7 +74,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Check if the password is already hashed -
-userSchema.pre("save", async function (next) {
+bloodBankSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
@@ -87,19 +83,19 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare passwords -
-userSchema.methods.comparePassword = async function (enteredPassword) {
+bloodBankSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
 // Json web token -
-userSchema.methods.getJsonWebToken = function () {
+bloodBankSchema.methods.getJsonWebToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };
 
 // Reset forgot password -
-userSchema.methods.getResetPasswordToken = function () {
+bloodBankSchema.methods.getResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(20).toString("hex");
   this.resetPasswordToken = crypto
     .createHash("sha256")
@@ -110,5 +106,5 @@ userSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+const bloodBankModel = mongoose.model("Blood Bank", bloodBankSchema);
+module.exports = bloodBankModel;
