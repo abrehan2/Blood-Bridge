@@ -1,8 +1,8 @@
 // IMPORTS -
-import ClientSignUp from "./ClientSignUp";
+import SignUp from "./SignUp";
 
-const SignUp = () => {
-  return <ClientSignUp />;
+const page = () => {
+  return <SignUp />;
 };
 
-export default SignUp;
+export default page;

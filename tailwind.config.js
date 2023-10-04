@@ -20,6 +20,7 @@ module.exports = {
     extend: {
       fontFamily: {
         LatoRegular: ['LatoRegular', 'sans'],
+        LatoMedium: ['LatoMedium', 'sans'],
         LatoBold: ['LatoBold', 'sans'],
       },
       colors: {

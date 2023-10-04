@@ -17,7 +17,7 @@ export interface SigninData {
 
 export type fieldTypes = "email" | "password";
 
-const ClientSigninForm = () => {
+const BloodBankSigninForm = () => {
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
 
     const schema: ZodType<SigninData> = z.object({
@@ -72,10 +72,10 @@ const ClientSigninForm = () => {
             </div>
             <div className='w-3/4 mx-auto'>
                 <Button className='w-full rounded-3xl bg-red-700 font-LatoBold uppercase tracking-[3.50px] hover:bg-red-800 mt-6 mb-5' type='submit'>Sign In</Button>
-                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3'>are you a new user? <Link href={'/auth/signUp?view=BloodRecipient'} className='text-blue-600 cursor-pointer capitalize underline'>Sign up</Link></p>
+                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3'>are you a new user? <Link href={'/auth/signUp?view=BloodBank'} className='text-blue-600 cursor-pointer capitalize underline'>Sign up</Link></p>
             </div>
         </form>
     )
 }
 
-export default ClientSigninForm
+export default BloodBankSigninForm

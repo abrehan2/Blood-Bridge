@@ -4,6 +4,11 @@
   }
 
 @font-face {
+    font-family: 'LatoMedium';
+    src: url('./fonts/Lato-Medium.ttf') format('opentype');
+}
+
+@font-face {
     font-family: 'LatoBold';
     src: url('./fonts/Lato-Bold.ttf') format('opentype');
 }
