@@ -141,3 +141,87 @@ exports.logoutBloodBank = catchAsyncErr(async (req, res, next) => {
     message: "You have been logged out of your account",
   });
 });
+
+// GENERATE TOKEN FOR FORGOT PASSWORD -
+exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return next(new ErrorHandler("Please enter the email", 400));
+  }
+
+  const blood_bank = await bloodBankModel.findOne({ email });
+
+  if (!blood_bank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  const resetToken = blood_bank.getResetPasswordToken();
+  await blood_bank.save({ validateBeforeSave: false });
+
+  const url = `${process.env.BASE_URL}/password/reset/${resetToken}`;
+
+  try {
+    await sendEmail({
+      email: blood_bank.email,
+      subject: "Blood Bridge password reset verification",
+      message: `Click the given link to change your password: ${url}`,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Email sent to ${blood_bank.email} successfully`,
+    });
+  } catch (err) {
+    blood_bank.resetPasswordToken = undefined;
+    blood_bank.resetPasswordExpire = undefined;
+    await blood_bank.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler(err.message, 500));
+  }
+});
+
+// RESET PASSWORD -
+exports.resetPassword = catchAsyncErr(async (req, res, next) => {
+  const { password, confirmPassword } = req.body;
+  const token = req.params.token;
+
+  if (!password || !confirmPassword) {
+    return next(
+      new ErrorHandler("Please enter your password and confirm password", 400)
+    );
+  }
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const blood_bank = await bloodBankModel.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: {
+      $gt: Date.now(),
+    },
+  });
+
+  if (!blood_bank) {
+    return next(
+      new ErrorHandler("Your password reset link is invalid or expired", 400)
+    );
+  }
+
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  blood_bank.password = req.body.password;
+  blood_bank.resetPasswordToken = undefined;
+  blood_bank.resetPasswordExpire = undefined;
+
+  await blood_bank.save();
+  res.status(200).json({
+    success: true,
+    message: "Your password has been changed",
+  });
+  // setToken(user, 200, res);
+});
