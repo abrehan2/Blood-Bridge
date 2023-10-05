@@ -251,5 +251,5 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
 
   user.password = newPassword;
   await user.save();
-  setToken(user, 200, res, "Your password has been updated");
+  setToken(user, 200, res);
 });
