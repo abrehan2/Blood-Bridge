@@ -217,5 +217,17 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     success: true,
     message: "Your password has been changed",
   });
-  // setToken(user, 200, res);
+ 
+});
+
+// GET USER DETAILS - 
+exports.getUserDetails = catchAsyncErr(async (req, res) => {
+
+  const user = await userModel.findById(req.user.id);
+
+  res.status(200).json({
+    success:true,
+    user
+  });
+
 });
