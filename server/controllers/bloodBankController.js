@@ -62,7 +62,7 @@ exports.verifyBloodBank = catchAsyncErr(async (req, res, next) => {
   });
 
   if (!token) {
-    return next(new ErrorHandler("Invalid email verification link", 400));
+    return next(new ErrorHandler("Invalid email verification link", 400)); 
   }
 
   await bloodBankModel.updateOne({ _id: bloodBank._id, verified: true });

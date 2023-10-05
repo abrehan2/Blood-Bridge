@@ -9,7 +9,8 @@ const sendEmail = require("../utils/email");
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
-  const { firstName, lastName, email, cnic, city, dob, password } = req.body;
+  const { firstName, lastName, email, cnic, city, dob, password, bloodGroup } =
+    req.body;
 
   let user = await userModel.findOne({ email });
 
@@ -18,12 +19,12 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("The email address you entered is already in use", 409)
     );
   } else {
-    z;
     user = await userModel.create({
       firstName,
       lastName,
       email,
       cnic,
+      bloodGroup,
       city,
       dob,
       password,
@@ -217,17 +218,38 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     success: true,
     message: "Your password has been changed",
   });
- 
 });
 
-// GET USER DETAILS - 
+// GET USER DETAILS -
 exports.getUserDetails = catchAsyncErr(async (req, res) => {
-
   const user = await userModel.findById(req.user.id);
 
   res.status(200).json({
-    success:true,
-    user
+    success: true,
+    user,
   });
+});
 
+// UPDATE USER PASSWORD -
+exports.updatePassword = catchAsyncErr(async (req, res, next) => {
+  const { oldPassword, confirmPassword, newPassword } = req.body;
+
+  if (!oldPassword || !confirmPassword || !newPassword) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const user = await userModel.findById(req.user.id).select("+password");
+  const isPasswordMatched = await user.comparePassword(oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Your old password is incorrect", 400));
+  }
+
+  if (confirmPassword !== newPassword) {
+    return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  user.password = newPassword;
+  await user.save();
+  setToken(user, 200, res, "Your password has been updated");
 });

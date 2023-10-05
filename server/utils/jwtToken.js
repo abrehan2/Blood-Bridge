@@ -1,4 +1,4 @@
-const setToken = (user, statusCode, res) => {
+const setToken = (user, statusCode, res, message="") => {
   const token = user.getJsonWebToken();
   const options = {
     expires: new Date(
@@ -11,6 +11,7 @@ const setToken = (user, statusCode, res) => {
     success: true,
     token,
     user,
+    message: "" || message
   });
 };
 
