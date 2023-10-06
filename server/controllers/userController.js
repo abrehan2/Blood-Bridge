@@ -221,8 +221,8 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
 });
 
 // GET USER DETAILS -
-exports.getUserDetails = catchAsyncErr(async (req, res) => {
-  const user = await userModel.findById(req.user.id);
+exports.getUserDetails = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.authUser.id);
 
   res.status(200).json({
     success: true,
@@ -238,7 +238,7 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Please fill in all required fields", 400));
   }
 
-  const user = await userModel.findById(req.user.id).select("+password");
+  const user = await userModel.findById(req.authUser.id).select("+password");
   const isPasswordMatched = await user.comparePassword(oldPassword);
 
   if (!isPasswordMatched) {
@@ -247,6 +247,10 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
 
   if (confirmPassword !== newPassword) {
     return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  if (newPassword === oldPassword) {
+    return next(new ErrorHandler("Please use a different password", 400));
   }
 
   user.password = newPassword;
