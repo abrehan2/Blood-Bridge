@@ -17,7 +17,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     return next(
       new ErrorHandler("The email address you entered is already in use", 409)
     );
-  } else {
+  } 
     bloodBank = await bloodBankModel.create({
       name,
       email,
@@ -45,7 +45,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       message:
         "Your account has been created! Please verify your email address to log in",
     });
-  }
+  
 });
 
 // VERIFY BLOOD BANK -

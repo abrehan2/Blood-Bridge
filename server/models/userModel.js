@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     required: [true, "Please enter your email"],
     unique: true,
     validator: [validator.isEmail, "Please enter a valid email address"],
-  },
+  }, 
 
   password: {
     type: String,
@@ -48,17 +48,24 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
 
+  contact: {
+    type: String,
+    unique: true  
+  },
+
   bloodGroup: {
     type: String,
-    required: [true, "Please enter your blood group"],    
+    required: [true, "Please enter your blood group"],
   },
 
   avatar: {
     public_id: {
       type: String,
+      required: true,
     },
     url: {
       type: String,
+      required: true
     },
   },
 
