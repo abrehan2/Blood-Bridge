@@ -7,14 +7,22 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-const fs = require("fs");
 
 const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
-  const { firstName, lastName, email, cnic, city, dob, password, bloodGroup } =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    cnic,
+    city,
+    dob,
+    password,
+    bloodGroup,
+    contact,
+  } = req.body;
 
   let user = await userModel.findOne({ email });
 
@@ -42,7 +50,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
       public_id: myCloud.public_id,
       url: myCloud.secure_url,
     },
-    contact: null,
+    contact,
   });
 
   const token = await new tokenModel({
