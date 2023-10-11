@@ -13,6 +13,7 @@ const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
+  
   const {
     firstName,
     lastName,

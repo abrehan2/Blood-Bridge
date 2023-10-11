@@ -5,18 +5,16 @@ const tokenSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    unique: true,
   },
 
   BloodBankId: {
     type: mongoose.Schema.ObjectId,
-    ref: "Blood Bank",
-    unique: true,
+    ref: "bloodBank",
   },
 
   token: {
     type: String,
-    required: true, 
+    required: true,
   },
 
   createdAt: {
