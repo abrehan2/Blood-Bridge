@@ -13,7 +13,7 @@ const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
-  
+
   const {
     firstName,
     lastName,
@@ -60,7 +60,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     token: crypto.randomBytes(32).toString("hex"),
   }).save();
 
-  const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
+  const url = `${process.env.BASE_URL}/auth/${user.id}/verify/${token.token}`;
 
   await sendEmail({
     email: user.email,
@@ -85,14 +85,14 @@ exports.verifyUser = catchAsyncErr(async (req, res, next) => {
 
   const token = await tokenModel.findOne({
     userId: user._id,
-    token: req.params.token,
+    token: req.params.token,   
   });
 
   if (!token) {
     return next(new ErrorHandler("Invalid email verification link", 400));
-  }
+  }  
 
-  await userModel.updateOne({ _id: user._id, verified: true });
+  await user.updateOne({ verified: true });
   await token.deleteOne();
 
   res.status(200).json({
@@ -124,7 +124,7 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
 
-      const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
+      const url = `${process.env.BASE_URL}/auth/${user.id}/verify/${token.token}`;
 
       await sendEmail({
         email: user.email,
@@ -178,7 +178,7 @@ exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
   const resetToken = user.getResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const url = `${process.env.BASE_URL}/password/reset/${resetToken}`;
+  const url = `${process.env.BASE_URL}/user/password/reset/${resetToken}`;
 
   try {
     await sendEmail({
@@ -334,7 +334,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
       user.emailVerified = false;
       await user.save();
 
-      const url = `${process.env.BASE_URL}/${user.id}/email/verify/${token.token}`;
+      const url = `${process.env.BASE_URL}/auth/${user.id}/email/verify/${token.token}`;
 
       await sendEmail({
         email: user.email,
