@@ -48,12 +48,25 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
 
+  contact: {
+    type: String,
+    required: [true, "Please enter your contact"],
+    unique: true,
+  },
+
+  bloodGroup: {
+    type: String,
+    required: [true, "Please enter your blood group"],
+  },
+
   avatar: {
     public_id: {
       type: String,
+      required: true,
     },
     url: {
       type: String,
+      required: true,
     },
   },
 

@@ -15,6 +15,7 @@ const errorMiddleware = (error, req, res, next) => {
   if (error.code === 11000) {
     const message = `Duplicate key entered`;
     error = new ErrorHandler(message, 400);
+    // console.log(error.message)
   }
 
   // WRONG JSON WEB TOKEN ERROR -
@@ -36,3 +37,4 @@ const errorMiddleware = (error, req, res, next) => {
 };
 
 module.exports = errorMiddleware;
+   

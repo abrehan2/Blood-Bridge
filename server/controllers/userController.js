@@ -6,10 +6,23 @@ const tokenModel = require("../models/tokenModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
+const cloudinary = require("cloudinary");
+
+const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
-  const { firstName, lastName, email, cnic, city, dob, password } = req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    cnic,
+    city,
+    dob,
+    password,
+    bloodGroup,
+    contact,
+  } = req.body;
 
   let user = await userModel.findOne({ email });
 
@@ -17,37 +30,47 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     return next(
       new ErrorHandler("The email address you entered is already in use", 409)
     );
-  } else {
-    z;
-    user = await userModel.create({
-      firstName,
-      lastName,
-      email,
-      cnic,
-      city,
-      dob,
-      password,
-    });
-
-    const token = await new tokenModel({
-      userId: user._id,
-      token: crypto.randomBytes(32).toString("hex"),
-    }).save();
-
-    const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
-
-    await sendEmail({
-      email: user.email,
-      subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
-    });
-
-    res.status(201).json({
-      success: true,
-      message:
-        "Your account has been created! Please verify your email address to log in",
-    });
   }
+  const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
+
+  user = await userModel.create({
+    firstName,
+    lastName,
+    email,
+    cnic,
+    bloodGroup,
+    city,
+    dob,
+    password,
+    avatar: {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    },
+    contact,
+  });
+
+  const token = await new tokenModel({
+    userId: user._id,
+    token: crypto.randomBytes(32).toString("hex"),
+  }).save();
+
+  const url = `${process.env.BASE_URL}/${user.id}/verify/${token.token}`;
+
+  await sendEmail({
+    email: user.email,
+    subject: "Blood Bridge Email Verification",
+    message: `Click the given link to verify your account: ${url}`,
+  });
+
+  res.status(201).json({
+    success: true,
+    message:
+      "Your account has been created! Please verify your email address to log in",
+  });
 });
 
 // VERIFY USER -
@@ -217,5 +240,84 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     success: true,
     message: "Your password has been changed",
   });
-  // setToken(user, 200, res);
+});
+
+// GET USER DETAILS -
+exports.getUserDetails = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.authUser.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// UPDATE USER PASSWORD -
+exports.updatePassword = catchAsyncErr(async (req, res, next) => {
+  const { oldPassword, confirmPassword, newPassword } = req.body;
+
+  if (!oldPassword || !confirmPassword || !newPassword) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const user = await userModel.findById(req.authUser.id).select("+password");
+  const isPasswordMatched = await user.comparePassword(oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Your old password is incorrect", 400));
+  }
+
+  if (confirmPassword !== newPassword) {
+    return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  if (newPassword === oldPassword) {
+    return next(new ErrorHandler("Please use a different password", 400));
+  }
+
+  user.password = newPassword;
+  await user.save();
+  setToken(user, 200, res);
+});
+
+// UPDATE PROFILE -
+exports.updateProfile = catchAsyncErr(async (req, res, next) => {
+  const newUserData = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    email: req.body.email,
+    dob: req.body.dob,
+    city: req.body.city,
+    cnic: req.body.cnic,
+    contact: req.body.contact,
+    bloodGroup: req.body.bloodGroup,
+  };
+
+  if (req.body.avatar !== undefined) {
+    const user = await userModel.findById(req.authUser.id);
+    const imageID = user.avatar.public_id;
+    await cloudinary.v2.uploader.destroy(imageID);
+
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+
+    newUserData.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
+  await userModel.findByIdAndUpdate(req.authUser.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Your profile changes have been saved",
+  });
 });

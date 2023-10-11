@@ -11,14 +11,14 @@ const sendEmail = require("../utils/email");
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
   const { name, email, password, licenseNo, city, address } = req.body;
 
-  let blood_bank = await bloodBankModel.findOne({ email });
+  let bloodBank = await bloodBankModel.findOne({ email });
 
-  if (blood_bank) {
+  if (bloodBank) {
     return next(
       new ErrorHandler("The email address you entered is already in use", 409)
     );
-  } else {
-    blood_bank = await bloodBankModel.create({
+  } 
+    bloodBank = await bloodBankModel.create({
       name,
       email,
       password,
@@ -28,14 +28,14 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     });
 
     const token = await new tokenModel({
-      BloodBankId: blood_bank._id,
+      BloodBankId: bloodBank._id,
       token: crypto.randomBytes(32).toString("hex"),
     }).save();
 
-    const url = `${process.env.BASE_URL}/${blood_bank.id}/verify/${token.token}`;
+    const url = `${process.env.BASE_URL}/${bloodBank.id}/verify/${token.token}`;
 
     await sendEmail({
-      email: blood_bank.email,
+      email: bloodBank.email,
       subject: "Blood Bridge Email Verification",
       message: `Click the given link to verify your account: ${url}`,
     });
@@ -45,7 +45,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       message:
         "Your account has been created! Please verify your email address to log in",
     });
-  }
+  
 });
 
 // VERIFY BLOOD BANK -
@@ -150,32 +150,32 @@ exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Please enter the email", 400));
   }
 
-  const blood_bank = await bloodBankModel.findOne({ email });
+  const bloodBank = await bloodBankModel.findOne({ email });
 
-  if (!blood_bank) {
+  if (!bloodBank) {
     return next(new ErrorHandler("Blood bank not found", 404));
   }
 
-  const resetToken = blood_bank.getResetPasswordToken();
-  await blood_bank.save({ validateBeforeSave: false });
+  const resetToken = bloodBank.getResetPasswordToken();
+  await bloodBank.save({ validateBeforeSave: false });
 
   const url = `${process.env.BASE_URL}/password/reset/${resetToken}`;
 
   try {
     await sendEmail({
-      email: blood_bank.email,
+      email: bloodBank.email,
       subject: "Blood Bridge password reset verification",
       message: `Click the given link to change your password: ${url}`,
     });
 
     res.status(200).json({
       success: true,
-      message: `Email sent to ${blood_bank.email} successfully`,
+      message: `Email sent to ${bloodBank.email} successfully`,
     });
   } catch (err) {
-    blood_bank.resetPasswordToken = undefined;
-    blood_bank.resetPasswordExpire = undefined;
-    await blood_bank.save({ validateBeforeSave: false });
+    bloodBank.resetPasswordToken = undefined;
+    bloodBank.resetPasswordExpire = undefined;
+    await bloodBank.save({ validateBeforeSave: false });
 
     return next(new ErrorHandler(err.message, 500));
   }
@@ -197,14 +197,14 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     .update(token)
     .digest("hex");
 
-  const blood_bank = await bloodBankModel.findOne({
+  const bloodBank = await bloodBankModel.findOne({
     resetPasswordToken,
     resetPasswordExpire: {
       $gt: Date.now(),
     },
   });
 
-  if (!blood_bank) {
+  if (!bloodBank) {
     return next(
       new ErrorHandler("Your password reset link is invalid or expired", 400)
     );
@@ -214,14 +214,53 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Passwords don't match", 400));
   }
 
-  blood_bank.password = req.body.password;
-  blood_bank.resetPasswordToken = undefined;
-  blood_bank.resetPasswordExpire = undefined;
+  bloodBank.password = req.body.password;
+  bloodBank.resetPasswordToken = undefined;
+  bloodBank.resetPasswordExpire = undefined;
 
-  await blood_bank.save();
+  await bloodBank.save();
   res.status(200).json({
     success: true,
     message: "Your password has been changed",
   });
-  // setToken(user, 200, res);
+});
+
+// GET BLOOD BANK DETAILS -
+exports.getBloodBank = catchAsyncErr(async (req, res) => {
+  const bloodBank = await bloodBankModel.findById(req.authUser.id);
+
+  res.status(200).json({
+    success: true,
+    bloodBank,
+  });
+});
+
+// UPDATE BLOOD BANK PASSWORD -
+exports.updatePassword = catchAsyncErr(async (req, res, next) => {
+  const { oldPassword, confirmPassword, newPassword } = req.body;
+
+  if (!oldPassword || !confirmPassword || !newPassword) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const bloodBank = await bloodBankModel
+    .findById(req.authUser.id)
+    .select("+password");
+  const isPasswordMatched = await bloodBank.comparePassword(oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Your old password is incorrect", 400));
+  }
+
+  if (confirmPassword !== newPassword) {
+    return next(new ErrorHandler("Passwords don't match", 400));
+  }
+
+  if (newPassword === oldPassword) {
+    return next(new ErrorHandler("Please use a different password", 400));
+  }
+
+  bloodBank.password = newPassword;
+  await bloodBank.save();
+  setToken(bloodBank, 200, res);
 });
