@@ -4,12 +4,12 @@ import React from 'react'
 import { useBBSelector } from '@/redux/store'
 
 const TestReduxUse = () => {
-    const email = useBBSelector(state => state.authReducer.value.email)
-    const isModerator = useBBSelector(state => state.authReducer.value.isModerator)
+    const user = useBBSelector(state => state.authReducer.value.user)
+    const isAuth = useBBSelector(state => state.authReducer.value.isAuth)
     return (
         <div>
-            <p>{email}</p>
-            {isModerator && <p>Moderator</p>}
+            <p>{user?.name}</p>
+            {isAuth && <p>Logged In</p>}
         </div>
     )
 }

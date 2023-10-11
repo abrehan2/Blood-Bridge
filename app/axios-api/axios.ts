@@ -2,7 +2,7 @@ import storageHelper from "@/lib/storage-helper";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/",
+  baseURL: "http://localhost:5000/api/",
 });
 const ResponseInterceptor = (response: AxiosResponse) => {
   return response;

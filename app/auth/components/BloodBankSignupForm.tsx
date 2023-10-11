@@ -9,14 +9,15 @@ import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
 import ValidatePassword from './ValidatePassword'
-import axios from 'axios'
+import { axiosInstance as axios } from '@/app/axios-api/axios'
 import cx from 'classnames'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
+import { registerBloodBankUrl } from '@/app/axios-api/Endpoint'
 
 export interface BloodBankSignupData {
-    bloodBank: string;
+    name: string;
     email: string;
     licenseNo: string;
     city: string;
@@ -25,7 +26,7 @@ export interface BloodBankSignupData {
     confirmPassword?: string;
 }
 
-export type BloodBankfieldTypes = "email" | "password" | "bloodBank" | "address" | "licenseNo" | "confirmPassword";
+export type BloodBankfieldTypes = "email" | "password" | "name" | "address" | "licenseNo" | "confirmPassword";
 
 const BloodBankSignupForm = () => {
     const token = useParams();
@@ -37,7 +38,7 @@ const BloodBankSignupForm = () => {
     const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false)
 
     const schema: ZodType<BloodBankSignupData> = z.object({
-        bloodBank: z.string().nonempty({ message: 'First Name is required' }).min(3, 'First Name must be at least 3 characters long'),
+        name: z.string().nonempty({ message: 'First Name is required' }).min(3, 'First Name must be at least 3 characters long'),
         licenseNo: z.string().nonempty({ message: 'License Number is required' }),
         email: z.string().email({ message: 'Email is invalid' }),
         address: z.string().nonempty('Address is Required').min(5, 'Address must be at least 5 characters long').max(100, 'Address must be at most 100 characters long'),
@@ -69,16 +70,16 @@ const BloodBankSignupForm = () => {
             return
         }
         data.password = password;
-        data.confirmPassword = confirmPassword;
         console.log(data);
-        // axios.post('/api/signUp', data)
-        //     .then((res) => {
-        //         toast.success(res.data.message);
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //         toast.error(err.response.data.error);
-        //     })
+        const url = registerBloodBankUrl();
+        axios.post(url, data)
+            .then((res) => {
+                toast.success(res.data.message);
+            })
+            .catch((err) => {
+                console.log(err);
+                toast.error(err.response.data.error);
+            })
     }
 
     useEffect(() => {
@@ -96,9 +97,9 @@ const BloodBankSignupForm = () => {
         <form className='w-full' onSubmit={handleSubmit(SubmitData)}>
             <div className='w-3/4 grid grid-cols-2 mx-auto gap-x-32 gap-y-6'>
                 <InputField
-                    fieldName='bloodBank' fieldType='text'
+                    fieldName='name' fieldType='text'
                     fieldTitle='Blood Bank' fieldLabel={"lifestream blood bank"}
-                    register={register} isError={errors?.bloodBank && true}/>
+                    register={register} isError={errors?.name && true}/>
                 <InputField
                     fieldName='email' fieldType='email'
                     fieldTitle='Email' fieldLabel={"aliakbar@gmail.com"}

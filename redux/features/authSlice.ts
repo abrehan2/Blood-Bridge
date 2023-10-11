@@ -1,10 +1,9 @@
+import storageHelper from '@/lib/storage-helper';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type AuthState = {
     isAuth: boolean;
-    email: string;
-    uid: string;
-    isModerator: boolean;
+    user: any;
 };
 
 type initialStateType = {
@@ -14,14 +13,12 @@ type initialStateType = {
 const initialState = {
     value: {
         isAuth: false,
-        email: '',
-        uid: '',
-        isModerator: false,
+        user: null,
     } as AuthState,
 } as initialStateType;
 
 interface LogInPayload {
-    email: string;
+    user: any;
 }
 
 export const auth = createSlice({
@@ -29,23 +26,23 @@ export const auth = createSlice({
     initialState,
     reducers: {
         logOut: () => {
+            storageHelper.removeItem(storageHelper.StorageKeys.User_Data);
             return initialState
         },
         logIn: (state, action: PayloadAction<LogInPayload>) => {
+            storageHelper.saveItem(storageHelper.StorageKeys.User_Data, initialState.value.user);
             return {
                 value: {
                     isAuth: true,
-                    email: action.payload.email,
-                    uid: 'HGafuhGDgAJjaADHa23543',
-                    isModerator: false,
+                    user: action.payload.user,
                 },
             }
         },
-        toggleModerator: (state) => {
-            state.value.isModerator = !state.value.isModerator;
-        }
+        // toggleModerator: (state) => {
+        //     state.value.isModerator = !state.value.isModerator;
+        // }
     },
 });
 
-export const { logOut, logIn, toggleModerator } = auth.actions;
+export const { logOut, logIn } = auth.actions;
 export default auth.reducer;

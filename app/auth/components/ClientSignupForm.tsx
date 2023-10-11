@@ -22,12 +22,14 @@ export interface SignupData {
     email: string;
     dob: string;
     city: string;
+    bloodGroup: string;
+    contact: string;
     password?: string;
     confirmPassword?: string;
     cnic?: string;
 }
 
-export type fieldTypes = "email" | "password" | "firstName" | "lastName" | "dob" | "confirmPassword" | "cnic";
+export type fieldTypes = "email" | "password" | "firstName" | "lastName" | "dob" | "confirmPassword" | "cnic" | "contact" | "bloodGroup";
 
 const ClientSignupForm = () => {
     const token = useParams();
@@ -53,6 +55,8 @@ const ClientSignupForm = () => {
             message: `Date of Birth must not exceed ${formattedDate}`
         }),
         city: z.string().nonempty({ message: 'City is required' }),
+        bloodGroup: z.string().nonempty({ message: 'Blood Group is required' }),
+        contact: z.string().nonempty({ message: 'Contact is required' }).min(11, 'Contact must be at least 11 characters long').max(11, 'Contact must be at most 11 characters long'),
     })
 
     const { register, handleSubmit, formState: { errors } } = useForm<SignupData>({
@@ -98,24 +102,16 @@ const ClientSignupForm = () => {
         if (regex.test(cnic)) {
             data.cnic = cnic;
             data.password = password;
-            data.confirmPassword = confirmPassword;
             console.log(data);
             const url = registerUserUrl();
             axios.post(url, data)
             .then((res: any) => {
                 console.log(res);
-
-                // toast.success(res.data.message);
-                // axios.get(`/api/activate/${token}`).then((res) => {
-                //     console.log(res);
-                // }).catch((err) => {
-                //     console.log(err);
-                //     toast.error(err.response.data.error)
-                // })
+                toast.success(res.data.message);
             })
             .catch((err: any) => {
                 console.log(err);
-                // toast.error(err.response.data.error);
+                toast.error(err!.response!.data!.message!);
             })
         }
         else {
@@ -162,6 +158,26 @@ const ClientSignupForm = () => {
                         <option value="Rawalpindi">Rawalpindi</option>
                     </select>
                 </div>
+
+                <div className='w-full flex flex-col-reverse'>
+                    <label htmlFor="firstName" className='text-zinc-500 text-xs font-normal font-LatoRegular uppercase tracking-[3.50px] pl-3 pt-0.5'>Blood Group</label>
+                    <select className='focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' {...register("bloodGroup")}>
+                        <option value="">Select Blood Group</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+
+                <InputField
+                    fieldName='contact' fieldType='text'
+                    fieldTitle='Contact' fieldLabel={`eg. 03001234567`}
+                    register={register} titleCase='capitalize' />
 
                 {/* CNIC field */}
                 <div className='w-full flex flex-col-reverse'>
