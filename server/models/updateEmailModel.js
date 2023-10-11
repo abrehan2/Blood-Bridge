@@ -1,22 +1,16 @@
 // IMPORTS -
 const mongoose = require("mongoose");
 
-const tokenSchema = new mongoose.Schema({
+const updateEmailSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
     unique: true,
   },
 
-  BloodBankId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "Blood Bank",
-    unique: true,
-  },
-
   token: {
     type: String,
-    required: true, 
+    required: true,
   },
 
   createdAt: {
@@ -26,5 +20,5 @@ const tokenSchema = new mongoose.Schema({
   },
 });
 
-const Token = mongoose.model("Token", tokenSchema);
-module.exports = Token;
+const updateEmail = mongoose.model("Update Email", updateEmailSchema);
+module.exports = updateEmail;

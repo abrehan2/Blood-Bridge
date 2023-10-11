@@ -13,9 +13,9 @@ const errorMiddleware = (error, req, res, next) => {
 
   // MONGOOSE DUPLICATE KEY ERROR -
   if (error.code === 11000) {
-    const message = `Duplicate key entered`;
-    error = new ErrorHandler(message, 400);
-    // console.log(error.message)
+    // const message = `Duplicate key entered`;
+    // error = new ErrorHandler(message, 400);
+    console.log(error.message)
   }
 
   // WRONG JSON WEB TOKEN ERROR -
