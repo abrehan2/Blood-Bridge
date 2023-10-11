@@ -3,6 +3,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const tokenModel = require("../models/tokenModel");
+const emailModel = require("../models/updateEmailModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
@@ -104,7 +105,7 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new ErrorHandler("Please enter the email and password", 400));
+    return next(new ErrorHandler("Please enter the email and password", 400)); 
   }
 
   const user = await userModel.findOne({ email }).select("+password");
@@ -285,7 +286,6 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
   const newUserData = {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
-    email: req.body.email,
     dob: req.body.dob,
     city: req.body.city,
     cnic: req.body.cnic,
@@ -310,14 +310,71 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     };
   }
 
-  await userModel.findByIdAndUpdate(req.authUser.id, newUserData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
+  if (req.body.email !== "") {
+    const user = await userModel.findById(req.authUser.id);
+    const check_token = await emailModel.findOne({
+      userId: user.id,
+    });
+
+    if (req.body.email === user.email && user.emailVerified) {
+      return next(new ErrorHandler("Your email is already verified", 403));
+    }
+
+    if (user.emailVerified === false && check_token) {
+      return next(new ErrorHandler("Confirm your email address", 403));
+    } else {
+      newUserData.email = req.body.email;
+
+      const token = await new emailModel({
+        userId: user._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+
+      user.emailVerified = false;
+      await user.save();
+
+      const url = `${process.env.BASE_URL}/${user.id}/email/verify/${token.token}`;
+
+      await sendEmail({
+        email: user.email,
+        subject: "Blood Bridge Email Verification",
+        message: `Click the given link to verify your account: ${url}`,
+      });
+    }
+
+    await userModel.findByIdAndUpdate(req.authUser.id, newUserData, {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Your profile changes have been saved",
+    });
+  }
+});
+
+exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findOne({ _id: req.params.id });
+  const token = await emailModel.findOne({
+    userId: user._id,
+    token: req.params.token,
   });
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  if (!token) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  await user.updateOne({ _id: user._id, emailVerified: true });
+  await token.deleteOne();
 
   res.status(200).json({
     success: true,
-    message: "Your profile changes have been saved",
+    message: "Thank you for verifying your email address",
   });
 });

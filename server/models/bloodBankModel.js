@@ -45,6 +45,8 @@ const bloodBankSchema = new mongoose.Schema({
     required: [true, "Please enter your address"],
   },
 
+  // timing, phoneNo, sector, reviews
+
   avatar: {
     public_id: {
       type: String,

@@ -26,7 +26,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       city,
       address,
     });
-
+    
     const token = await new tokenModel({
       BloodBankId: bloodBank._id,
       token: crypto.randomBytes(32).toString("hex"),
