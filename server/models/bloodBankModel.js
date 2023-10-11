@@ -108,5 +108,5 @@ bloodBankSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-const bloodBankModel = mongoose.model("Blood Bank", bloodBankSchema);
+const bloodBankModel = mongoose.model("bloodBank", bloodBankSchema);
 module.exports = bloodBankModel;

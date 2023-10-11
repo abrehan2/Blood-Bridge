@@ -22,3 +22,4 @@ const updateEmailSchema = new mongoose.Schema({
 
 const updateEmail = mongoose.model("Update Email", updateEmailSchema);
 module.exports = updateEmail;
+  
