@@ -37,7 +37,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     folder: "avatars",
     width: 150,
     crop: "scale",
-  });
+  }); 
 
   user = await userModel.create({
     firstName,
@@ -223,7 +223,7 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
     },
   });
 
-  if (!user) {
+  if (!user) { 
     return next(
       new ErrorHandler("Your password reset link is invalid or expired", 400)
     );
@@ -324,7 +324,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     if (user.emailVerified === false && check_token) {
       return next(new ErrorHandler("Confirm your email address", 403));
     } else {
-      newUserData.email = req.body.email;
+      newUserData.email = req.body.email; 
 
       const token = await new emailModel({
         userId: user._id,
