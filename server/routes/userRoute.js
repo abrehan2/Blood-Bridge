@@ -8,11 +8,12 @@ router.route("/auth/user/register").post(registerUser);
 router.route("/auth/:id/verify/:token").get(verifyUser);
 router.route("/auth/user/login").post(loginUser);
 router.route("/auth/user/logout").get(logoutUser);
-router.route("/user/password/forgot").post(forgotPassword);
-router.route("/user/password/reset/:token").put(resetPassword);
+router.route("/auth/user/forgot").post(forgotPassword);
+router.route("/auth/user/reset/:token").put(resetPassword);
 router.route("/user/me").get(authenticateUser, authorizeRoles("user"), getUserDetails);
 router.route("/user/password/update").put(authenticateUser, authorizeRoles("user"), updatePassword);
 router.route("/user/me/update").put(authenticateUser, authorizeRoles("user"), updateProfile);
-router.route("/:id/email/verify/:token").get(authenticateUser, authorizeRoles("user"), verifyEmail);
+router.route("/user/:id/email/verify/:token").get(verifyEmail);
+
 
 module.exports = router;
