@@ -14,7 +14,7 @@ const {
 const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
 
 router.route("/auth/bloodBank/register").post(registerBloodBank);
-router.route("/auth/:id/verify/:token").get(verifyBloodBank);
+router.route("/auth/bloodBank/:id/verify/:token").get(verifyBloodBank);
 router.route("/auth/bloodBank/login").post(loginBloodBank);
 router.route("/auth/bloodBank/logout").get(logoutBloodBank);
 router.route("/auth/bloodBank/forgot").post(forgotPassword);

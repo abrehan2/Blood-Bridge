@@ -17,35 +17,34 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     return next(
       new ErrorHandler("The email address you entered is already in use", 409)
     );
-  } 
-    bloodBank = await bloodBankModel.create({
-      name,
-      email,
-      password,
-      licenseNo,
-      city,
-      address,
-    });
-    
-    const token = await new tokenModel({
-      BloodBankId: bloodBank._id,
-      token: crypto.randomBytes(32).toString("hex"),
-    }).save();
+  }
+  bloodBank = await bloodBankModel.create({
+    name,
+    email,
+    password,
+    licenseNo,
+    city,
+    address,
+  });
 
-    const url = `${process.env.BASE_URL}/auth/${bloodBank.id}/verify/${token.token}`;
+  const token = await new tokenModel({
+    BloodBankId: bloodBank._id,
+    token: crypto.randomBytes(32).toString("hex"),
+  }).save();
 
-    await sendEmail({
-      email: bloodBank.email,
-      subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
-    });
+  const url = `${process.env.BASE_URL}/auth/bloodBank/${bloodBank.id}/verify/${token.token}`;
 
-    res.status(201).json({
-      success: true,
-      message:
-        "Your account has been created! Please verify your email address to log in",
-    });
-  
+  await sendEmail({
+    email: bloodBank.email,
+    subject: "Blood Bridge Email Verification",
+    message: `Click the given link to verify your account: ${url}`,
+  });
+
+  res.status(201).json({
+    success: true,
+    message:
+      "Your account has been created! Please verify your email address to log in",
+  });
 });
 
 // VERIFY BLOOD BANK -
@@ -103,7 +102,7 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
 
-      const url = `${process.env.BASE_URL}/auth/${bloodBank.id}/verify/${token.token}`;
+      const url = `${process.env.BASE_URL}/auth/bloodBank/${bloodBank.id}/verify/${token.token}`;
 
       await sendEmail({
         email: bloodBank.email,
