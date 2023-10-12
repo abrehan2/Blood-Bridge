@@ -32,7 +32,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       token: crypto.randomBytes(32).toString("hex"),
     }).save();
 
-    const url = `${process.env.BASE_URL}/${bloodBank.id}/verify/${token.token}`;
+    const url = `${process.env.BASE_URL}/auth/${bloodBank.id}/verify/${token.token}`;
 
     await sendEmail({
       email: bloodBank.email,
@@ -103,7 +103,7 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
 
-      const url = `${process.env.BASE_URL}/${bloodBank.id}/verify/${token.token}`;
+      const url = `${process.env.BASE_URL}/auth/${bloodBank.id}/verify/${token.token}`;
 
       await sendEmail({
         email: bloodBank.email,
@@ -159,7 +159,7 @@ exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
   const resetToken = bloodBank.getResetPasswordToken();
   await bloodBank.save({ validateBeforeSave: false });
 
-  const url = `${process.env.BASE_URL}/password/reset/${resetToken}`;
+  const url = `${process.env.BASE_URL}/auth/bloodBank/reset/${resetToken}`;
 
   try {
     await sendEmail({
