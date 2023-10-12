@@ -59,7 +59,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     token: crypto.randomBytes(32).toString("hex"),
   }).save();
 
-  const url = `${process.env.BASE_URL}/auth/${user.id}/verify/${token.token}`;
+  const url = `${process.env.BASE_URL}/auth/user/${user.id}/verify/${token.token}`;
 
   await sendEmail({
     email: user.email,
@@ -123,7 +123,7 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
         token: crypto.randomBytes(32).toString("hex"),
       }).save();
 
-      const url = `${process.env.BASE_URL}/auth/${user.id}/verify/${token.token}`;
+      const url = `${process.env.BASE_URL}/auth/user/${user.id}/verify/${token.token}`;
 
       await sendEmail({
         email: user.email,
@@ -330,7 +330,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     user.emailVerified = false;
     await user.save();
 
-    const url = `${process.env.BASE_URL}/user/${user.id}/email/verify/${token.token}`;
+    const url = `${process.env.BASE_URL}/user/${user.id}/verify/${token.token}`;
 
     await sendEmail({
       email: user.email,
