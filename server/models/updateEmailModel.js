@@ -5,7 +5,11 @@ const updateEmailSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    unique: true,
+  },
+
+  BloodBankId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "bloodBank",
   },
 
   token: {
@@ -20,6 +24,5 @@ const updateEmailSchema = new mongoose.Schema({
   },
 });
 
-const updateEmail = mongoose.model("Update Email", updateEmailSchema);
+const updateEmail = mongoose.model("updateEmail", updateEmailSchema);
 module.exports = updateEmail;
-  
