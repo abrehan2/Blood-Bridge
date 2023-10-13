@@ -1,7 +1,7 @@
-import storageHelper from '@/lib/storage-helper';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type AuthState = {
+    isLoading: boolean;
     isAuth: boolean;
     user: any;
 };
@@ -12,6 +12,7 @@ type initialStateType = {
 
 const initialState = {
     value: {
+        isLoading: true,
         isAuth: false,
         user: null,
     } as AuthState,
@@ -26,23 +27,24 @@ export const auth = createSlice({
     initialState,
     reducers: {
         logOut: () => {
-            storageHelper.removeItem(storageHelper.StorageKeys.User_Data);
-            return initialState
+            return { value: { ...initialState.value, isLoading: false } }
         },
         logIn: (state, action: PayloadAction<LogInPayload>) => {
-            storageHelper.saveItem(storageHelper.StorageKeys.User_Data, initialState.value.user);
-            return {
-                value: {
-                    isAuth: true,
-                    user: action.payload.user,
-                },
+            if (action.payload.user) {
+                return {
+                    value: {
+                        isLoading: false,
+                        isAuth: true,
+                        user: action.payload.user,
+                    },
+                }
             }
         },
-        // toggleModerator: (state) => {
-        //     state.value.isModerator = !state.value.isModerator;
-        // }
+        notFound: () => {
+            return { value: { ...initialState.value, isLoading: false } }
+        },
     },
 });
 
-export const { logOut, logIn } = auth.actions;
+export const { logOut, logIn, notFound } = auth.actions;
 export default auth.reducer;

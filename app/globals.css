@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('../node_modules/react-password-validattor/dist/style.css');
 
 html,
 body,

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,6 +9,11 @@ import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
 import Link from 'next/link'
+import { axiosInstance as axios } from '@/app/axios-api/axios'
+import { loginUserUrl } from '@/app/axios-api/Endpoint'
+import { useRouter } from 'next/navigation'
+import { useDispatch } from 'react-redux'
+import { logIn } from '@/redux/features/authSlice'
 
 export interface SigninData {
     email: string;
@@ -18,8 +23,10 @@ export interface SigninData {
 export type fieldTypes = "email" | "password";
 
 const ClientSigninForm = () => {
+    const { push } = useRouter();
+    const dispath = useDispatch();
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
-
+    
     const schema: ZodType<SigninData> = z.object({
         email: z.string().nonempty('Email is required').email({ message: 'Email is invalid' }),
         password: z.string().nonempty({ message: 'Password is required' }),
@@ -30,15 +37,16 @@ const ClientSigninForm = () => {
     })
 
     const submitData = (data: SigninData) => {
-        // signIn("credentials", {...data, redirect: false}).then((callback) => {
-        //     if (callback?.ok) {
-        //         toast.success('Sign in successful');
-        //     }
-
-        //     if (callback?.error) {
-        //         toast.error(callback.error);
-        //     }
-        // })
+        const url = loginUserUrl();
+        axios.post(url, data, {
+            withCredentials: true,
+        }).then((res) => {
+            dispath(logIn({user: res.data.user} as any))
+            toast.success('Login Successful');
+            push("/")
+        }).catch((err) => {
+            toast.error(err!.response!.data!.message!);
+        })
     }
 
     useEffect(() => {
@@ -68,7 +76,7 @@ const ClientSigninForm = () => {
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
-                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3 text-right'>forgot Password? <Link href={'/auth/forgot-password'} className='text-blue-600 cursor-pointer capitalize underline'>reset Password</Link></p>
+                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3 text-right'>forgot Password? <Link href={'/auth/forgot-password?type=user'} className='text-blue-600 cursor-pointer capitalize underline'>reset Password</Link></p>
             </div>
             <div className='w-3/4 mx-auto'>
                 <Button className='w-full rounded-3xl bg-red-700 font-LatoBold uppercase tracking-[3.50px] hover:bg-red-800 mt-6 mb-5' type='submit'>Sign In</Button>

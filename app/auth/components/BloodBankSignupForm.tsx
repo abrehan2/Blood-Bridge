@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useMemo } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,13 +8,13 @@ import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
-import ValidatePassword from './ValidatePassword'
 import { axiosInstance as axios } from '@/app/axios-api/axios'
 import cx from 'classnames'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { registerBloodBankUrl } from '@/app/axios-api/Endpoint'
+import { passwordStrength } from 'check-password-strength'
 
 export interface BloodBankSignupData {
     name: string;
@@ -33,9 +33,7 @@ const BloodBankSignupForm = () => {
 
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [agreeConditions, setAgreeConditions] = useState<boolean>(false)
-    const [password, setPassword] = useState<string>('')
-    const [confirmPassword, setConfirmPassword] = useState<string>('')
-    const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false)
+    const [typedPasswordStrength, setTypedPasswordStrength] = useState<string>('')
 
     const schema: ZodType<BloodBankSignupData> = z.object({
         name: z.string().nonempty({ message: 'First Name is required' }).min(3, 'First Name must be at least 3 characters long'),
@@ -43,19 +41,19 @@ const BloodBankSignupForm = () => {
         email: z.string().email({ message: 'Email is invalid' }),
         address: z.string().nonempty('Address is Required').min(5, 'Address must be at least 5 characters long').max(100, 'Address must be at most 100 characters long'),
         city: z.string().nonempty({ message: 'City is required' }),
-    })
+        password: z.string().nonempty({ message: 'Password is required' }).min(8, 'Password must be at least 8 characters long'),
+        confirmPassword: z.string().nonempty({ message: 'Confirm Password is required' }).min(8, 'Confirm Password must be at least 8 characters long')
+    }).refine(data => data.password === data.confirmPassword, {
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+    });
 
     const { register, handleSubmit, formState: { errors } } = useForm<BloodBankSignupData>({
         resolver: zodResolver(schema)
     })
 
-    const onValidatorChangeHandler = (result: boolean) => {
-        if (result) {
-            setIsPasswordValid(true)
-        }
-        else {
-            setIsPasswordValid(false)
-        }
+    const onChangePassword = (password: string) => {
+
     }
 
     const { push } = useRouter();
@@ -65,12 +63,10 @@ const BloodBankSignupForm = () => {
             toast.error('Please agree to the terms and conditions');
             return
         }
-        if (!isPasswordValid) {
-            toast.error('Password is invalid');
+        if (typedPasswordStrength !== 'Strong') {
+            toast.error('Password Must be Strong');
             return
         }
-        data.password = password;
-        console.log(data);
         const url = registerBloodBankUrl();
         axios.post(url, data)
             .then((res) => {
@@ -82,7 +78,7 @@ const BloodBankSignupForm = () => {
             })
     }
 
-    useEffect(() => {
+    useMemo(() => {
         const allErrors = Object.values(errors);
         allErrors.map((error) => (
             notifyError(error?.message)
@@ -99,7 +95,7 @@ const BloodBankSignupForm = () => {
                 <InputField
                     fieldName='name' fieldType='text'
                     fieldTitle='Blood Bank' fieldLabel={"lifestream blood bank"}
-                    register={register} isError={errors?.name && true}/>
+                    register={register} isError={errors?.name && true} />
                 <InputField
                     fieldName='email' fieldType='email'
                     fieldTitle='Email' fieldLabel={"aliakbar@gmail.com"}
@@ -108,10 +104,10 @@ const BloodBankSignupForm = () => {
                     fieldName='licenseNo' fieldType='text'
                     fieldTitle='License Number' fieldLabel={"bb-2032-13-001"}
                     register={register} titleCase='lowercase' isError={errors?.licenseNo && true} />
-                
+
                 <div className='w-full flex flex-col-reverse'>
                     <label htmlFor="firstName" className='text-zinc-500 text-xs font-normal font-LatoRegular uppercase tracking-[3.50px] pl-3 pt-0.5'>Islamabad</label>
-                    <select className={cx('focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]', {'!border-red-500': errors?.city ? true : false})} {...register("city")}>
+                    <select className={cx('focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]', { '!border-red-500': errors?.city ? true : false })} {...register("city")}>
                         <option value="">Select City</option>
                         <option value="Islamabad">Islamabad</option>
                         <option value="Rawalpindi">Rawalpindi</option>
@@ -121,30 +117,41 @@ const BloodBankSignupForm = () => {
                 <InputField
                     fieldName='address' fieldType='text'
                     fieldTitle='Address' fieldLabel={"123 Main St, any street, 12345"}
-                    register={register} titleCase='capitalize' isError={errors?.address && true}/>
+                    register={register} titleCase='capitalize' isError={errors?.address && true} />
 
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
                         <label htmlFor="password" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
-                        <input onChange={(e) => setPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className={cx('placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]')} value={password} id='password' />
+                        <input {...register("password", {
+                            onChange: (e) => {
+                                setTypedPasswordStrength(passwordStrength(e.target.value).value);
+                            }
+                        }
+                        )} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className={cx('placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px] text-red-500', { '!text-black': typedPasswordStrength === 'Strong' })} />
                     </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
+                    {typedPasswordStrength !== '' &&
+                        <div className='absolute left-2 -bottom-6'>
+                            <p className='pl-1.5 text-zinc-500 text-sm font-LatoRegular tracking-[1px]'>Password is <span className={cx('text-green-600 uppercase', { '!text-red-500': typedPasswordStrength !== 'Strong' })}>{typedPasswordStrength}</span>
+                            </p>
+                        </div>
+                    }
                 </div>
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
                         <label htmlFor="confirmPassword" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
-                        <input onChange={(e) => setConfirmPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={confirmPassword} id='confirmPassword' />
+                        <input {...register("confirmPassword")} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' />
                     </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
 
-                <div className='w-full col-span-2'>
+                {/* <div className='w-full col-span-2'>
                     <ValidatePassword password={password} confirmPassword={confirmPassword} onValidatorChangeHandler={onValidatorChangeHandler} />
-                </div>
+                </div> */}
             </div>
             <div className='w-3/4 mx-auto'>
                 <div className='flex items-center gap-x-2'>

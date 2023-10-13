@@ -1,7 +1,6 @@
 export const StorageKeys = {
-  USER_ID: "userId",
-  Access_Token: "access_token",
   User_Data: "userData",
+  is_Logged_In: "isLoggedIn",
 };
 
 function saveItem(key: any, value: any) {

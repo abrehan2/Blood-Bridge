@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button'
 import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
-import ValidatePassword from './ValidatePassword'
 import { axiosInstance as axios } from '@/app/axios-api/axios'
 import { registerUserUrl } from '@/app/axios-api/Endpoint'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
+import cx from 'classnames'
+import { passwordStrength } from 'check-password-strength'
 
 export interface SignupData {
     firstName: string;
@@ -37,9 +38,7 @@ const ClientSignupForm = () => {
     const [cnic, setCnic] = useState<string>('')
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [agreeConditions, setAgreeConditions] = useState<boolean>(false)
-    const [password, setPassword] = useState<string>('')
-    const [confirmPassword, setConfirmPassword] = useState<string>('')
-    const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false)
+    const [typedPasswordStrength, setTypedPasswordStrength] = useState<string>('')
 
     const today = new Date();
     const formattedDate = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`;
@@ -57,7 +56,12 @@ const ClientSignupForm = () => {
         city: z.string().nonempty({ message: 'City is required' }),
         bloodGroup: z.string().nonempty({ message: 'Blood Group is required' }),
         contact: z.string().nonempty({ message: 'Contact is required' }).min(11, 'Contact must be at least 11 characters long').max(11, 'Contact must be at most 11 characters long'),
-    })
+        password: z.string().nonempty({ message: 'Password is required' }).min(8, 'Password must be at least 8 characters long'),
+        confirmPassword: z.string().nonempty({ message: 'Confirm Password is required' }).min(8, 'Confirm Password must be at least 8 characters long')
+    }).refine(data => data.password === data.confirmPassword, {
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+    });
 
     const { register, handleSubmit, formState: { errors } } = useForm<SignupData>({
         resolver: zodResolver(schema)
@@ -74,15 +78,6 @@ const ClientSignupForm = () => {
         }
     }
 
-    const onValidatorChangeHandler = (result: boolean) => {
-        if (result) {
-            setIsPasswordValid(true)
-        }
-        else {
-            setIsPasswordValid(false)
-        }
-    }
-
     const { push } = useRouter();
 
     const SubmitData = (data: SignupData) => {
@@ -94,19 +89,16 @@ const ClientSignupForm = () => {
             toast.error('Please agree to the terms and conditions');
             return
         }
-        if (!isPasswordValid) {
-            toast.error('Password is invalid');
+        if (typedPasswordStrength !== 'Strong') {
+            toast.error('Password Must be Strong');
             return
         }
         const regex = new RegExp(Constants.CNIC_REGEXP);
         if (regex.test(cnic)) {
             data.cnic = cnic;
-            data.password = password;
-            console.log(data);
             const url = registerUserUrl();
             axios.post(url, data)
             .then((res: any) => {
-                console.log(res);
                 toast.success(res.data.message);
             })
             .catch((err: any) => {
@@ -188,27 +180,35 @@ const ClientSignupForm = () => {
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
                         <label htmlFor="password" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
-                        <input onChange={(e) => setPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={password} id='password' />
+                        <input {...register("password", {
+                            onChange: (e) => {
+                                setTypedPasswordStrength(passwordStrength(e.target.value).value);
+                            }
+                        }
+                        )} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]'/>
                     </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
+                    {typedPasswordStrength !== '' &&
+                        <div className='absolute left-2 -bottom-6'>
+                            <p className='pl-1.5 text-zinc-500 text-sm font-LatoRegular tracking-[1px]'>Password is <span className={cx('text-green-600 uppercase', { '!text-red-500': typedPasswordStrength !== 'Strong' })}>{typedPasswordStrength}</span>
+                            </p>
+                        </div>
+                    }
                 </div>
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
                         <label htmlFor="confirmPassword" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Combination of alphanumerics & symbols</label>
-                        <input onChange={(e) => setConfirmPassword(e.target.value)} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={confirmPassword} id='confirmPassword' />
+                        <input {...register("confirmPassword")} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' />
                     </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
 
-                <div className='w-full col-span-2'>
-                    <ValidatePassword password={password} confirmPassword={confirmPassword} onValidatorChangeHandler={onValidatorChangeHandler} />
-                </div>
             </div>
-            <div className='w-3/4 mx-auto'>
+            <div className='w-3/4 mx-auto mt-4'>
                 <div className='flex items-center gap-x-2'>
                     <input id='agreeTerms' type="checkbox"
                         onChange={() => setAgreeConditions(!agreeConditions)}

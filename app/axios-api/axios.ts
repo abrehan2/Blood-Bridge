@@ -1,4 +1,3 @@
-import storageHelper from "@/lib/storage-helper";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 export const axiosInstance = axios.create({
@@ -8,11 +7,7 @@ const ResponseInterceptor = (response: AxiosResponse) => {
   return response;
 };
 const RequestInterceptor = async (config: AxiosRequestConfig) => {
-  const accessToken = await storageHelper.getItem(
-    storageHelper.StorageKeys.Access_Token,
-  );
-  config!.headers!.Authorization =  "Bearer" + accessToken;
-  console.log(config!.headers!.Authorization);
+  config!.headers!["Content-Type"]! = "application/json";
   return config;
 };
 //@ts-ignore
@@ -32,8 +27,7 @@ axiosInstance.interceptors.response.use(
       return;
     } else {
       if (error.response.status === 401) {
-        // await storageHelper.removeItem(storageHelper.StorageKeys.Access_Token);
-        // await storageHelper.removeItem(storageHelper.StorageKeys.USER_ID);
+        //logOut User
       }
       return Promise.reject(error);
     }

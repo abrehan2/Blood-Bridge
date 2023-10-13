@@ -9,19 +9,26 @@ import toast from 'react-hot-toast'
 import HidePassword from '@/globals/icons/hide-password'
 import ShowPassword from '@/globals/icons/show-password'
 import Link from 'next/link'
+import { loginBloodBankUrl } from '@/app/axios-api/Endpoint'
+import { axiosInstance as axios } from '@/app/axios-api/axios'
+import { useDispatch } from 'react-redux'
+import { logIn } from '@/redux/features/authSlice'
+import { useRouter } from 'next/navigation'
 
 export interface SigninData {
-    email: string;
+    licenseNo: string;
     password: string;
 }
 
-export type fieldTypes = "email" | "password";
+export type fieldTypes = "licenseNo" | "password";
 
 const BloodBankSigninForm = () => {
+    const dispath = useDispatch();
+    const { push } = useRouter();
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
 
     const schema: ZodType<SigninData> = z.object({
-        email: z.string().nonempty('Email is required').email({ message: 'Email is invalid' }),
+        licenseNo: z.string().nonempty({ message: 'License Number is required' }),
         password: z.string().nonempty({ message: 'Password is required' }),
     })
 
@@ -30,15 +37,17 @@ const BloodBankSigninForm = () => {
     })
 
     const submitData = (data: SigninData) => {
-        // signIn("credentials", {...data, redirect: false}).then((callback) => {
-        //     if (callback?.ok) {
-        //         toast.success('Sign in successful');
-        //     }
-
-        //     if (callback?.error) {
-        //         toast.error(callback.error);
-        //     }
-        // })
+        const url = loginBloodBankUrl();
+        axios.post(url, data, {
+            withCredentials: true,
+        }).then((res) => {
+            dispath(logIn({user: res.data.user} as any))
+            toast.success('Login Successful');
+            push("/")
+        }).catch((err) => {
+            console.log(err.response)
+            toast.error(err!.response!.data!.message!);
+        })
     }
 
     useEffect(() => {
@@ -55,10 +64,10 @@ const BloodBankSigninForm = () => {
     return (
         <form className='w-full' onSubmit={handleSubmit(submitData)}>
             <div className='w-3/4 grid mx-auto gap-x-32 gap-y-6'>
-                <InputField
-                    fieldName='email' fieldType='email'
-                    fieldTitle='Email' fieldLabel={"aliakbar@gmail.com"}
-                    register={register} titleCase='lowercase' />
+            <InputField
+                    fieldName='licenseNo' fieldType='text'
+                    fieldTitle='License Number' fieldLabel={"458001"}
+                    register={register} titleCase='lowercase' isError={errors?.licenseNo && true} />
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
                         <label htmlFor="password" className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[3.50px] pl-3 pt-0.5'>Enter password set at creating account</label>
@@ -68,7 +77,7 @@ const BloodBankSigninForm = () => {
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
-                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3 text-right'>forgot Password? <Link href={'/auth/forgot-password'} className='text-blue-600 cursor-pointer capitalize underline'>reset Password</Link></p>
+                <p className='text-zinc-500 text-xs font-normal font-LatoRegular capitalize tracking-[2px] mt-3 text-right'>forgot Password? <Link href={'/auth/forgot-password?type=bloodBank'} className='text-blue-600 cursor-pointer capitalize underline'>reset Password</Link></p>
             </div>
             <div className='w-3/4 mx-auto'>
                 <Button className='w-full rounded-3xl bg-red-700 font-LatoBold uppercase tracking-[3.50px] hover:bg-red-800 mt-6 mb-5' type='submit'>Sign In</Button>
