@@ -36,7 +36,7 @@ const bloodBankSchema = new mongoose.Schema({
   },
 
   city: {
-    type: String,    
+    type: String,
   },
 
   address: {
@@ -53,8 +53,10 @@ const bloodBankSchema = new mongoose.Schema({
     unique: true,
   },
 
-  timing: {
+  status: {
     type: String,
+    enum: ["open", "close"],
+    default: "close",
   },
 
   reviews: [
@@ -111,6 +113,11 @@ const bloodBankSchema = new mongoose.Schema({
   profileVerified: {
     type: Boolean,
     default: false,
+  },
+
+  emailVerified: {
+    type: Boolean,
+    default: null,
   },
 
   resetPasswordToken: String,
