@@ -8,6 +8,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
+const bcrypt = require("bcryptjs");
 
 const imageBuffer = "./constants/avatar.jpg";
 
@@ -38,11 +39,13 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     crop: "scale",
   });
 
+  let encrypt_cninc = await bcrypt.hash(password, 10);
+
   user = await userModel.create({
     firstName,
     lastName,
     email,
-    cnic,
+    cnic: encrypt_cninc,
     bloodGroup,
     city,
     dob,
@@ -134,7 +137,7 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
     return next(
       new ErrorHandler(
         "Activate your account by clicking the link in the email",
-        400
+        403
       )
     );
   }
@@ -293,6 +296,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     cnic: req.body.cnic,
     contact: req.body.contact,
     bloodGroup: req.body.bloodGroup,
+    email: req.body.email
   };
 
   if (req.body.avatar !== undefined) {
@@ -312,28 +316,31 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
   }
 
   if (req.body.email !== undefined) {
-    if (req.body.email === user.email) {
+    if (
+      (req.body.email === user.email && user.emailVerified === true) ||
+      user.emailVerified === true ||
+      (req.body.email === user.email && user.emailVerified !== false)
+    ) {
       return next(new ErrorHandler("Your email is already verified", 403));
     }
 
-    if (!user.emailVerified) {
+    if (user.emailVerified===false) {
       return next(new ErrorHandler("Confirm your email address", 403));
     }
-
-    newUserData.email = req.body.email;
+ 
 
     const token = await new emailModel({
       userId: user._id,
       token: crypto.randomBytes(32).toString("hex"),
-    }).save();
-
-    user.emailVerified = false;
-    await user.save();
+    });
+  
+     user.emailVerified = false;
+     await Promise.all([token.save(), user.save()]);
 
     const url = `${process.env.BASE_URL}/user/${user.id}/verify/${token.token}`;
 
     await sendEmail({
-      email: user.email,
+      email: req.body.email,
       subject: "Blood Bridge Email Verification",
       message: `Click the given link to verify your account: ${url}`,
     });
@@ -377,11 +384,39 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 });
 
 // RESEND EMAIL VERIFICATIO FOR UPDATED -
-exports.rendEmailVerification = catchAsyncErr(async (req, res, next) => {
+exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
+  
+  const user = await userModel.findById(req.authUser.id);
 
+  if (user.emailVerified) {
+    return next(new ErrorHandler("Your account is already verified", 403));
+  }
 
+  let token = await emailModel.findOne({ userId: user._id });
 
+  if (token === null) {
+    const newToken = await emailModel.create({
+      userId: user._id,
+      token: crypto.randomBytes(32).toString("hex"),
+    });
 
+    const url = `${process.env.BASE_URL}/user/${user.id}/verify/${newToken.token}`;
 
+    await sendEmail({
+      email: user.email,
+      subject: "Blood Bridge Email Verification",
+      message: `Click the given link to verify your account: ${url}`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Email sent to ${user.email} successfully`,
+    });
+  }
+
+  return next(new ErrorHandler("Activate your account by clicking the link in the email", 403));
 });
+
+ 
+
 
