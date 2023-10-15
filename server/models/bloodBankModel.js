@@ -36,23 +36,60 @@ const bloodBankSchema = new mongoose.Schema({
   },
 
   city: {
-    type: String,
-    required: [true, "Please enter your city"],
+    type: String,    
   },
 
   address: {
     type: String,
-    required: [true, "Please enter your address"],
   },
 
-  // timing, phoneNo, sector, reviews
+  sector: {
+    type: String,
+  },
+
+  contact: {
+    type: String,
+    required: [true, "Please enter your contact"],
+    unique: true,
+  },
+
+  timing: {
+    type: String,
+  },
+
+  reviews: [
+    {
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true,
+      },
+
+      name: {
+        type: String,
+        required: true,
+      },
+
+      rating: {
+        type: Number,
+        required: true,
+      },
+
+      comment: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 
   avatar: {
     public_id: {
       type: String,
+      required: true,
     },
     url: {
       type: String,
+      required: true,
     },
   },
 
@@ -69,6 +106,11 @@ const bloodBankSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+
+  profileVerified: {
+    type: Boolean,
+    default: false,
   },
 
   resetPasswordToken: String,

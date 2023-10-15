@@ -8,8 +8,8 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-const bcrypt = require("bcryptjs");
 
+// PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER USER -
@@ -33,19 +33,18 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("The email address you entered is already in use", 409)
     );
   }
+
   const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
     folder: "avatars",
     width: 150,
     crop: "scale",
   });
 
-  let encrypt_cninc = await bcrypt.hash(password, 10);
-
   user = await userModel.create({
     firstName,
     lastName,
     email,
-    cnic: encrypt_cninc,
+    cnic,
     bloodGroup,
     city,
     dob,
@@ -296,7 +295,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     cnic: req.body.cnic,
     contact: req.body.contact,
     bloodGroup: req.body.bloodGroup,
-    email: req.body.email
+    email: req.body.email,
   };
 
   if (req.body.avatar !== undefined) {
@@ -324,18 +323,17 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
       return next(new ErrorHandler("Your email is already verified", 403));
     }
 
-    if (user.emailVerified===false) {
+    if (user.emailVerified === false) {
       return next(new ErrorHandler("Confirm your email address", 403));
     }
- 
 
     const token = await new emailModel({
       userId: user._id,
       token: crypto.randomBytes(32).toString("hex"),
     });
-  
-     user.emailVerified = false;
-     await Promise.all([token.save(), user.save()]);
+
+    user.emailVerified = false;
+    await Promise.all([token.save(), user.save()]);
 
     const url = `${process.env.BASE_URL}/user/${user.id}/verify/${token.token}`;
 
@@ -385,7 +383,6 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 
 // RESEND EMAIL VERIFICATIO FOR UPDATED -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
-  
   const user = await userModel.findById(req.authUser.id);
 
   if (user.emailVerified) {
@@ -414,9 +411,10 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
     });
   }
 
-  return next(new ErrorHandler("Activate your account by clicking the link in the email", 403));
+  return next(
+    new ErrorHandler(
+      "Activate your account by clicking the link in the email",
+      403
+    )
+  );
 });
-
- 
-
-
