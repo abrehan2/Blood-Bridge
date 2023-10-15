@@ -6,10 +6,14 @@ const tokenModel = require("../models/tokenModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
+const cloudinary = require("cloudinary");
+
+// PARTIALS -
+const imageBuffer = "./constants/avatar.jpg";
 
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
-  const { name, email, password, licenseNo, city, address } = req.body;
+  const { name, email, password, licenseNo, contact } = req.body;
 
   let bloodBank = await bloodBankModel.findOne({ email });
 
@@ -18,13 +22,23 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("The email address you entered is already in use", 409)
     );
   }
+
+   const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
+     folder: "avatars",
+     width: 150,
+     crop: "scale",
+   });
+
   bloodBank = await bloodBankModel.create({
     name,
     email,
     password,
-    licenseNo,
-    city,
-    address,
+    licenseNo,    
+    contact,
+    avatar: {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    },
   });
 
   const token = await new tokenModel({
@@ -93,6 +107,7 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
     );
   }
 
+
   if (!bloodBank.verified) {
     let token = await tokenModel.findOne({ BloodBankId: bloodBank._id });
 
@@ -117,6 +132,16 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
       )
     );
   }
+
+   if (
+     bloodBank.city &&
+     bloodBank.address &&
+     bloodBank.sector &&
+     bloodBank.timing
+   ) {
+     bloodBank.profileVerified = true;
+     await bloodBank.save();
+   }
 
   const isPasswordMatched = await bloodBank.comparePassword(password);
 
@@ -262,4 +287,21 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
   bloodBank.password = newPassword;
   await bloodBank.save();
   setToken(bloodBank, 200, res);
+});
+
+// UPDATE BLOOD BANK PROFILE -
+exports.updateProfile = catchAsyncErr(async (req, res, next) => {
+
+  const bloodBank = await bloodBankModel.findById(req.authUser.id);
+
+ const newData = {
+   name,
+   email,
+   password,
+   licenseNo,
+   city,
+   address,
+ };
+
+
 });

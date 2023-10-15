@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema({
   cnic: {
     type: String,
     required: [true, "Please enter your cnic"],
-    unique: true,
+    unique: true,   
   },
 
   contact: {
