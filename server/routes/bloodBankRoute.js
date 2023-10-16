@@ -10,6 +10,9 @@ const {
   resetPassword, 
   getBloodBank,
   updatePassword,
+  updateProfile,
+  verifyEmail,
+  resendEmailVerification,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
 
@@ -21,5 +24,8 @@ router.route("/auth/bloodBank/forgot").post(forgotPassword);
 router.route("/auth/bloodBank/reset/:token").put(resetPassword);
 router.route("/bloodBank/me").get(authenticateBloodBank, authorizeRoles("bloodBank"), getBloodBank);
 router.route("/bloodBank/password/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updatePassword);
+router.route("/bloodBank/me/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateProfile);
+router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
+router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"),resendEmailVerification)
 
 module.exports = router;

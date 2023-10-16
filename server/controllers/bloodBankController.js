@@ -7,6 +7,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
+const emailModel = require("../models/updateEmailModel");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -23,17 +24,17 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     );
   }
 
-   const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
-     folder: "avatars",
-     width: 150,
-     crop: "scale",
-   });
+  const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
+    folder: "avatars",
+    width: 150,
+    crop: "scale",
+  });
 
   bloodBank = await bloodBankModel.create({
     name,
     email,
     password,
-    licenseNo,    
+    licenseNo,
     contact,
     avatar: {
       public_id: myCloud.public_id,
@@ -107,7 +108,6 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
     );
   }
 
-
   if (!bloodBank.verified) {
     let token = await tokenModel.findOne({ BloodBankId: bloodBank._id });
 
@@ -132,16 +132,6 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
       )
     );
   }
-
-   if (
-     bloodBank.city &&
-     bloodBank.address &&
-     bloodBank.sector &&
-     bloodBank.timing
-   ) {
-     bloodBank.profileVerified = true;
-     await bloodBank.save();
-   }
 
   const isPasswordMatched = await bloodBank.comparePassword(password);
 
@@ -291,17 +281,144 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
 
 // UPDATE BLOOD BANK PROFILE -
 exports.updateProfile = catchAsyncErr(async (req, res, next) => {
-
   const bloodBank = await bloodBankModel.findById(req.authUser.id);
 
- const newData = {
-   name,
-   email,
-   password,
-   licenseNo,
-   city,
-   address,
- };
+  const newData = {
+    name: req.body.name,
+    email: req.body.email,
+    licenseNo: req.body.licenseNo,
+    city: req.body.city,
+    address: req.body.address,
+    sector: req.body.sector,
+    status: req.body.status,
+    contact: req.body.contact,
+  };
+
+  if (req.body.avatar !== undefined) {
+    const imageID = bloodBank.avatar.public_id;
+    await cloudinary.v2.uploader.destroy(imageID);
+
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+
+    newData.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
+  if (req.body.email !== undefined) {
+    if (
+      (req.body.email === bloodBank.email &&
+        bloodBank.emailVerified === true) ||      
+      (req.body.email === bloodBank.email && bloodBank.emailVerified !== false)
+    ) {
+      return next(new ErrorHandler("Your email is already verified", 403));
+    }
+
+    if (bloodBank.emailVerified === false) {
+      return next(new ErrorHandler("Confirm your email address", 403));
+    }
+
+    const token = await new emailModel({
+      BloodBankId: bloodBank._id,
+      token: crypto.randomBytes(32).toString("hex"),
+    });
+
+    bloodBank.emailVerified = false;
+    await Promise.all([token.save(), bloodBank.save()]);
+
+    const url = `${process.env.BASE_URL}/bloodBank/${bloodBank.id}/verify/${token.token}`;
+
+    await sendEmail({
+      email: req.body.email,
+      subject: "Blood Bridge Email Verification",
+      message: `Click the given link to verify your account: ${url}`,
+    });
+  }
+
+  //  CHECK IF THE PROFILE IS COMPLETED -
+  if (req.body.city && req.body.address && req.body.sector) {
+    bloodBank.profileVerified = true;
+    bloodBank.status = "open";
+    await bloodBank.save();
+  }
+
+  await bloodBankModel.findByIdAndUpdate(req.authUser.id, newData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Your profile changes have been saved",
+  });
+});
+
+// VERIFY UPDATED EMAIL -
+exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findOne({ _id: req.params.id });
+  const token = await emailModel.findOne({
+    BloodBankId: bloodBank._id,
+    token: req.params.token,
+  });
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  if (!token) {
+    return next(new ErrorHandler("Invalid email verification link", 400));
+  }
+
+  await bloodBank.updateOne({ _id: bloodBank._id, emailVerified: true });
+  await token.deleteOne();
+
+  res.status(200).json({
+    success: true,
+    message: "Thank you for verifying your email address",
+  });
+});
 
 
+// RESEND EMAIL VERIFICATIO FOR UPDATED -
+exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.authUser.id);
+
+  if (bloodBank.emailVerified) {
+    return next(new ErrorHandler("Your account is already verified", 403));
+  }
+
+  let token = await emailModel.findOne({ BloodBankId: bloodBank._id });
+
+  if (token === null) {
+    const newToken = await emailModel.create({
+      BloodBankId: bloodBank._id,
+      token: crypto.randomBytes(32).toString("hex"),
+    });
+
+    const url = `${process.env.BASE_URL}/bloodBank/${bloodBank.id}/verify/${newToken.token}`;
+
+    await sendEmail({
+      email: bloodBank.email,
+      subject: "Blood Bridge Email Verification",
+      message: `Click the given link to verify your account: ${url}`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Email sent to ${bloodBank.email} successfully`,
+    });
+  }
+
+  return next(
+    new ErrorHandler(
+      "Activate your account by clicking the link in the email",
+      403
+    )
+  );
 });
