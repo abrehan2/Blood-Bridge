@@ -313,7 +313,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
   if (req.body.email !== undefined) {
     if (
       (req.body.email === bloodBank.email &&
-        bloodBank.emailVerified === true) ||      
+        bloodBank.emailVerified === true) ||
       (req.body.email === bloodBank.email && bloodBank.emailVerified !== false)
     ) {
       return next(new ErrorHandler("Your email is already verified", 403));
@@ -383,7 +383,6 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
     message: "Thank you for verifying your email address",
   });
 });
-
 
 // RESEND EMAIL VERIFICATIO FOR UPDATED -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
