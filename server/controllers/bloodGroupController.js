@@ -5,16 +5,12 @@ const bloodGroupModel = require("../models/BloodGroupModel");
 
 // CREATE BLOOD TYPE -
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {
+  req.body.bloodBank = req.authUser.id;
 
-const { bloodGroup, stock } = req.body;
-const bloodType = await bloodGroupModel.create({
-bloodGroup,
-stock
-});
+  const bloodType = await bloodGroupModel.create(req.body);
 
-res.status(201).json({
-  success: true,
-  product,
-});
-
+  res.status(201).json({
+    success: true,
+    bloodType,
+  });
 });

@@ -28,6 +28,6 @@ router.route("/bloodBank/password/update").put(authenticateBloodBank, authorizeR
 router.route("/bloodBank/me/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateProfile);
 router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
 router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"),resendEmailVerification)
-router.route("/bloodBank/bloodType/new").get(authenticateBloodBank, authorizeRoles("bloodBank"), createBloodType);
+router.route("/bloodBank/bloodType/new").post(authenticateBloodBank, authorizeRoles("bloodBank"), createBloodType);
 
 module.exports = router;
