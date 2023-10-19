@@ -12,7 +12,7 @@ const bloodGroupSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Please enter the blood group stock"],
     maxLength: [4, "Stock cannot exceed 4 characters"],
-    default: 1,
+    default: 0,
   },
 
   bloodBank: {
