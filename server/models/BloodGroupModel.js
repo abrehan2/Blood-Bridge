@@ -5,7 +5,7 @@ const bloodGroupSchema = new mongoose.Schema({
   bloodGroup: {
     type: String,
     required: [true, "Select the blood type"],
-    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
   },
 
   stock: {
