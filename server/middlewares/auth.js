@@ -24,7 +24,7 @@ exports.authenticate = (model) =>
 exports.authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.authUser) {
-      return next(new ErrorHandler("Unauthorized", 401));
+      return next(new ErrorHandler("Please login to continue", 401));
     }
 
     if (!roles.includes(req.authUser?.role)) {

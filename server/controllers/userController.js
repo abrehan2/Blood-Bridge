@@ -316,7 +316,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
 
   if (req.body.email !== undefined) {
     if (
-      (req.body.email === user.email && user.emailVerified === true) ||     
+      (req.body.email === user.email && user.emailVerified === true) ||
       (req.body.email === user.email && user.emailVerified !== false)
     ) {
       return next(new ErrorHandler("Your email is already verified", 403));
@@ -343,13 +343,15 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     });
   }
 
-  const updated_user = await userModel.findByIdAndUpdate(req.authUser.id, newUserData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
-
-
+  const updated_user = await userModel.findByIdAndUpdate(
+    req.authUser.id,
+    newUserData,
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
 
   res.status(200).json({
     success: true,

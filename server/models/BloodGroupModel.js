@@ -11,7 +11,7 @@ const bloodGroupSchema = new mongoose.Schema({
   stock: {
     type: Number,
     required: [true, "Please enter the blood group stock"],
-    maxLength: [4, "Stock cannot exceed 4 characters"],
+    max: [1000, "Stock cannot exceed 1000 units"],
     default: 0,
   },
 
@@ -26,6 +26,8 @@ const bloodGroupSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
 
 const bloodGroup = mongoose.model("bloodGroup", bloodGroupSchema);
 module.exports = bloodGroup;
