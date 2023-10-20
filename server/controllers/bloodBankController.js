@@ -347,7 +347,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     await bloodBank.save();
   }
 
-  await bloodBankModel.findByIdAndUpdate(req.authUser.id, newData, {
+  const updated_bloodBank = await bloodBankModel.findByIdAndUpdate(req.authUser.id, newData, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
@@ -356,6 +356,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Your profile changes have been saved",
+    updated_bloodBank,
   });
 });
 
