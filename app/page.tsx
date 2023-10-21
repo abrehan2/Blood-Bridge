@@ -1,6 +1,5 @@
 import Header from "@/app/header/Header";
 import HomeIntro from "@/app/components/HomeIntro";
-import RecentEvent from "@/app/components/RecentEvent";
 import HomeAbout from "@/app/components/HomeAbout";
 import Quote from "@/app/components/Quote";
 import BloodBanks from "@/app/components/BloodBanks";
@@ -11,8 +10,6 @@ const Home = () => {
       <Header />
 
       <HomeIntro />
-
-      <RecentEvent />
 
       <HomeAbout />
 

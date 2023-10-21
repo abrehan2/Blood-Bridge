@@ -7,7 +7,6 @@ const ResponseInterceptor = (response: AxiosResponse) => {
   return response;
 };
 const RequestInterceptor = async (config: AxiosRequestConfig) => {
-  config!.headers!["Content-Type"]! = "application/json";
   return config;
 };
 //@ts-ignore

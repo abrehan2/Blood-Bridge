@@ -20,6 +20,14 @@ export const userForgotPasswordUrl = () => {
   return encodeURI(`auth/user/forgot`);
 };
 
+export const userUpdateDetailsUrl = () => {
+  return encodeURI(`user/me/update`);
+};
+
+export const userUpdatePasswordUrl = () => {
+  return encodeURI(`user/password/update`);
+};
+
 export const registerBloodBankUrl = () => {
   return encodeURI(`auth/bloodBank/register`);
 };
@@ -30,4 +38,8 @@ export const loginBloodBankUrl = () => {
 
 export const bloodBankForgotPasswordUrl = () => {
   return encodeURI(`auth/bloodBank/forgot`);
+};
+
+export const getBloodBankDetailsUrl = () => {
+  return encodeURI(`bloodBank/me`);
 };

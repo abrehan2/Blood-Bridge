@@ -11,7 +11,7 @@ class _Constants {
   };
 
   readonly DATE_TIME_LOCALE = 'en';
-  readonly phoneRegExp = /^\d{11}$/;
+  readonly phoneRegExp = /^0\d{10}$/;
   readonly CNIC_REGEXP = /^\d{5}-\d{7}-\d{1}$/;
 
   readonly REGEX_EMAIL =

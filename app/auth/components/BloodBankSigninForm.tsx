@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -40,6 +40,9 @@ const BloodBankSigninForm = () => {
         const url = loginBloodBankUrl();
         axios.post(url, data, {
             withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then((res) => {
             dispath(logIn({user: res.data.user} as any))
             toast.success('Login Successful');

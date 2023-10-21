@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, ChangeEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -13,7 +13,6 @@ import { axiosInstance as axios } from '@/app/axios-api/axios'
 import { registerUserUrl } from '@/app/axios-api/Endpoint'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useParams } from 'next/navigation'
 import cx from 'classnames'
 import { passwordStrength } from 'check-password-strength'
 
@@ -33,9 +32,7 @@ export interface SignupData {
 export type fieldTypes = "email" | "password" | "firstName" | "lastName" | "dob" | "confirmPassword" | "cnic" | "contact" | "bloodGroup";
 
 const ClientSignupForm = () => {
-    const token = useParams();
 
-    const [cnic, setCnic] = useState<string>('')
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [agreeConditions, setAgreeConditions] = useState<boolean>(false)
     const [typedPasswordStrength, setTypedPasswordStrength] = useState<string>('')
@@ -55,7 +52,12 @@ const ClientSignupForm = () => {
         }),
         city: z.string().nonempty({ message: 'City is required' }),
         bloodGroup: z.string().nonempty({ message: 'Blood Group is required' }),
-        contact: z.string().nonempty({ message: 'Contact is required' }).min(11, 'Contact must be at least 11 characters long').max(11, 'Contact must be at most 11 characters long'),
+        contact: z.string().nonempty('Contact is Required').refine((value) => Constants.phoneRegExp.test(value), {
+            message: 'Contact must be 11 digits long starting with 0',
+        }),
+        cnic: z.string().nonempty('CNIC is Required').refine((value) => Constants.CNIC_REGEXP.test(value), {
+            message: 'CNIC must be 13 digits long with dashes',
+        }),
         password: z.string().nonempty({ message: 'Password is required' }).min(8, 'Password must be at least 8 characters long'),
         confirmPassword: z.string().nonempty({ message: 'Confirm Password is required' }).min(8, 'Confirm Password must be at least 8 characters long')
     }).refine(data => data.password === data.confirmPassword, {
@@ -67,24 +69,9 @@ const ClientSignupForm = () => {
         resolver: zodResolver(schema)
     })
 
-    const handleCNIC = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length > 15) {
-            return
-        }
-        if (cnic.length === 4 || cnic.length === 12) {
-            setCnic(e.target.value + '-')
-        } else {
-            setCnic(e.target.value)
-        }
-    }
-
     const { push } = useRouter();
 
     const SubmitData = (data: SignupData) => {
-        if (cnic.length === 0) {
-            toast.error('CNIC is required');
-            return
-        }
         if (!agreeConditions) {
             toast.error('Please agree to the terms and conditions');
             return
@@ -93,22 +80,17 @@ const ClientSignupForm = () => {
             toast.error('Password Must be Strong');
             return
         }
-        const regex = new RegExp(Constants.CNIC_REGEXP);
-        if (regex.test(cnic)) {
-            data.cnic = cnic;
-            const url = registerUserUrl();
-            axios.post(url, data)
+
+        const url = registerUserUrl();
+        axios.post(url, data)
             .then((res: any) => {
                 toast.success(res.data.message);
+                push('/auth/signIn?view=BloodRecipient')
             })
             .catch((err: any) => {
-                console.log(err);
                 toast.error(err!.response!.data!.message!);
             })
-        }
-        else {
-            toast.error('CNIC is invalid');
-        }
+
     }
 
     useEffect(() => {
@@ -174,7 +156,7 @@ const ClientSignupForm = () => {
                 {/* CNIC field */}
                 <div className='w-full flex flex-col-reverse'>
                     <label htmlFor="firstName" className='text-zinc-500 text-xs font-normal font-LatoRegular uppercase tracking-[3.50px] pl-3 pt-0.5'>12345-6582314-2</label>
-                    <input onChange={handleCNIC} type="text" placeholder="CNIC" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' value={cnic} />
+                    <input {...register("cnic")} type="text" placeholder="CNIC" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]' />
                 </div>
 
                 <div className='w-full relative'>
@@ -185,7 +167,7 @@ const ClientSignupForm = () => {
                                 setTypedPasswordStrength(passwordStrength(e.target.value).value);
                             }
                         }
-                        )} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className='placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]'/>
+                        )} type={isShowPassword ? 'text' : 'password'} placeholder="Password" className={cx('placeholder:uppercase placeholder:font-LatoRegular placeholder:text-zinc-500 placeholder:text-base md:placeholder:text-lg focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px] text-red-500', { '!text-black': typedPasswordStrength === 'Strong' })} />
                     </div>
                     <div className='absolute top-2 my-auto right-2 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}

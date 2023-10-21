@@ -40,7 +40,11 @@ const ClientSigninForm = () => {
         const url = loginUserUrl();
         axios.post(url, data, {
             withCredentials: true,
+            headers: {
+                'Content-Type': 'application/json'
+            }
         }).then((res) => {
+            console.log(res.data)
             dispath(logIn({user: res.data.user} as any))
             toast.success('Login Successful');
             push("/")

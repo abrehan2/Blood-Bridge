@@ -1,6 +1,6 @@
 export const StorageKeys = {
   User_Data: "userData",
-  is_Logged_In: "isLoggedIn",
+  Role: "role",
 };
 
 function saveItem(key: any, value: any) {

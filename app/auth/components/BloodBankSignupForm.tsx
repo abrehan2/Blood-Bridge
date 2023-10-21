@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,18 +15,18 @@ import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { registerBloodBankUrl } from '@/app/axios-api/Endpoint'
 import { passwordStrength } from 'check-password-strength'
+import { Constants } from '@/globals/constants'
 
 export interface BloodBankSignupData {
     name: string;
     email: string;
     licenseNo: string;
-    city: string;
-    address: string;
+    contact: string;
     password?: string;
     confirmPassword?: string;
 }
 
-export type BloodBankfieldTypes = "email" | "password" | "name" | "address" | "licenseNo" | "confirmPassword";
+export type BloodBankfieldTypes = "email" | "password" | "name" | "contact" | "licenseNo" | "confirmPassword";
 
 const BloodBankSignupForm = () => {
     const token = useParams();
@@ -36,11 +36,12 @@ const BloodBankSignupForm = () => {
     const [typedPasswordStrength, setTypedPasswordStrength] = useState<string>('')
 
     const schema: ZodType<BloodBankSignupData> = z.object({
-        name: z.string().nonempty({ message: 'First Name is required' }).min(3, 'First Name must be at least 3 characters long'),
+        name: z.string().nonempty({ message: 'Blood Bank Name is required' }).min(3, 'Blood Bank Name must be at least 3 characters long'),
         licenseNo: z.string().nonempty({ message: 'License Number is required' }),
         email: z.string().email({ message: 'Email is invalid' }),
-        address: z.string().nonempty('Address is Required').min(5, 'Address must be at least 5 characters long').max(100, 'Address must be at most 100 characters long'),
-        city: z.string().nonempty({ message: 'City is required' }),
+        contact: z.string().nonempty('Contact is Required').refine((value) => Constants.phoneRegExp.test(value), {
+            message: 'Contact must be 11 digits long starting with 0',
+        }),
         password: z.string().nonempty({ message: 'Password is required' }).min(8, 'Password must be at least 8 characters long'),
         confirmPassword: z.string().nonempty({ message: 'Confirm Password is required' }).min(8, 'Confirm Password must be at least 8 characters long')
     }).refine(data => data.password === data.confirmPassword, {
@@ -50,11 +51,7 @@ const BloodBankSignupForm = () => {
 
     const { register, handleSubmit, formState: { errors } } = useForm<BloodBankSignupData>({
         resolver: zodResolver(schema)
-    })
-
-    const onChangePassword = (password: string) => {
-
-    }
+    });
 
     const { push } = useRouter();
 
@@ -71,14 +68,14 @@ const BloodBankSignupForm = () => {
         axios.post(url, data)
             .then((res) => {
                 toast.success(res.data.message);
+                push('/auth/signIn?view=BloodBank')
             })
             .catch((err) => {
-                console.log(err);
-                toast.error(err.response.data.error);
+                toast.error(err.response.data.message);
             })
     }
 
-    useMemo(() => {
+    useEffect(() => {
         const allErrors = Object.values(errors);
         allErrors.map((error) => (
             notifyError(error?.message)
@@ -102,22 +99,22 @@ const BloodBankSignupForm = () => {
                     register={register} titleCase='lowercase' isError={errors?.email && true} />
                 <InputField
                     fieldName='licenseNo' fieldType='text'
-                    fieldTitle='License Number' fieldLabel={"bb-2032-13-001"}
+                    fieldTitle='License Number' fieldLabel={"562084"}
                     register={register} titleCase='lowercase' isError={errors?.licenseNo && true} />
 
-                <div className='w-full flex flex-col-reverse'>
+                {/* <div className='w-full flex flex-col-reverse'>
                     <label htmlFor="firstName" className='text-zinc-500 text-xs font-normal font-LatoRegular uppercase tracking-[3.50px] pl-3 pt-0.5'>Islamabad</label>
                     <select className={cx('focus:outline-0 focus:border-b focus:shadow-none border-b outline-0 shadow-none border-black w-full py-[5px] px-3 tracking-[3px]', { '!border-red-500': errors?.city ? true : false })} {...register("city")}>
                         <option value="">Select City</option>
                         <option value="Islamabad">Islamabad</option>
                         <option value="Rawalpindi">Rawalpindi</option>
                     </select>
-                </div>
+                </div> */}
 
                 <InputField
-                    fieldName='address' fieldType='text'
-                    fieldTitle='Address' fieldLabel={"123 Main St, any street, 12345"}
-                    register={register} titleCase='capitalize' isError={errors?.address && true} />
+                    fieldName='contact' fieldType='text'
+                    fieldTitle='Contact' fieldLabel={"eg. 03256245871"}
+                    register={register} titleCase='capitalize' isError={errors?.contact && true} />
 
                 <div className='w-full relative'>
                     <div className='w-full flex flex-col-reverse'>
@@ -148,12 +145,8 @@ const BloodBankSignupForm = () => {
                         {isShowPassword ? <ShowPassword /> : <HidePassword />}
                     </div>
                 </div>
-
-                {/* <div className='w-full col-span-2'>
-                    <ValidatePassword password={password} confirmPassword={confirmPassword} onValidatorChangeHandler={onValidatorChangeHandler} />
-                </div> */}
             </div>
-            <div className='w-3/4 mx-auto'>
+            <div className='w-3/4 mx-auto mt-4'>
                 <div className='flex items-center gap-x-2'>
                     <input id='agreeTerms' type="checkbox"
                         onChange={() => setAgreeConditions(!agreeConditions)}

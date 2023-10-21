@@ -37,6 +37,8 @@ module.exports = {
         BarlowMedium: ['BarlowMedium', 'sans'],
         BarlowBold: ['BarlowBold', 'sans'],
         BarlowSemiBold: ['BarlowSemiBold', 'sans'],
+        LateefRegular: ['LateefRegular', 'sans'],
+        LateefMedium: ['LateefMedium', 'sans'],
       },
       colors: {
         darkRed: Colors.darkRed,

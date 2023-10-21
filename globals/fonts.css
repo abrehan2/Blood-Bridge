@@ -87,3 +87,13 @@
     font-family: 'PlayfairDisplayRegular';
     src: url('./fonts/PlayfairDisplay-Regular.ttf') format('opentype');
 }
+
+@font-face {
+    font-family: 'LateefMedium';
+    src: url('./fonts/Lateef-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'LateefRegular';
+    src: url('./fonts/Lateef-Regular.ttf') format('opentype');
+}
