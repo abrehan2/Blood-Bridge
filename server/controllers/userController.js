@@ -422,3 +422,5 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
     )
   );
 });
+
+// NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
