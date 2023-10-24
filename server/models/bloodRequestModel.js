@@ -7,7 +7,7 @@ const bloodRequestSchema = new mongoose.Schema({
         required: [true, "Please enter your name"]
     },
 
-    requestedAddress
+   
 
 });
 
