@@ -4,6 +4,7 @@ const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const tokenModel = require("../models/tokenModel");
 const emailModel = require("../models/updateEmailModel");
+const feedBackModel = require("../models/feedBackModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
@@ -385,7 +386,7 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
   });
 });
 
-// RESEND EMAIL VERIFICATIO FOR UPDATED -
+// RESEND EMAIL VERIFICATION FOR UPDATED AN EMAIL -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id);
 
@@ -421,6 +422,35 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
       403
     )
   );
+});
+
+// GIVE FEEDBACK -
+exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
+  const { feedback } = req.body;
+  const user = await userModel.findById(req.authUser.id);
+  const userExist = await feedBackModel.findOne({
+    user: user._id,
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (userExist === null) {
+    await feedBackModel.create({
+      feedback,
+      user: user._id,
+    });
+  } else {
+    userExist.feedback.push(feedback);
+    await userExist.save();
+  }
+
+  res.status(200).json({
+    success: true,
+    message:
+      "We appreciate your feedback. We're always looking for ways to improve!",
+  });
 });
 
 // NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
