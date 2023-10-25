@@ -42,6 +42,7 @@ module.exports = {
       },
       colors: {
         darkRed: Colors.darkRed,
+        bloodBankNavRed: Colors.bloodBankNavRed,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

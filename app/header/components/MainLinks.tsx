@@ -11,12 +11,13 @@ import { logOut } from '@/redux/features/authSlice'
 import { useDispatch } from 'react-redux'
 import toast from 'react-hot-toast'
 import ClientOnly from '@/app/components/ClientOnly'
-import { User } from 'lucide-react'
+import { BellDot, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import cx from 'classnames'
 import mapIcon from '@/assets/MapIcon.png'
 import Image from 'next/image'
 import shadow from '@/app/components/shadow.module.css'
+import LogoutIcon from '@/globals/icons/logout'
 
 const MainLinks = () => {
     const dispatch = useDispatch();
@@ -43,7 +44,7 @@ const MainLinks = () => {
 
     const handleProfile = () => {
         if (user.role === 'bloodBank') {
-            push('/')
+            push('/profile/bloodBank/settings/details')
         }
         else {
             push('/profile/user/donations')
@@ -52,18 +53,30 @@ const MainLinks = () => {
     }
 
     return (
-        <div className='flex items-center justify-center'>
-            <Button variant={'ghost'} className='!py-0 !px-1 !rounded-[3px] !h-auto flex items-center gap-x-1.5'>
-                <Image className='!w-5 !h-5 object-contain' src={mapIcon} alt="Map Icon" />
-                <p className='text-zinc-500 text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>
-                    locate
-                </p>
-            </Button>
-            <div className='border-r-2 border-zinc-500 h-3 mx-2' />
-            <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Donate</Button>
-            <div className='border-r-2 border-zinc-500 h-3 mx-2' />
-            <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Request</Button>
-            <div className='border-r-2 border-zinc-500 h-3 mx-2' />
+        <div className={cx('flex items-center justify-center', {'!gap-x-1.5': user?.role === 'bloodBank'})}>
+            {user?.role !== 'bloodBank' && <>
+                <Button variant={'ghost'} className='!py-0 !px-1 !rounded-[3px] !h-auto flex items-center gap-x-1.5'>
+                    <Image className='!w-5 !h-5 object-contain' src={mapIcon} alt="Map Icon" />
+                    <p className='text-zinc-500 text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>
+                        locate
+                    </p>
+                </Button>
+                <div className='border-r-2 border-zinc-500 h-3 mx-2' />
+                <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Donate</Button>
+                <div className='border-r-2 border-zinc-500 h-3 mx-2' />
+                <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Request</Button>
+                <div className='border-r-2 border-zinc-500 h-3 mx-2' />
+            </>}
+            {user?.role === 'bloodBank' &&
+                <div className='flex items-center gap-x-0.5'>
+                    <div className='w-7 h-7 cursor-pointer' onClick={handleLogout}>
+                        <LogoutIcon svgClass='w-full h-full' />
+                    </div>
+                    <div className='cursor-pointer'>
+                        <BellDot color="#ba5456" strokeWidth={1.4} size={24} />
+                    </div>
+                </div>
+            }
             <ClientOnly>
                 {isLoading ? <div className='w-5 h-5 border-t-2 border-zinc-500 rounded-full animate-spin' /> : <>
                     {!isAuth ? <>
@@ -73,19 +86,18 @@ const MainLinks = () => {
                     </> :
                         <div className='relative'>
                             <div className='flex items-center gap-x-1.5'>
-                                <p className='text-black font-RobotoBold tracking-[2.75px] uppercase'>{user.role === "user" ? user.firstName.split(' ')[0] : user.name.split(' ')[0]}</p>
-                                <div className='w-5 h-5 cursor-pointer' onClick={() => setShowDropdown(!showDropdown)}>
-                                    {user.role === 'bloodBank' ? <>
-                                        <img src={user.avatar.url} alt="Profile" className='w-full h-full object-cover rounded-full' />
-                                    </> :
-                                        <>
-                                            {user?.avatar?.url ?
-                                                <>
-                                                    <Image src={user?.avatar?.url} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
-                                                </> :
-                                                <User className='w-full h-full text-zinc-500' />
-                                            }
-                                        </>
+                                <p className={cx('text-black font-RobotoBold tracking-[2.75px] uppercase', { '!font-LatoMedium !capitalize !tracking-normal': user.role === 'bloodBank' })}>{user?.role === "user" ? user.firstName.split(' ')[0] : user.name}</p>
+                                <div className={cx('w-5 h-5 cursor-pointer', { '!w-7 !h-7': user?.role === 'bloodBank' })} onClick={user?.role === 'bloodBank' ? handleProfile : () => setShowDropdown(!showDropdown)}>
+                                    {user?.role === 'bloodBank' ? <>
+                                        <Image src={user.avatar.url} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20}/>
+                                    </> : <>
+                                        {user?.avatar?.url ?
+                                            <>
+                                                <Image src={user?.avatar?.url} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
+                                            </> :
+                                            <User className='w-full h-full text-zinc-500' />
+                                        }
+                                    </>
                                     }
                                 </div>
                             </div>

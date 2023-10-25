@@ -21,7 +21,7 @@ const BloodBankCard = ({ bloodBank }: { bloodBank: BloodBankInterface }) => {
                 </div>
                 <div className='w-full mt-2 flex items-center flex-wrap gap-x-4 gap-y-2'>
                     {bloodBank.availableBloodGroups.map((bloodGroup, groupIndex) => (
-                        <span key={groupIndex} className={cx('text-black font-PlayfairDisplaySemiBold px-1 border border-darkRed min-w-[40px] text-center hover:bg-darkRed hover:text-white hover:cursor-pointer', {'!hidden': bloodGroup.quantity <= 0})} onClick={() => setBloodBankGroup(bloodGroup)}>
+                        <span key={groupIndex} className={cx('text-black font-PlayfairDisplaySemiBold px-1 border border-darkRed min-w-[40px] text-center hover:bg-darkRed hover:text-white hover:cursor-pointer', {'!hidden': bloodGroup.quantity <= 0}, {'!bg-darkRed !text-white': bloodBankGroup.bloodType === bloodGroup.bloodType})} onClick={() => setBloodBankGroup(bloodGroup)}>
                             {bloodGroup.bloodType}
                         </span>
                     ))}

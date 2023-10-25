@@ -80,7 +80,8 @@ const userInfo = () => {
                 </div>
             </> :
                 <>
-                    <div className='w-full bg-[#EEEBEB] flex flex-col justify-center items-center gap-y-4 py-4 rounded-[33px]'>
+                    <div className='relative w-full bg-[#EEEBEB] flex flex-col justify-center items-center gap-y-4 py-4 rounded-[33px]'>
+                        <span className='absolute left-3.5 top-3.5 bg-bloodBankNavRed max-w-[32px] max-h-[32px] rounded-full p-2 font-RobotoBold text-white text-sm'>{user?.bloodGroup}</span>
                         <p className='capitalize text-black text-4xl font-LateefRegular'>Profile</p>
                         <div onClick={isAccountActive ? handleUpload : () => { }}
                             className={cx('relative w-44 h-44', { 'group cursor-pointer': isAccountActive })}>

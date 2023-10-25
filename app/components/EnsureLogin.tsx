@@ -6,9 +6,12 @@ import { axiosInstance as axios } from '@/app/axios-api/axios';
 import { getUserDetailsUrl, getBloodBankDetailsUrl } from '@/app/axios-api/Endpoint';
 import storageHelper from '@/lib/storage-helper';
 import toast from 'react-hot-toast';
+import { useBBSelector } from '@/redux/store';
+import { useRouter } from 'next/navigation';
 
 const EnsureLogin = () => {
     const dispatch = useDispatch();
+    const { push } = useRouter();
     useEffect(() => {
         const reloadData = async () => {
             let user: any = null;
@@ -25,14 +28,6 @@ const EnsureLogin = () => {
                     dispatch(updateUser({ user } as any))
                 }).catch(() => {
                     dispatch(notFound())
-                }).finally(() => {
-                    if (role === 'bloodBank') {
-                        if (user) {
-                            if (!user.profileVerified) {
-                                toast.error('Your profile is not Completed yet. We will redirect you.')
-                            }
-                        }
-                    }
                 })
             }
             else {
@@ -41,6 +36,18 @@ const EnsureLogin = () => {
         }
         reloadData()
     }, [])
+
+    const isLoading = useBBSelector(state => state.authReducer.value.isLoading)
+    const user = useBBSelector(state => state.authReducer.value.user)
+    useEffect(() => {
+        if (user?.role === 'bloodBank') {
+            if (user) {
+                if (!user.profileVerified) {
+                    push('/profile/bloodBank/settings/details')
+                }
+            }
+        }
+    }, [isLoading])
 
     return (
         <></>
