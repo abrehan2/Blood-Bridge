@@ -47,6 +47,7 @@ const EnsureLogin = () => {
                 }
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading])
 
     return (

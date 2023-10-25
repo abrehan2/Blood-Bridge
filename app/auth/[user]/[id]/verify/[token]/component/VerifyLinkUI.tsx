@@ -23,6 +23,7 @@ const VerifyLinkUI = ({ url }: { url: string }) => {
             toast.error(err!.response!.data!.message!);
             setIsError(true);
         })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     return (
         <>

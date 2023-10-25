@@ -13,7 +13,7 @@ import toast from 'react-hot-toast'
 import { axiosInstance } from '@/app/axios-api/axios'
 import { userUpdateDetailsUrl } from '@/app/axios-api/Endpoint'
 
-const userInfo = () => {
+const UserInfo = () => {
     const [previewImage, setPreviewImage] = useState<any>();
     const { push } = useRouter();
     const path = usePathname();
@@ -146,4 +146,4 @@ const userInfo = () => {
     )
 }
 
-export default userInfo
+export default UserInfo
