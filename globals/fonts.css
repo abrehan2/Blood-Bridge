@@ -1,0 +1,99 @@
+@font-face {
+    font-family: 'LatoRegular';
+    src: url("./fonts/Lato-Regular.ttf") format("opentype");
+  }
+
+@font-face {
+    font-family: 'LatoMedium';
+    src: url('./fonts/Lato-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'LatoBold';
+    src: url('./fonts/Lato-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'RobotoRegular';
+    src: url("./fonts/Roboto-Regular.ttf") format("opentype");
+  }
+
+@font-face {
+    font-family: 'RobotoMedium';
+    src: url('./fonts/Roboto-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'RobotoBold';
+    src: url('./fonts/Roboto-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'BarlowBold';
+    src: url('./fonts/Barlow-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'BarlowSemiBold';
+    src: url('./fonts/Barlow-SemiBold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'BarlowMedium';
+    src: url('./fonts/Barlow-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'BarlowRegular';
+    src: url('./fonts/Barlow-Regular.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DMSansBold';
+    src: url('./fonts/DMSans_18pt-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DMSansSemiBold';
+    src: url('./fonts/DMSans_18pt-SemiBold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DMSansMedium';
+    src: url('./fonts/DMSans_18pt-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'DMSansRegular';
+    src: url('./fonts/DMSans_18pt-Regular.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PlayfairDisplayBold';
+    src: url('./fonts/PlayfairDisplay-Bold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PlayfairDisplaySemiBold';
+    src: url('./fonts/PlayfairDisplay-SemiBold.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PlayfairDisplayMedium';
+    src: url('./fonts/PlayfairDisplay-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'PlayfairDisplayRegular';
+    src: url('./fonts/PlayfairDisplay-Regular.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'LateefMedium';
+    src: url('./fonts/Lateef-Medium.ttf') format('opentype');
+}
+
+@font-face {
+    font-family: 'LateefRegular';
+    src: url('./fonts/Lateef-Regular.ttf') format('opentype');
+}

@@ -30,6 +30,6 @@
     "main-server/config/database.js",
     "main-server/models/userModel.js",
     "main-server/middlewares/auth.js"
-, "main-server/middlewares/catchAsyncErr.js", "main-server/middlewares/error.js", "main-server/utils/errorHandler.js", "main-server/utils/jwtToken.js", "main-server/controllers/userController.js", "main-server/routes/userRoute.js"  ],
+, "main-server/middlewares/catchAsyncErr.js", "main-server/middlewares/error.js", "main-server/utils/errorHandler.js", "main-server/utils/jwtToken.js", "main-server/controllers/userController.js", "main-server/routes/userRoute.js", "lib/middleware.js"  ],
   "exclude": ["node_modules"]
 }

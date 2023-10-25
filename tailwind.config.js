@@ -1,5 +1,5 @@
 // SHADCN/UI TOOLKIT
-
+const { Colors } = require('./globals/colors');
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -18,7 +18,31 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        LatoRegular: ['LatoRegular', 'sans'],
+        LatoMedium: ['LatoMedium', 'sans'],
+        LatoBold: ['LatoBold', 'sans'],
+        RobotoRegular: ['RobotoRegular', 'sans'],
+        RobotoMedium: ['RobotoMedium', 'sans'],
+        RobotoBold: ['RobotoBold', 'sans'],
+        PlayfairDisplayRegular: ['PlayfairDisplayRegular', 'sans'],
+        PlayfairDisplayMedium: ['PlayfairDisplayMedium', 'sans'],
+        PlayfairDisplayBold: ['PlayfairDisplayBold', 'sans'],
+        PlayfairDisplaySemiBold: ['PlayfairDisplaySemiBold', 'sans'],
+        DMSansRegular: ['DMSansRegular', 'sans'],
+        DMSansMedium: ['DMSansMedium', 'sans'],
+        DMSansBold: ['DMSansBold', 'sans'],
+        DMSansSemiBold: ['DMSansSemiBold', 'sans'],
+        BarlowRegular: ['BarlowRegular', 'sans'],
+        BarlowMedium: ['BarlowMedium', 'sans'],
+        BarlowBold: ['BarlowBold', 'sans'],
+        BarlowSemiBold: ['BarlowSemiBold', 'sans'],
+        LateefRegular: ['LateefRegular', 'sans'],
+        LateefMedium: ['LateefMedium', 'sans'],
+      },
       colors: {
+        darkRed: Colors.darkRed,
+        bloodBankNavRed: Colors.bloodBankNavRed,
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -67,10 +91,20 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
+        "right-to-left": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "left-to-right": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "right-to-left": "right-to-left 0.2s ease-out forwards",
+        "left-to-right": "left-to-right 0.2s ease-out forwards",
       },
     },
   },
