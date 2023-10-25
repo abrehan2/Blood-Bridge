@@ -9,6 +9,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
+var satelize = require("satelize");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -454,3 +455,18 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 });
 
 // NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
+
+
+
+
+
+exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
+  const ipAddress = requestIp?.getClientIp();
+  
+console.log(ipAddress);
+
+satelize.satelize({ ip: "39.33.176.95" }, function (err, payload) {
+  console.log(payload);
+});
+
+});
