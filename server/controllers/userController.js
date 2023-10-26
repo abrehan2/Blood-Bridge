@@ -461,12 +461,15 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 
 
 exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
-  const ipAddress = requestIp?.getClientIp();
-  
-console.log(ipAddress);
+ 
+  const ip =
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-real-ip"] ||
+    req.headers["x-forwarded-for"] || req.ip;
+console.log(req.socket.address)
 
-satelize.satelize({ ip: "39.33.176.95" }, function (err, payload) {
-  console.log(payload);
-});
+// satelize.satelize({ ip: "39.33.176.95" }, function (err, payload) {
+//   console.log(payload);
+// });
 
 });
