@@ -9,7 +9,8 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-
+const asyncError = require("../middlewares/catchAsyncErr");
+const ip = require("ip");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -456,9 +457,4 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 
 // NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
 
-
-
-
-
-
-
+exports.getUserLocation = asyncError(async (req, res, next) => {});
