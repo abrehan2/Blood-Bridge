@@ -9,7 +9,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-var satelize = require("satelize");
+
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -460,16 +460,5 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 
 
 
-exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
- 
-  const ip =
-    req.headers["cf-connecting-ip"] ||
-    req.headers["x-real-ip"] ||
-    req.headers["x-forwarded-for"] || req.ip;
-console.log(req.socket.address)
 
-// satelize.satelize({ ip: "39.33.176.95" }, function (err, payload) {
-//   console.log(payload);
-// });
 
-});

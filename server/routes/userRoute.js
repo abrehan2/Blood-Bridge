@@ -16,5 +16,5 @@ router.route("/user/me/update").put(authenticateUser, authorizeRoles("user"), up
 router.route("/user/:id/verify/:token").get(verifyEmail);
 router.route("/user/email/resend").get(authenticateUser, authorizeRoles("user"), resendEmailVerification);
 router.route("/user/feedback").post(authenticateUser, authorizeRoles("user"), userFeedBack);
-router.route("/user/location").get(authenticateUser, authorizeRoles("user"), getUserLocation);
+
 module.exports = router;
