@@ -2,15 +2,13 @@
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
-const tokenModel = require("../models/tokenModel");
-const emailModel = require("../models/updateEmailModel");
+const verificationModel = require("../models/verificationModel");
 const feedBackModel = require("../models/feedBackModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-const asyncError = require("../middlewares/catchAsyncErr");
-const ip = require("ip");
+const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -59,16 +57,17 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     contact,
   });
 
-  const token = await new tokenModel({
+  const token = await new verificationModel({
     userId: user._id,
     token: crypto.randomBytes(32).toString("hex"),
+    purpose: "accountVerify",
   }).save();
 
   const url = `${process.env.BASE_URL}/auth/user/${user.id}/verify/${token.token}`;
 
   await sendEmail({
     email: user.email,
-    subject: "Blood Bridge Email Verification",
+    subject: "Blood Bridge Account Verification",
     message: `Click the given link to verify your account: ${url}`,
   });
 
@@ -87,7 +86,7 @@ exports.verifyUser = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email verification link", 400));
   }
 
-  const token = await tokenModel.findOne({
+  const token = await verificationModel.findOne({
     userId: user._id,
     token: req.params.token,
   });
@@ -120,19 +119,20 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   }
 
   if (!user.verified) {
-    let token = await tokenModel.findOne({ userId: user._id });
+    let token = await verificationModel.findOne({ userId: user._id });
 
     if (!token) {
-      token = await new tokenModel({
+      token = await new verificationModel({
         userId: user._id,
         token: crypto.randomBytes(32).toString("hex"),
+        purpose: "accountVerify",
       }).save();
 
       const url = `${process.env.BASE_URL}/auth/user/${user.id}/verify/${token.token}`;
 
       await sendEmail({
         email: user.email,
-        subject: "Blood Bridge Email Verification",
+        subject: "Blood Bridge Account Verification",
         message: `Click the given link to verify your account: ${url}`,
       });
     }
@@ -320,7 +320,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
   if (req.body.email !== undefined) {
     if (
       (req.body.email === user.email && user.emailVerified === true) ||
-      (req.body.email === user.email && user.emailVerified !== false)
+      (req.body.email === user.email && user.emailVerified === null)
     ) {
       return next(new ErrorHandler("Your email is already verified", 403));
     }
@@ -329,9 +329,17 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
       return next(new ErrorHandler("Confirm your email address", 403));
     }
 
-    const token = await new emailModel({
+    const emailExists = await userModel.findOne({ email: req.body.email });
+    if (emailExists) {
+      return next(
+        new ErrorHandler("Please use a different email address", 400)
+      );
+    }
+
+    const token = await new verificationModel({
       userId: user._id,
       token: crypto.randomBytes(32).toString("hex"),
+      purpose: "emailVerify",
     });
 
     user.emailVerified = false;
@@ -342,7 +350,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     await sendEmail({
       email: req.body.email,
       subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
+      message: `Click the given link to verify your email: ${url}`,
     });
   }
 
@@ -366,7 +374,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
 // VERIFY UPDATED EMAIL -
 exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findOne({ _id: req.params.id });
-  const token = await emailModel.findOne({
+  const token = await verificationModel.findOne({
     userId: user._id,
     token: req.params.token,
   });
@@ -391,17 +399,17 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 // RESEND EMAIL VERIFICATION FOR UPDATED AN EMAIL -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id);
+  let token = await verificationModel.findOne({ userId: user._id });
 
-  if (user.emailVerified) {
-    return next(new ErrorHandler("Your account is already verified", 403));
+  if (user.emailVerified || user.emailVerified === null) {
+    return next(new ErrorHandler("Your email is already verified", 403));
   }
 
-  let token = await emailModel.findOne({ userId: user._id });
-
   if (token === null) {
-    const newToken = await emailModel.create({
+    const newToken = await verificationModel.create({
       userId: user._id,
       token: crypto.randomBytes(32).toString("hex"),
+      purpose: "emailVerify",
     });
 
     const url = `${process.env.BASE_URL}/user/${user.id}/verify/${newToken.token}`;
@@ -409,7 +417,7 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
     await sendEmail({
       email: user.email,
       subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
+      message: `Click the given link to verify your email: ${url}`,
     });
 
     return res.status(200).json({
@@ -420,7 +428,7 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
 
   return next(
     new ErrorHandler(
-      "Activate your account by clicking the link in the email",
+      "Activate your email by clicking the link in the email",
       403
     )
   );
@@ -457,4 +465,12 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 
 // NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
 
-exports.getUserLocation = asyncError(async (req, res, next) => {});
+exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
+  const { longitude, latitude } = await parseLocation();
+
+  res.status(200).json({
+    success: true,
+    longitude,
+    latitude,
+  });
+});
