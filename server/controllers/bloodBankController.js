@@ -2,12 +2,12 @@
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const bloodBankModel = require("../models/bloodBankModel");
-const tokenModel = require("../models/tokenModel");
+const verificationModel = require("../models/verificationModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
-const emailModel = require("../models/updateEmailModel");
+const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -42,16 +42,17 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     },
   });
 
-  const token = await new tokenModel({
+  const token = await new verificationModel({
     BloodBankId: bloodBank._id,
     token: crypto.randomBytes(32).toString("hex"),
+    purpose: "accountVerify",
   }).save();
 
   const url = `${process.env.BASE_URL}/auth/bloodBank/${bloodBank.id}/verify/${token.token}`;
 
   await sendEmail({
     email: bloodBank.email,
-    subject: "Blood Bridge Email Verification",
+    subject: "Blood Bridge Account Verification",
     message: `Click the given link to verify your account: ${url}`,
   });
 
@@ -70,7 +71,7 @@ exports.verifyBloodBank = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Invalid email verification link", 400));
   }
 
-  const token = await tokenModel.findOne({
+  const token = await verificationModel.findOne({
     BloodBankId: bloodBank._id,
     token: req.params.token,
   });
@@ -109,19 +110,20 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
   }
 
   if (!bloodBank.verified) {
-    let token = await tokenModel.findOne({ BloodBankId: bloodBank._id });
+    let token = await verificationModel.findOne({ BloodBankId: bloodBank._id });
 
     if (!token) {
-      token = await new tokenModel({
+      token = await new verificationModel({
         BloodBankId: bloodBank._id,
         token: crypto.randomBytes(32).toString("hex"),
+        purpose: "accountVerify",
       }).save();
 
       const url = `${process.env.BASE_URL}/auth/bloodBank/${bloodBank.id}/verify/${token.token}`;
 
       await sendEmail({
         email: bloodBank.email,
-        subject: "Blood Bridge Email Verification",
+        subject: "Blood Bridge Account Verification",
         message: `Click the given link to verify your account: ${url}`,
       });
     }
@@ -314,7 +316,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     if (
       (req.body.email === bloodBank.email &&
         bloodBank.emailVerified === true) ||
-      (req.body.email === bloodBank.email && bloodBank.emailVerified !== false)
+      (req.body.email === bloodBank.email && bloodBank.emailVerified === null)
     ) {
       return next(new ErrorHandler("Your email is already verified", 403));
     }
@@ -323,9 +325,17 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
       return next(new ErrorHandler("Confirm your email address", 403));
     }
 
-    const token = await new emailModel({
+    const emailExists = await bloodBankModel.findOne({ email: req.body.email });
+    if (emailExists) {
+      return next(
+        new ErrorHandler("Please use a different email address", 400)
+      );
+    }
+
+    const token = await new verificationModel({
       BloodBankId: bloodBank._id,
       token: crypto.randomBytes(32).toString("hex"),
+      purpose: "emailVerify",
     });
 
     bloodBank.emailVerified = false;
@@ -336,7 +346,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     await sendEmail({
       email: req.body.email,
       subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
+      message: `Click the given link to verify your email: ${url}`,
     });
   }
 
@@ -347,11 +357,15 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     await bloodBank.save();
   }
 
-  const updated_bloodBank = await bloodBankModel.findByIdAndUpdate(req.authUser.id, newData, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false,
-  });
+  const updated_bloodBank = await bloodBankModel.findByIdAndUpdate(
+    req.authUser.id,
+    newData,
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
 
   res.status(200).json({
     success: true,
@@ -363,7 +377,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
 // VERIFY UPDATED EMAIL -
 exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
   const bloodBank = await bloodBankModel.findOne({ _id: req.params.id });
-  const token = await emailModel.findOne({
+  const token = await verificationModel.findOne({
     BloodBankId: bloodBank._id,
     token: req.params.token,
   });
@@ -388,17 +402,17 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 // RESEND EMAIL VERIFICATIO FOR UPDATED -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id);
+  let token = await verificationModel.findOne({ BloodBankId: bloodBank._id });
 
-  if (bloodBank.emailVerified) {
+  if (bloodBank.emailVerified || bloodBank.emailVerified === null) {
     return next(new ErrorHandler("Your account is already verified", 403));
   }
 
-  let token = await emailModel.findOne({ BloodBankId: bloodBank._id });
-
   if (token === null) {
-    const newToken = await emailModel.create({
+    const newToken = await verificationModel.create({
       BloodBankId: bloodBank._id,
       token: crypto.randomBytes(32).toString("hex"),
+      purpose: "emailVerify",
     });
 
     const url = `${process.env.BASE_URL}/bloodBank/${bloodBank.id}/verify/${newToken.token}`;
@@ -406,7 +420,7 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
     await sendEmail({
       email: bloodBank.email,
       subject: "Blood Bridge Email Verification",
-      message: `Click the given link to verify your account: ${url}`,
+      message: `Click the given link to verify your email: ${url}`,
     });
 
     return res.status(200).json({
@@ -421,4 +435,15 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
       403
     )
   );
+});
+
+// GET BLOOD BANK COORDINATES -
+exports.getBloodBankLocation = catchAsyncErr(async (req, res, next) => {
+  const { longitude, latitude } = await parseLocation();
+
+  res.status(200).json({
+    success: true,
+    longitude,
+    latitude,
+  });
 });

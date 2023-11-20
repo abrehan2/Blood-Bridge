@@ -1,7 +1,7 @@
 // IMPORTS -
 const mongoose = require("mongoose");
 
-const tokenSchema = new mongoose.Schema({
+const verificationSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
@@ -17,6 +17,12 @@ const tokenSchema = new mongoose.Schema({
     required: true,
   },
 
+  purpose: {
+    type: String,
+    required: true,
+    enum: ["accountVerify", "emailVerify"],
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -24,5 +30,5 @@ const tokenSchema = new mongoose.Schema({
   },
 });
 
-const Token = mongoose.model("Token", tokenSchema);
-module.exports = Token;
+const Verification = mongoose.model("Verification", verificationSchema);
+module.exports = Verification;
