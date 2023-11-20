@@ -11,7 +11,7 @@ const cloudinary = require("cloudinary");
 const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
-const imageBuffer = "./constants/avatar.jpg";
+const imageBuffer = "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
 
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
@@ -35,11 +35,11 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     );
   }
 
-  const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
-    folder: "avatars",
-    width: 150,
-    crop: "scale",
-  });
+  // const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
+  //   folder: "avatars",
+  //   width: 150,
+  //   crop: "scale",
+  // });
 
   user = await userModel.create({
     firstName,
@@ -50,10 +50,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     city,
     dob,
     password,
-    avatar: {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    },
+    avatar: imageBuffer,
     contact,
   });
 
@@ -299,23 +296,24 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     contact: req.body.contact,
     bloodGroup: req.body.bloodGroup,
     email: req.body.email,
+    avatar: req.body.avatar
   };
 
-  if (req.body.avatar !== undefined) {
-    const imageID = user.avatar.public_id;
-    await cloudinary.v2.uploader.destroy(imageID);
+  // if (req.body.avatar !== undefined) {
+  //   const imageID = user.avatar.public_id;
+  //   await cloudinary.v2.uploader.destroy(imageID);
 
-    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-      folder: "avatars",
-      width: 150,
-      crop: "scale",
-    });
+  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+  //     folder: "avatars",
+  //     width: 150,
+  //     crop: "scale",
+  //   });
 
-    newUserData.avatar = {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    };
-  }
+  //   newUserData.avatar = {
+  //     public_id: myCloud.public_id,
+  //     url: myCloud.secure_url,
+  //   };
+  // }
 
   if (req.body.email !== undefined) {
     if (
