@@ -7,6 +7,11 @@ const bloodGroupModel = require("../models/BloodGroupModel");
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {
   const { bloodGroup, stock } = req.body;
   const bloodBank = req.authUser.id;
+  const bloodGroupExist = bloodGroupModel.findById({ bloodGroup, bloodBank });
+
+  if (bloodGroupExist) {
+    return next(new ErrorHandler(`Blood type already exists`, 409));
+  }
 
   await bloodGroupModel.create({
     bloodGroup,
@@ -34,7 +39,7 @@ exports.getAllBloodTypes = catchAsyncErr(async (req, res) => {
 
 // UPDATE BLOOD TYPE -
 exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
-  const { bloodGroup } = req.body;
+  const { bloodGroup, stock } = req.body;
 
   const getBloodType = await bloodGroupModel.findOne({
     bloodGroup,
@@ -45,13 +50,12 @@ exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler(`Blood type does not exist`, 400));
   }
 
-  getBloodType.stock = req.body.stock;
+  getBloodType.stock = stock;
   await getBloodType.save();
 
   res.status(200).json({
     success: true,
     message: "Blood type has been updated",
-    getBloodType,
   });
 });
 
