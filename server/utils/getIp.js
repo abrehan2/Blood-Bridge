@@ -13,6 +13,7 @@ const parseLocation = async () => {
 
     // PARSE IP ADDRESS
     const ipInfo = await ipData.lookup(ip);
+    // console.log(ipInfo)
 
     const parser = {
       longitude: ipInfo?.longitude,

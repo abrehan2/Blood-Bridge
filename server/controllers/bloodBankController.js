@@ -7,6 +7,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const cloudinary = require("cloudinary");
+const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
 const imageBuffer = "./constants/avatar.jpg";
@@ -434,4 +435,15 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
       403
     )
   );
+});
+
+// GET BLOOD BANK COORDINATES -
+exports.getBloodBankLocation = catchAsyncErr(async (req, res, next) => {
+  const { longitude, latitude } = await parseLocation();
+
+  res.status(200).json({
+    success: true,
+    longitude,
+    latitude,
+  });
 });

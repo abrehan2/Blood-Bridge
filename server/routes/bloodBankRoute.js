@@ -13,6 +13,7 @@ const {
   updateProfile,
   verifyEmail,
   resendEmailVerification,
+  getBloodBankLocation,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
 const { createBloodType, getAllBloodTypes, updateBloodType, removeBloodType } = require("../controllers/bloodGroupController");
@@ -32,4 +33,5 @@ router.route("/bloodBank/bloodType/new").post(authenticateBloodBank, authorizeRo
 router.route("/bloodBank/bloodType/all").get(authenticateBloodBank, authorizeRoles("bloodBank"), getAllBloodTypes);
 router.route("/bloodBank/bloodType/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateBloodType);
 router.route("/bloodBank/bloodType/delete").delete(authenticateBloodBank, authorizeRoles("bloodBank"), removeBloodType);
+router.route("/bloodBank/location").get(getBloodBankLocation);
 module.exports = router;
