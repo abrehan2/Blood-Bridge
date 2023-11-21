@@ -32,7 +32,13 @@ const bloodRequestSchema = new mongoose.Schema({
 
   bloodNeededOn: {
     type: Date,
-    required: [true, "Please enter date blood needed on"],
+    required: [true, "Please enter the date you will need the blood bags"],
+  },
+
+  reqStatus: {
+    type: String,
+    required: true,
+    enum: ["Pending", "Accepted", "Rejected"],
   },
 
   createdAt: {
@@ -41,4 +47,5 @@ const bloodRequestSchema = new mongoose.Schema({
   },
 });
 
-
+const bloodRequestModel = mongoose.model("bloodRequest", bloodRequestSchema);
+module.exports = bloodRequestModel;
