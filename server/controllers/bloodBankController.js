@@ -10,7 +10,7 @@ const cloudinary = require("cloudinary");
 const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
-const imageBuffer = "./constants/avatar.jpg";
+const imageBuffer = "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
 
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
@@ -241,6 +241,7 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
 // GET BLOOD BANK DETAILS -
 exports.getBloodBank = catchAsyncErr(async (req, res) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id);
+  // console.log(bloodBank);
 
   res.status(200).json({
     success: true,
@@ -445,3 +446,4 @@ exports.getBloodBankLocation = catchAsyncErr(async (req, res, next) => {
     latitude,
   });
 });
+ 

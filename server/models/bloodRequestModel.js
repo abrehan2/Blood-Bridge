@@ -2,13 +2,43 @@
 const mongoose = require("mongoose");
 
 const bloodRequestSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: [true, "Please enter your name"]
-    },
+  name: {
+    type: String,
+    required: [true, "Please enter your name"],
+  },
 
-   
+  contact: {
+    type: String,
+    required: [true, "Please enter your contact"],
+  },
 
+  bloodBank: {
+    type: mongoose.Schema.ObjectId,
+    ref: "bloodBank",
+    required: [true, "Please select the blood bank"],
+  },
+
+  bloodGroup: {
+    type: mongoose.Schema.ObjectId,
+    ref: "bloodGroup",
+    required: [true, "Please select the blood type"],
+  },
+
+  bloodBags: {
+    type: Number,
+    default: 1,
+    required: [true, "Please enter the number of blood bags"],
+  },
+
+  bloodNeededOn: {
+    type: Date,
+    required: [true, "Please enter date blood needed on"],
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 
