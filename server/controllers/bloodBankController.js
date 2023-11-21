@@ -24,11 +24,11 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     );
   }
 
-  const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
-    folder: "avatars",
-    width: 150,
-    crop: "scale",
-  });
+  // const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
+  //   folder: "avatars",
+  //   width: 150,
+  //   crop: "scale",
+  // });
 
   bloodBank = await bloodBankModel.create({
     name,
@@ -36,10 +36,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     password,
     licenseNo,
     contact,
-    avatar: {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    },
+    avatar: imageBuffer,
   });
 
   const token = await new verificationModel({
@@ -294,23 +291,24 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     sector: req.body.sector,
     status: req.body.status,
     contact: req.body.contact,
+    avatar: req.body.avatar,
   };
 
-  if (req.body.avatar !== undefined) {
-    const imageID = bloodBank.avatar.public_id;
-    await cloudinary.v2.uploader.destroy(imageID);
+  // if (req.body.avatar !== undefined) {
+  //   const imageID = bloodBank.avatar.public_id;
+  //   await cloudinary.v2.uploader.destroy(imageID);
 
-    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-      folder: "avatars",
-      width: 150,
-      crop: "scale",
-    });
+  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+  //     folder: "avatars",
+  //     width: 150,
+  //     crop: "scale",
+  //   });
 
-    newData.avatar = {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    };
-  }
+  //   newData.avatar = {
+  //     public_id: myCloud.public_id,
+  //     url: myCloud.secure_url,
+  //   };
+  // }
 
   if (req.body.email !== undefined) {
     if (
