@@ -6,7 +6,6 @@ const verificationModel = require("../models/verificationModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
-const cloudinary = require("cloudinary");
 const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
@@ -23,12 +22,6 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("The email address you entered is already in use", 409)
     );
   }
-
-  // const myCloud = await cloudinary.v2.uploader.upload(imageBuffer, {
-  //   folder: "avatars",
-  //   width: 150,
-  //   crop: "scale",
-  // });
 
   bloodBank = await bloodBankModel.create({
     name,
@@ -295,23 +288,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     avatar: req.body.avatar,
   };
 
-  // if (req.body.avatar !== undefined) {
-  //   const imageID = bloodBank.avatar.public_id;
-  //   await cloudinary.v2.uploader.destroy(imageID);
-
-  //   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-  //     folder: "avatars",
-  //     width: 150,
-  //     crop: "scale",
-  //   });
-
-  //   newData.avatar = {
-  //     public_id: myCloud.public_id,
-  //     url: myCloud.secure_url,
-  //   };
-  // }
-
-  if (req.body.email !== undefined) {
+   if (req.body.email !== undefined) {
     if (
       (req.body.email === bloodBank.email &&
         bloodBank.emailVerified === true) ||
