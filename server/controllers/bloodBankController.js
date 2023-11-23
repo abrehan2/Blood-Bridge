@@ -9,7 +9,8 @@ const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
 
 // PARTIALS -
-const imageBuffer = "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
+const imageBuffer =
+  "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
 
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
@@ -288,7 +289,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     avatar: req.body.avatar,
   };
 
-   if (req.body.email !== undefined) {
+  if (req.body.email !== undefined) {
     if (
       (req.body.email === bloodBank.email &&
         bloodBank.emailVerified === true) ||
@@ -326,13 +327,6 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     });
   }
 
-  //  CHECK IF THE PROFILE IS COMPLETED -
-  if (req.body.city && req.body.address && req.body.sector) {
-    bloodBank.profileVerified = true;
-    bloodBank.status = "open";
-    await bloodBank.save();
-  }
-
   const updated_bloodBank = await bloodBankModel.findByIdAndUpdate(
     req.authUser.id,
     newData,
@@ -347,6 +341,43 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     success: true,
     message: "Your profile changes have been saved",
     updated_bloodBank,
+  });
+});
+
+// COMPLETE BLOOD BANK PROFILE -
+exports.completeProfile = catchAsyncErr(async (req, res, next) => {
+  const { city, address, sector } = req.body;
+
+  if (!city || !address || !sector) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const bloodBank = await bloodBankModel.findById(req.authUser.id);
+
+  if (bloodBank.profileVerified) {
+    return next(new ErrorHandler("Your profile is already completed", 409));
+  }
+
+  await bloodBank.updateOne(
+    {
+      $set: {
+        profileVerified: true,
+        status: "open",
+        city,
+        address,
+        sector,
+      },
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Your profile has been completed",
   });
 });
 
@@ -381,7 +412,7 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   let token = await verificationModel.findOne({ BloodBankId: bloodBank._id });
 
   if (bloodBank.emailVerified || bloodBank.emailVerified === null) {
-    return next(new ErrorHandler("Your account is already verified", 403));
+    return next(new ErrorHandler("Your account is already verified", 409));
   }
 
   if (token === null) {
@@ -423,4 +454,3 @@ exports.getBloodBankLocation = catchAsyncErr(async (req, res, next) => {
     latitude,
   });
 });
- 

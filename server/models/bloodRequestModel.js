@@ -10,6 +10,7 @@ const bloodRequestSchema = new mongoose.Schema({
   contact: {
     type: String,
     required: [true, "Please enter your contact"],
+    unique: true,
   },
 
   bloodBank: {
