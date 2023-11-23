@@ -36,11 +36,13 @@ app.use(
 const userRoute = require("./routes/userRoute");
 const bloodBank = require("./routes/bloodBankRoute");
 const bloodGroup = require("./routes/bloodGroupRoute");
+const bloodRequest = require("./routes/bloodRequestRoute");
 
 // ROUTES -
 app.use("/api", userRoute);
 app.use("/api", bloodBank);
 app.use("/api", bloodGroup);
+app.use("/api", bloodRequest);
 
 // MIDDLEWARE FOR ERROR-HANDLING -
 app.use(errorMiddleware);

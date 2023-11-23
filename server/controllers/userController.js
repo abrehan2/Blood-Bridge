@@ -422,15 +422,8 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  if (userExist === null) {
-    await feedBackModel.create({
-      feedback,
-      user: user._id,
-    });
-  } else {
-    userExist.feedback.push(feedback);
-    await userExist.save();
-  }
+  user.feedback.push(feedback);
+  await user.save();
 
   res.status(200).json({
     success: true,

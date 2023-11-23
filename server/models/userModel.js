@@ -85,6 +85,14 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
 
+  feedback: [
+    {
+      type: String,
+      required: [true, "Please enter your feedback"],
+      //   maxLength: [true, "Please keep your response to 500 words or less"],
+    },
+  ],
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
