@@ -3,7 +3,6 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const verificationModel = require("../models/verificationModel");
-const feedBackModel = require("../models/feedBackModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");

@@ -1,9 +1,9 @@
 // IMPORTS -
 const express = require("express");
 const router = express.Router();
-const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
+const { authenticateUser, authorizeRoles } = require("../middlewares/auth");
 const { createBloodRequest } = require("../controllers/bloodRequestController");
 
-router.route("/bloodBank/blood/request").post(authenticateBloodBank, authorizeRoles("bloodBank"), createBloodRequest);
+router.route("/bloodBank/blood/request").post(authenticateUser, authorizeRoles("user"), createBloodRequest);
 
 module.exports = router;

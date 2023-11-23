@@ -9,20 +9,25 @@ const bloodRequestSchema = new mongoose.Schema({
 
   contact: {
     type: String,
-    required: [true, "Please enter your contact"],
-    unique: true,
+    required: [true, "Please enter your contact"],   
   },
 
   bloodBank: {
     type: mongoose.Schema.ObjectId,
     ref: "bloodBank",
-    required: [true, "Please select the blood bank"],
+    required: true,
   },
 
   bloodGroup: {
     type: mongoose.Schema.ObjectId,
     ref: "bloodGroup",
-    required: [true, "Please select the blood type"],
+    required: true,
+  },
+
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "user",
+    required: true,
   },
 
   bloodBags: {
@@ -37,9 +42,9 @@ const bloodRequestSchema = new mongoose.Schema({
   },
 
   reqStatus: {
-    type: String,
-    required: true,
+    type: String,   
     enum: ["Pending", "Accepted", "Rejected"],
+    default: "Pending"
   },
 
   createdAt: {
@@ -47,6 +52,9 @@ const bloodRequestSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// TACKLE THE DUPLICATION ERROR FOR THE CONTACT -
+bloodRequestSchema.index({ contact: 1 });
 
 const bloodRequestModel = mongoose.model("bloodRequest", bloodRequestSchema);
 module.exports = bloodRequestModel;
