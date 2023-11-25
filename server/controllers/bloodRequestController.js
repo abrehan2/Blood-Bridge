@@ -6,6 +6,10 @@ const bloodBankModel = require("../models/bloodBankModel");
 const bloodGroupModel = require("../models/BloodGroupModel");
 const userModel = require("../models/userModel");
 const moment = require("moment");
+const NodeCache = require("node-cache");
+
+// PARTIALS -
+const cache = new NodeCache();
 
 // CREATE BLOOD REQUEST -
 exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
@@ -98,5 +102,24 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     success: true,
     message:
       "Your blood request has been processed and we will contact you soon regarding the next steps.",
+  });
+});
+
+// GET ALL BLOOD REQUESTS FOR BLOOD BANK:
+exports.getBloodRequests = catchAsyncErr(async (req, res) => {
+  let bloodRequests;
+
+  if (cache.has("bloodRequests")) {
+    bloodRequests = JSON.parse(cache.get("bloodRequests"));
+  } else {
+    bloodRequests = await bloodRequestModel
+      .find({ bloodBank: req.authUser.id })
+      .populate("bloodGroup", "bloodGroup");
+    cache.set("bloodRequests", JSON.stringify(bloodRequests));
+  }
+
+  res.status(200).json({
+    success: true,
+    bloodRequests,
   });
 });

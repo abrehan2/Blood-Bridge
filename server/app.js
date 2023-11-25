@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const errorMiddleware = require("./middlewares/error");
 const cors = require("cors");
+const morgan = require("morgan");
 
 // CONFIG -
 if (process.env.NODE_ENV !== "PRODUCTION") {
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 
 // MIDDLEWARES -
 app.use(express.json());
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -37,6 +39,7 @@ const userRoute = require("./routes/userRoute");
 const bloodBank = require("./routes/bloodBankRoute");
 const bloodGroup = require("./routes/bloodGroupRoute");
 const bloodRequest = require("./routes/bloodRequestRoute");
+const NodeCache = require("node-cache");
 
 // ROUTES -
 app.use("/api", userRoute);
