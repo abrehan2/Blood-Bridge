@@ -7,6 +7,10 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+const NodeCache = require("node-cache");
+
+// PARTIALS -
+const cache = new NodeCache();
 
 // PARTIALS -
 const imageBuffer =
@@ -234,8 +238,14 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
 
 // GET BLOOD BANK DETAILS -
 exports.getBloodBank = catchAsyncErr(async (req, res) => {
-  const bloodBank = await bloodBankModel.findById(req.authUser.id);
-  // console.log(bloodBank);
+  let bloodBank;
+
+  if (cache.has("bloodBank")) {
+    bloodBank = JSON.parse(cache.get("bloodBank"));
+  } else {
+    bloodBank = await bloodBankModel.findById(req.authUser.id);
+    cache.set("bloodBank", JSON.stringify(bloodBank));
+  }
 
   res.status(200).json({
     success: true,
@@ -446,11 +456,20 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
 
 // GET BLOOD BANK COORDINATES -
 exports.getBloodBankLocation = catchAsyncErr(async (req, res, next) => {
-  const { longitude, latitude } = await parseLocation();
+  let parser = {
+    longitude: "",
+    latitude: "",
+  };
+
+  if (cache.has("bloodBankCoordinates")) {
+    parser = JSON.parse(cache.get("bloodBankCoordinates"));
+  } else {
+    parser = await parseLocation();
+    cache.set("bloodRequests", JSON.stringify(parser));
+  }
 
   res.status(200).json({
     success: true,
-    longitude,
-    latitude,
+    parser,
   });
 });

@@ -7,6 +7,10 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+const NodeCache = require("node-cache");
+
+// PARTIALS -
+const cache = new NodeCache();
 
 // PARTIALS -
 const imageBuffer =
@@ -240,7 +244,16 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
 
 // GET USER DETAILS -
 exports.getUserDetails = catchAsyncErr(async (req, res, next) => {
-  const user = await userModel.findById(req.authUser.id);
+  // const user = await userModel.findById(req.authUser.id);
+
+  let user;
+
+  if (cache.has("user")) {
+    user = JSON.parse(cache.get("user"));
+  } else {
+    user = await userModel.findById(req.authUser.id);
+    cache.set("user", JSON.stringify(user));
+  }
 
   res.status(200).json({
     success: true,
@@ -413,9 +426,6 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
 exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
   const { feedback } = req.body;
   const user = await userModel.findById(req.authUser.id);
-  const userExist = await feedBackModel.findOne({
-    user: user._id,
-  });
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
@@ -435,11 +445,20 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
 
 // GET USER COORDINATES -
 exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
-  const { longitude, latitude } = await parseLocation();
+  let parser = {
+    longitude: "",
+    latitude: "",
+  };
+
+  if (cache.has("userCoordinates")) {
+    parser = JSON.parse(cache.get("userCoordinates"));
+  } else {
+    parser = await parseLocation();
+    cache.set("userCoordinates", JSON.stringify(parser));
+  }
 
   res.status(200).json({
     success: true,
-    longitude,
-    latitude,
+    parser,
   });
 });
