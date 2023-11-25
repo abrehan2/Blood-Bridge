@@ -453,3 +453,4 @@ exports.getBloodBankLocation = catchAsyncErr(async (req, res) => {
     latitude,
   });
 });
+

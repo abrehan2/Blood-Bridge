@@ -39,7 +39,6 @@ const userRoute = require("./routes/userRoute");
 const bloodBank = require("./routes/bloodBankRoute");
 const bloodGroup = require("./routes/bloodGroupRoute");
 const bloodRequest = require("./routes/bloodRequestRoute");
-const NodeCache = require("node-cache");
 
 // ROUTES -
 app.use("/api", userRoute);

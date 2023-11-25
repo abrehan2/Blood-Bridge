@@ -113,4 +113,14 @@ exports.getBloodRequests = catchAsyncErr(async (req, res) => {
   });
 });
 
-// GET ALL USER BLOOD REQUESTS -
+// GET ALL BLOOD REQUESTS FOR USER -
+exports.getUserBloodRequests = catchAsyncErr(async (req, res) => {
+  const bloodRequests = await bloodRequestModel
+    .find({ user: req.authUser.id })
+    .populate("bloodGroup bloodBank", "bloodGroup name");
+
+  res.status(200).json({
+    success: true,
+    bloodRequests,
+  });
+});
