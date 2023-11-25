@@ -2,10 +2,6 @@
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const bloodGroupModel = require("../models/BloodGroupModel");
-const NodeCache = require("node-cache");
-
-// PARTIALS -
-const cache = new NodeCache();
 
 // CREATE BLOOD TYPE -
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {
@@ -39,16 +35,9 @@ exports.createBloodType = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL BLOOD TYPES -
 exports.getAllBloodTypes = catchAsyncErr(async (req, res) => {
-  let bloodTypes;
-
-  if (cache.has("bloodTypes")) {
-    bloodTypes = JSON.parse(cache.get("bloodTypes"));
-  } else {
-    bloodTypes = await bloodGroupModel.find({
-      bloodBank: req.authUser.id,
-    });
-    cache.set("bloodTypes", JSON.stringify(bloodTypes));
-  }
+  const bloodTypes = await bloodGroupModel.find({
+    bloodBank: req.authUser.id,
+  });
 
   res.status(201).json({
     success: true,
