@@ -69,10 +69,14 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     );
   }
 
-  // CHECK IF THE 24 HOURS ARE COMPLETED TO MAKE ANOTHER BLOOD REQUEST -
+  // CHECK IF THE 24 HOURS ARE COMPLETED TO MAKE ANOTHER BLOOD REQUEST OR IF THE PREVIOUS REQUEST GETS ACCEPTED -
+
   const lastRequest = await bloodRequestModel.findOne({
     user: req.authUser.id,
-    createdAt: { $gte: moment().subtract(24, "hours").toDate() },
+    $and: [
+      { createdAt: { $gte: moment().subtract(24, "hours").toDate() } }, // 11:49 PM
+      { reqStatus: "Pending" },
+    ],
   });
 
   if (lastRequest) {
@@ -105,6 +109,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
 exports.getBloodRequests = catchAsyncErr(async (req, res) => {
   const bloodRequests = await bloodRequestModel
     .find({ bloodBank: req.authUser.id })
+    .populate({ path: "user", select: "cnic" })
     .populate("bloodGroup", "bloodGroup");
 
   res.status(200).json({
@@ -117,10 +122,12 @@ exports.getBloodRequests = catchAsyncErr(async (req, res) => {
 exports.getUserBloodRequests = catchAsyncErr(async (req, res) => {
   const bloodRequests = await bloodRequestModel
     .find({ user: req.authUser.id })
-    .populate("bloodGroup bloodBank", "bloodGroup name");
+    .populate("bloodGroup bloodBank", "bloodGroup name city");
 
   res.status(200).json({
     success: true,
     bloodRequests,
   });
 });
+
+// UPDATE BLOOD REQUEST STATUS -
