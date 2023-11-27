@@ -174,14 +174,15 @@ exports.updateStatus = catchAsyncErr(async (req, res, next) => {
   } else {
     if (status === "Accepted" && bloodRequest.reqStatus === "Pending") {
       await emailUser(bloodRequest, message, res);
-    } else if (
-      status === "Completed" &&
-      bloodRequest.reqStatus === "Accepted"
-    ) {
-      await updateStock(bloodRequest, bloodType, res);
-    } else if (status === "Rejected" && bloodRequest.reqStatus === "Pending") {
-      await removeRequest(bloodRequest, res);
     }
+
+    if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
+      await updateStock(bloodRequest, bloodType, res);
+    }
+  }
+
+  if (status === "Rejected" && bloodRequest.reqStatus === "Pending") {
+    await removeRequest(bloodRequest, res);
   }
 });
 
