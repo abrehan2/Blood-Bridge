@@ -6,6 +6,7 @@ const bloodBankModel = require("../models/bloodBankModel");
 const bloodGroupModel = require("../models/BloodGroupModel");
 const userModel = require("../models/userModel");
 const moment = require("moment");
+const sendEmail = require("../utils/email");
 
 // CREATE BLOOD REQUEST -
 exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
@@ -131,3 +132,81 @@ exports.getUserBloodRequests = catchAsyncErr(async (req, res) => {
 });
 
 // UPDATE BLOOD REQUEST STATUS -
+exports.updateStatus = catchAsyncErr(async (req, res, next) => {
+  const { status, message } = req.body;  
+  console.log(status, message)
+
+  
+const bloodRequest = await bloodRequestModel.findById(req.params.id).populate("bloodGroup", "bloodGroup").populate({path: "user", select: "email"}).populate({path: "bloodBank", select: "address"});
+
+console.log(bloodRequest)
+
+
+if (!bloodRequest) {
+  return next(new ErrorHandler("Blood request not found", 404));
+}
+
+if (bloodRequest.reqStatus === "Completed") {
+  return next(new ErrorHandler("Blood request is already completed", 400));
+}
+
+if (bloodRequest.reqStatus === "Accepted") {
+  return next(new ErrorHandler("Blood request is already accepted", 400));
+}
+
+if ((status === "Accepted") && (bloodRequest.reqStatus === "Pending")) {
+      await emailUser(bloodRequest, message);
+}
+
+if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
+  await updateStock(bloodRequest, req, res, next);
+}
+
+ res.status(200).json({
+   success: true,
+   message: "Blood request has been updated",
+ });
+
+
+});
+
+// EMAIL USER -
+const emailUser = async(bloodRequest, message) => {
+
+const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Request Update</title>
+</head>
+<body>
+  <p>Dear ${bloodRequest?.name},</p>
+
+  <p>We'd like to inform you that your request for blood has been accepted!</p>
+  <p>Please visit us on <b>${message?.day}</b> at <b>${message?.time}</b>.</p>
+  <p><b>Location:</b> ${bloodRequest?.bloodBank.address}</p>
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+   
+ await sendEmail({
+   email: bloodRequest?.user?.email,
+   subject: "Blood Bridge: Blood Request Update",
+   message: html,
+ });
+
+  bloodRequest.reqStatus = "Accepted";
+  await bloodRequest.save({ validateBeforeSave: true });
+
+}
+
+// UPDATE STOCK -
+const updateStock = async (bloodRequest, req, res, next) => {
+
+  
+  
+
+};
