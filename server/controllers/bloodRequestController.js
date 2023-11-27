@@ -133,47 +133,70 @@ exports.getUserBloodRequests = catchAsyncErr(async (req, res) => {
 
 // UPDATE BLOOD REQUEST STATUS -
 exports.updateStatus = catchAsyncErr(async (req, res, next) => {
-  const { status, message } = req.body;  
-  console.log(status, message)
+  const { status, message } = req.body;
 
-  
-const bloodRequest = await bloodRequestModel.findById(req.params.id).populate("bloodGroup", "bloodGroup").populate({path: "user", select: "email"}).populate({path: "bloodBank", select: "address"});
+  const bloodRequest = await bloodRequestModel
+    .findById(req.params.id)
+    .populate("bloodGroup", "bloodGroup")
+    .populate({ path: "user", select: "email" })
+    .populate({ path: "bloodBank", select: "address contact" });
 
-console.log(bloodRequest)
+  const bloodType = await bloodGroupModel.findOne({
+    $and: [
+      { bloodBank: req.authUser.id },
+      { bloodGroup: bloodRequest?.bloodGroup?.bloodGroup },
+    ],
+  });
 
+  if (!bloodRequest) {
+    return next(new ErrorHandler("Blood request not found", 404));
+  }
 
-if (!bloodRequest) {
-  return next(new ErrorHandler("Blood request not found", 404));
-}
+  if (!bloodType) {
+    return next(new ErrorHandler("Blood type not found", 400));
+  }
 
-if (bloodRequest.reqStatus === "Completed") {
-  return next(new ErrorHandler("Blood request is already completed", 400));
-}
+  if (bloodRequest.reqStatus === "Completed" && status == "Completed") {
+    return next(new ErrorHandler("Blood request is already completed", 400));
+  }
 
-if (bloodRequest.reqStatus === "Accepted") {
-  return next(new ErrorHandler("Blood request is already accepted", 400));
-}
+  if (bloodRequest.reqStatus === "Accepted" && status == "Accepted") {
+    return next(new ErrorHandler("Blood request is already accepted", 400));
+  }
 
-if ((status === "Accepted") && (bloodRequest.reqStatus === "Pending")) {
-      await emailUser(bloodRequest, message);
-}
-
-if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
-  await updateStock(bloodRequest, req, res, next);
-}
-
- res.status(200).json({
-   success: true,
-   message: "Blood request has been updated",
- });
-
-
+  if (bloodRequest?.bloodBags > bloodType.stock) {
+    return next(
+      new ErrorHandler(
+        `Insufficient ${bloodType.bloodGroup} blood stock to fulfill this request`,
+        406
+      )
+    );
+  } else {
+    if (status === "Accepted" && bloodRequest.reqStatus === "Pending") {
+      await emailUser(bloodRequest, message, res);
+    } else if (
+      status === "Completed" &&
+      bloodRequest.reqStatus === "Accepted"
+    ) {
+      await updateStock(bloodRequest, bloodType, res);
+    } else if (status === "Rejected" && bloodRequest.reqStatus === "Pending") {
+      await removeRequest(bloodRequest, res);
+    }
+  }
 });
 
-// EMAIL USER -
-const emailUser = async(bloodRequest, message) => {
+// COMMON SUCCESS FUNCTIONS TO AVOID HEADERS ERROR -
+const sendSuccessResponse = (res, message) => {
+  res.status(200).json({
+    success: true,
+    message,
+  });
+};
 
-const html = `<!DOCTYPE html>
+// EMAIL USER -
+const emailUser = async (bloodRequest, message, res) => {
+  console.log(message);
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -191,22 +214,56 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-   
- await sendEmail({
-   email: bloodRequest?.user?.email,
-   subject: "Blood Bridge: Blood Request Update",
-   message: html,
- });
+  await sendEmail({
+    email: bloodRequest?.user?.email,
+    subject: "Blood Bridge: Blood Request Update",
+    message: html,
+  });
 
   bloodRequest.reqStatus = "Accepted";
   await bloodRequest.save({ validateBeforeSave: true });
 
-}
+  sendSuccessResponse(res, "Blood request has been updated");
+};
 
 // UPDATE STOCK -
-const updateStock = async (bloodRequest, req, res, next) => {
+const updateStock = async (bloodRequest, bloodType, res) => {
+  bloodType.stock -= bloodRequest?.bloodBags;
+  bloodRequest.reqStatus = "Completed";
 
-  
-  
+  await Promise.all([
+    bloodType.save({ validateBeforeSave: true }),
+    bloodRequest.save({ validateBeforeSave: true }),
+  ]);
 
+  sendSuccessResponse(res, "Blood request has been updated");
+};
+
+// REMOVE BLOOD REQUEST -
+const removeRequest = async (bloodRequest, res) => {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Request Update</title>
+</head>
+<body>
+  <p>Dear ${bloodRequest?.name},</p>
+
+  <p>We apologize to inform you that we are unable to fulfill your blood request at this time.</p>
+  <p>For further information, please reach out to us at <b>${bloodRequest?.bloodBank.contact}</b>.<p/>  
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+  await sendEmail({
+    email: bloodRequest?.user?.email,
+    subject: "Blood Bridge: Blood Request Update",
+    message: html,
+  });
+  await bloodRequest.deleteOne();
+
+  sendSuccessResponse(res, "Blood request has been updated");
 };
