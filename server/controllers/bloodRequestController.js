@@ -76,7 +76,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     user: req.authUser.id,
     $and: [
       { createdAt: { $gte: moment().subtract(24, "hours").toDate() } }, // 11:49 PM
-      { reqStatus: "Pending" },
+      { reqStatus: { $in: ["Pending", "Accepted"] } },
     ],
   });
 
@@ -138,50 +138,28 @@ exports.updateStatus = catchAsyncErr(async (req, res, next) => {
   const bloodRequest = await bloodRequestModel
     .findById(req.params.id)
     .populate("bloodGroup", "bloodGroup")
-    .populate({ path: "user", select: "email" })
+    .populate({ path: "user", select: "email cnic" })
     .populate({ path: "bloodBank", select: "address contact" });
-
-  const bloodType = await bloodGroupModel.findOne({
-    $and: [
-      { bloodBank: req.authUser.id },
-      { bloodGroup: bloodRequest?.bloodGroup?.bloodGroup },
-    ],
-  });
 
   if (!bloodRequest) {
     return next(new ErrorHandler("Blood request not found", 404));
   }
 
-  if (!bloodType) {
-    return next(new ErrorHandler("Blood type not found", 400));
-  }
+  // console.log(bloodRequest);
 
-  if (bloodRequest.reqStatus === "Completed" && status == "Completed") {
+  if (bloodRequest.reqStatus === "Completed" && status === "Completed") {
     return next(new ErrorHandler("Blood request is already completed", 400));
   }
 
-  if (bloodRequest.reqStatus === "Accepted" && status == "Accepted") {
+  if (bloodRequest.reqStatus === "Accepted" && status === "Accepted") {
     return next(new ErrorHandler("Blood request is already accepted", 400));
   }
 
-  if (bloodRequest?.bloodBags > bloodType.stock) {
-    return next(
-      new ErrorHandler(
-        `Insufficient ${bloodType.bloodGroup} blood stock to fulfill this request`,
-        406
-      )
-    );
-  } else {
-    if (status === "Accepted" && bloodRequest.reqStatus === "Pending") {
-      await emailUser(bloodRequest, message, res);
-    }
-
-    if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
-      await updateStock(bloodRequest, bloodType, res);
-    }
-  }
-
-  if (status === "Rejected" && bloodRequest.reqStatus === "Pending") {
+  if (status === "Accepted" && bloodRequest.reqStatus === "Pending") {
+    await emailUser(bloodRequest, message, req, res, next);
+  } else if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
+    await updateStock(bloodRequest, req, res);
+  } else if (status === "Rejected") {
     await removeRequest(bloodRequest, res);
   }
 });
@@ -195,8 +173,15 @@ const sendSuccessResponse = (res, message) => {
 };
 
 // EMAIL USER -
-const emailUser = async (bloodRequest, message, res) => {
-  console.log(message);
+const emailUser = async (bloodRequest, message, req, res) => {
+  const bloodType = await checkBloodGroup(req, bloodRequest);
+  //  console.log(bloodType)
+
+  if (bloodType.stock < bloodRequest?.bloodBags) {
+    await removeRequest(bloodRequest, res);
+    return;
+  }
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -228,7 +213,17 @@ const emailUser = async (bloodRequest, message, res) => {
 };
 
 // UPDATE STOCK -
-const updateStock = async (bloodRequest, bloodType, res) => {
+const updateStock = async (bloodRequest, req, res) => {
+  const bloodType = await checkBloodGroup(req, bloodRequest);
+  console.log(bloodType);
+
+  bloodType?.reservedBags.push({
+    user: bloodRequest?.user?._id,
+    name: bloodRequest?.name,
+    cnic: bloodRequest?.user?.cnic,
+    bloodBags: bloodRequest?.bloodBags,
+  });
+
   bloodType.stock -= bloodRequest?.bloodBags;
   bloodRequest.reqStatus = "Completed";
 
@@ -238,6 +233,22 @@ const updateStock = async (bloodRequest, bloodType, res) => {
   ]);
 
   sendSuccessResponse(res, "Blood request has been updated");
+};
+
+// CHECK BLOOD GROUP -
+const checkBloodGroup = async (req, bloodRequest) => {
+  const bloodType = await bloodGroupModel.findOne({
+    $and: [
+      { bloodBank: req.authUser.id },
+      { bloodGroup: bloodRequest?.bloodGroup?.bloodGroup },
+    ],
+  });
+
+  if (!bloodType) {
+    return next(new ErrorHandler("Blood type not found", 400));
+  }
+
+  return bloodType;
 };
 
 // REMOVE BLOOD REQUEST -
@@ -264,7 +275,7 @@ const removeRequest = async (bloodRequest, res) => {
     subject: "Blood Bridge: Blood Request Update",
     message: html,
   });
-  await bloodRequest.deleteOne();
 
+  await bloodRequest.deleteOne();
   sendSuccessResponse(res, "Blood request has been updated");
 };

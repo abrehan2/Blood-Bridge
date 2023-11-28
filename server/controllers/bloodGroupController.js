@@ -62,6 +62,10 @@ exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler(`Blood type does not exist`, 400));
   }
 
+  if (stock > 1000) {
+    return next(new ErrorHandler("Stock cannot exceed 1000 units", 400));
+  }
+
   getBloodType.stock = stock;
   await getBloodType.save();
 

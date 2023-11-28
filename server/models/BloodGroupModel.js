@@ -21,6 +21,31 @@ const bloodGroupSchema = new mongoose.Schema({
     required: true,
   },
 
+  reservedBags: [
+    {
+      user: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true,
+      },
+
+      name: {
+        type: String,
+        required: true,
+      },
+
+      cnic: {
+        type: String,
+        required: true,
+      },    
+
+      bloodBags: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,
