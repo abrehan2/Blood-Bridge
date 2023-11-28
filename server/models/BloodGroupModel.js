@@ -4,13 +4,13 @@ const mongoose = require("mongoose");
 const bloodGroupSchema = new mongoose.Schema({
   bloodGroup: {
     type: String,
-    required: [true, "Select the blood type"],
+    required: [true, "Please select the blood type"],
     enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
   },
 
   stock: {
     type: Number,
-    required: [true, "Please enter the blood group stock"],
+    required: [true, "Please enter the blood type stock"],
     max: [1000, "Stock cannot exceed 1000 units"],
     default: 0,
   },

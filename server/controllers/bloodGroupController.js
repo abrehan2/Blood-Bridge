@@ -6,8 +6,16 @@ const bloodGroupModel = require("../models/BloodGroupModel");
 // CREATE BLOOD TYPE -
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {
   const { bloodGroup, stock } = req.body;
+
+  if (!bloodGroup || !stock) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
   const bloodBank = req.authUser.id;
-  const bloodGroupExist = bloodGroupModel.findById({ bloodGroup, bloodBank });
+  const bloodGroupExist = await bloodGroupModel.findOne({
+    bloodGroup,
+    bloodBank,
+  });
 
   if (bloodGroupExist) {
     return next(new ErrorHandler(`Blood type already exists`, 409));
@@ -27,19 +35,23 @@ exports.createBloodType = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL BLOOD TYPES -
 exports.getAllBloodTypes = catchAsyncErr(async (req, res) => {
-  const bloodType = await bloodGroupModel.find({
+  const bloodTypes = await bloodGroupModel.find({
     bloodBank: req.authUser.id,
   });
 
   res.status(201).json({
     success: true,
-    bloodType,
+    bloodTypes,
   });
 });
 
 // UPDATE BLOOD TYPE -
 exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
   const { bloodGroup, stock } = req.body;
+
+  if (!bloodGroup || !stock) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
 
   const getBloodType = await bloodGroupModel.findOne({
     bloodGroup,
@@ -62,6 +74,15 @@ exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
 // REMOVE BLOOD TYPE -
 exports.removeBloodType = catchAsyncErr(async (req, res, next) => {
   const { bloodGroup } = req.body;
+
+  if (!bloodGroup) {
+    return next(
+      new ErrorHandler(
+        "Please indicate which blood type you would like to remove",
+        400
+      )
+    );
+  }
 
   const getBloodType = await bloodGroupModel.findOne({
     bloodGroup,
