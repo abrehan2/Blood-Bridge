@@ -37,7 +37,7 @@ const bloodGroupSchema = new mongoose.Schema({
       cnic: {
         type: String,
         required: true,
-      },    
+      },
 
       bloodBags: {
         type: String,

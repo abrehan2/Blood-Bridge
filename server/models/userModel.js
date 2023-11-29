@@ -85,6 +85,11 @@ const userSchema = new mongoose.Schema({
     default: null,
   },
 
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+
   feedback: [
     {
       type: String,

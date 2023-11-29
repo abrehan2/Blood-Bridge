@@ -440,3 +440,26 @@ exports.getUserLocation = catchAsyncErr(async (req, res) => {
     latitude,
   });
 });
+
+// DEACTIVATE USER ACCOUNT -
+exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
+  const id = req.params.id;
+
+  const updatedUser = await userModel.findByIdAndUpdate(id, {
+    isActive: false,
+  });
+
+  if (!updatedUser) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Your account has been deactivated",
+  });
+});
