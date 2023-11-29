@@ -15,6 +15,7 @@ const {
   resendEmailVerification,
   getBloodBankLocation,
   completeProfile,
+  deactivateAccount,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
 
@@ -31,5 +32,6 @@ router.route("/bloodBank/me/update").put(authenticateBloodBank, authorizeRoles("
 router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
 router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"), resendEmailVerification)
 router.route("/bloodBank/location").get(getBloodBankLocation);
+router.route("/bloodBank/deactivate/:id").put(authenticateBloodBank, authorizeRoles("bloodBank"), deactivateAccount)
 
 module.exports = router;

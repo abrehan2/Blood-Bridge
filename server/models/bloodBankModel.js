@@ -114,6 +114,11 @@ const bloodBankSchema = new mongoose.Schema({
     default: null,
   },
 
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
