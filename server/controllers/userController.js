@@ -104,8 +104,16 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
 
+
+  
+
   if (!user) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
+  }
+
+  if (user.isActive === false) {
+    user.isActive = true;
+   
   }
 
   if (!user.verified) {
@@ -139,6 +147,8 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
+
+  await user.save({ validateBeforeSave: true });
   setToken(user, 200, res);
 });
 
@@ -447,6 +457,10 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 
   const updatedUser = await userModel.findByIdAndUpdate(id, {
     isActive: false,
+  }, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false
   });
 
   if (!updatedUser) {
