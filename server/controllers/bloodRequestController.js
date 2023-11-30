@@ -83,7 +83,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
   if (lastRequest) {
     return next(
       new ErrorHandler(
-        "You have already submitted a blood request. Please wait 24 hours before submitting another request.",
+        "You have already submitted a blood request. Please wait 24 hours before submitting another request",
         429
       )
     );
@@ -102,7 +102,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message:
-      "Your blood request has been processed and we will contact you soon regarding the next steps.",
+      "Your blood request has been processed and we will contact you soon regarding the next steps",
   });
 });
 
