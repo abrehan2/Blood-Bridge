@@ -462,7 +462,7 @@ exports.getBloodBankLocation = catchAsyncErr(async (req, res) => {
 
 // DEACTIVATE BLOOD BANK ACCOUNT -
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.authUser.id;
 
   const updatedBloodBank = await bloodBankModel.findByIdAndUpdate(
     id,
@@ -475,7 +475,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
       runValidators: true,
       useFindAndModify: false,
     }
-  );
+  );  
 
   if (!updatedBloodBank) {
     return next(new ErrorHandler("Blood bank not found", 404));

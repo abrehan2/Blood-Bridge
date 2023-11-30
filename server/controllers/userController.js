@@ -453,7 +453,7 @@ exports.getUserLocation = catchAsyncErr(async (req, res) => {
 
 // DEACTIVATE USER ACCOUNT -
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.authUser.id;
 
   const updatedUser = await userModel.findByIdAndUpdate(id, {
     isActive: false,

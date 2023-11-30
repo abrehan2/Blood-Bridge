@@ -17,5 +17,5 @@ router.route("/user/:id/verify/:token").get(verifyEmail);
 router.route("/user/email/resend").get(authenticateUser, authorizeRoles("user"), resendEmailVerification);
 router.route("/user/feedback").post(authenticateUser, authorizeRoles("user"), userFeedBack);
 router.route("/user/location").get(getUserLocation);
-router.route("/user/deactivate/:id").put(authenticateUser, authorizeRoles("user"), deactivateAccount)
+router.route("/user/deactivate").put(authenticateUser, authorizeRoles("user"), deactivateAccount)
 module.exports = router;
