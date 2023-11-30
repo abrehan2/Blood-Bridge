@@ -100,6 +100,10 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
     );
   }
 
+  if (bloodBank.isActive === false) {
+    bloodBank.isActive = true;
+  }
+
   if (!bloodBank.verified) {
     let token = await verificationModel.findOne({ BloodBankId: bloodBank._id });
 
@@ -133,6 +137,8 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
       new ErrorHandler("Your license number or password is incorrect", 401)
     );
   }
+
+  await bloodBank.save({ validateBeforeSave: true });
   setToken(bloodBank, 200, res);
 });
 
@@ -454,3 +460,34 @@ exports.getBloodBankLocation = catchAsyncErr(async (req, res) => {
   });
 });
 
+// DEACTIVATE BLOOD BANK ACCOUNT -
+exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
+  const id = req.params.id;
+
+  const updatedBloodBank = await bloodBankModel.findByIdAndUpdate(
+    id,
+    {
+      isActive: false,
+      status: "close",
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  if (!updatedBloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Your account has been deactivated",
+  });
+});

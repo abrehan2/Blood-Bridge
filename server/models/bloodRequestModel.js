@@ -38,7 +38,7 @@ const bloodRequestSchema = new mongoose.Schema({
 
   bloodNeededOn: {
     type: Date,
-    required: [true, "Please enter the date you will need the blood bags"],
+    required: [true, "Please select the date you will need the blood bags"],
   },
 
   reqStatus: {
