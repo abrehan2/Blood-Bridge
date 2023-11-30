@@ -53,17 +53,34 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Blood type not found", 404));
   }
 
-  const lastRequest = await bloodDonationModel.findOne({
+const startOfThreeMonthsAgo = moment()
+  .utc()
+  .subtract(3, "months")
+  .startOf("month")
+  .toDate();
+const startOfTwoMonthsAgo = moment()
+  .utc()
+  .subtract(2, "months")
+  .startOf("month")
+  .toDate();
+  const lastRequest = await bloodDonationModel.find({
     user: req.authUser.id,
     $or: [
-      { createdAt: { $gte: moment().subtract(3, "months").toDate() } },
-      { reqStatus: { $in: ["Pending", "Accepted"] } },
+      {
+        createdAt: {
+          $gt: startOfThreeMonthsAgo,
+          $lt: startOfTwoMonthsAgo,
+        },
+      },
+      { donationStatus: { $in: ["Pending", "Accepted"] } },
     ],
-  });
+  })
+// console.log(lastRequest);
+  const threeMonthsLater = moment().utc().add(3, "months").toDate();
 
-  const threeMonthsLater = moment().add(3, "months").toDate();
-
-  if (lastRequest) {
+  const lastLatestEL = lastRequest[lastRequest.length - 1];
+console.log(lastLatestEL);
+  if (lastLatestEL && lastLatestEL?.donationStatus !== "Rejected") {
     return next(
       new ErrorHandler(
         `We appreciate your willingness to donate blood regularly. To maintain donor eligibility and ensure a healthy blood donation experience, we recommend waiting until ${threeMonthsLater} to schedule your next blood donation`,

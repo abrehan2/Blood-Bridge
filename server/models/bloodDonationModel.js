@@ -1,5 +1,6 @@
 // IMPORTS -
 const mongoose = require("mongoose");
+const moment = require("moment");
 
 const bloodDonationSchema = new mongoose.Schema({
   name: {
@@ -59,7 +60,7 @@ const bloodDonationSchema = new mongoose.Schema({
 
   createdAt: {
     type: Date,
-    default: Date.now,
+    default: () => moment().utc().startOf("day").toDate(),
   },
 });
 
