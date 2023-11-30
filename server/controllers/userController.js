@@ -3,10 +3,12 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const verificationModel = require("../models/verificationModel");
+const bloodBankModel = require("../models/bloodBankModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+
 
 // PARTIALS -
 const imageBuffer =
@@ -249,7 +251,7 @@ exports.resetPassword = catchAsyncErr(async (req, res, next) => {
 });
 
 // GET USER DETAILS -
-exports.getUserDetails = catchAsyncErr(async (req, res, next) => {
+exports.getUserDetails = catchAsyncErr(async (req, res) => {
   const user = await userModel.findById(req.authUser.id);
 
   res.status(200).json({
@@ -477,3 +479,14 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
     message: "Your account has been deactivated",
   });
 });
+
+// GET ALL BLOOD BANKS -
+exports.getBloodBanks = catchAsyncErr(async (req, res) => {
+  const bloodBanks = await bloodBankModel.find();
+
+   res.status(200).json({
+     success: true,
+     bloodBanks,
+   });
+
+})
