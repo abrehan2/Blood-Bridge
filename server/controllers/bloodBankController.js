@@ -468,7 +468,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
     id,
     {
       isActive: false,
-      status: "close"
+      status: "close",
     },
     {
       new: true,
