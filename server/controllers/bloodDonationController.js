@@ -92,14 +92,186 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL DONATION REQUESTS FOR BLOOD BANK-
 exports.getBloodDonations = catchAsyncErr(async (req, res) => {
+  const bloodDonations = await bloodDonationModel
+    .find({ bloodBank: req.authUser.id })
+    .populate({
+      path: "user",
+      select: "cnic",
+    })
+    .populate("bloodGroup", "bloodGroup");
 
-  const bloodDonations = await bloodDonationModel.find({bloodBank: req.authUser.id}).populate({
-    path: "user", select: "cnic"
-  }).populate("bloodGroup", "bloodGroup");
-
-   res.status(200).json({
-     success: true,
-     bloodDonations,
-   });
-
+  res.status(200).json({
+    success: true,
+    bloodDonations,
+  });
 });
+
+// GET ALL DONATION REQUESTS FOR USER -
+exports.getUserBloodDonations = catchAsyncErr(async (req, res) => {
+  const bloodDonations = await bloodDonationModel
+    .find({ user: req.authUser.id })
+    .populate({
+      path: "user",
+      select: "cnic",
+    })
+    .populate("bloodGroup bloodBank", "bloodGroup name city");
+
+  res.status(200).json({
+    success: true,
+    bloodDonations,
+  });
+});
+
+// UPDATE BLOOD DONATION STATUS -
+exports.updateDonationStatus = catchAsyncErr(async (req, res, next) => {
+  const { status, message } = req.body;
+
+  const bloodDonation = await bloodDonationModel
+    .findById(req.params.id)
+    .populate("bloodGroup", "bloodGroup")
+    .populate({ path: "user", select: "email cnic" })
+    .populate({ path: "bloodBank", select: "address contact city sector" });
+
+  if (!bloodDonation) {
+    return next(new ErrorHandler("Blood donation not found", 404));
+  }
+
+  // NECESSARY CONDITIONS -
+  if (bloodDonation.donationStatus === "Completed" && status === "Completed") {
+    return next(new ErrorHandler("Blood donation is already completed", 400));
+  }
+
+  if (bloodDonation.donationStatus === "Accepted" && status === "Accepted") {
+    return next(new ErrorHandler("Blood donation is already accepted", 400));
+  }
+
+  if (bloodDonation.donationStatus === "Rejected" && status === "Rejected") {
+    return next(new ErrorHandler("Blood donation is already rejected", 400));
+  }
+
+  if (
+    (bloodDonation.donationStatus === "Accepted" ||
+      bloodDonation.donationStatus === "Completed") &&
+    status === "Rejected"
+  ) {
+    return next(
+      new ErrorHandler(
+        `You cannot reject the request while it is ${bloodDonation.donationStatus}`,
+        400
+      )
+    );
+  }
+
+  // BLOOD DONATION RENDERING -
+  if (status === "Accepted" && bloodDonation.donationStatus === "Pending") {
+    await emailUser(bloodDonation, message, res, next);
+  } else if (
+    status === "Completed" &&
+    bloodDonation.donationStatus === "Accepted"
+  ) {
+    await completeDonation(bloodDonation, res);
+  } else if (status === "Rejected") {
+    await rejectDonation(bloodDonation, res);
+  }
+});
+
+// COMMON SUCCESS FUNCTIONS TO AVOID HEADERS ERROR -
+const sendSuccessResponse = (res, message) => {
+  res.status(200).json({
+    success: true,
+    message,
+  });
+};
+
+// EMAIL USER -
+const emailUser = async (bloodDonation, message, res) => {
+  const location = `${bloodDonation?.bloodBank.sector}, ${bloodDonation?.bloodBank.address}, ${bloodDonation?.bloodBank.city}`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Donation Update</title>
+</head>
+<body>
+  <p>Dear ${bloodDonation?.name},</p>
+
+  <p>We'd like to inform you that your request for blood donation has been accepted!</p>
+  <p>Please visit us on <b>${message?.day}</b> at <b>${message?.time}</b>.</p>
+  <p><b>Location:</b> ${location}.</p>
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+  await sendEmail({
+    email: bloodDonation?.user?.email,
+    subject: "Blood Bridge: Blood Donation Update",
+    message: html,
+  });
+
+  bloodDonation.donationStatus = "Accepted";
+  await bloodDonation.save({ validateBeforeSave: true });
+
+  sendSuccessResponse(res, "Blood donation has been updated");
+};
+
+// COMPLETE DONATION -
+const completeDonation = async (bloodDonation, res) => {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Donation Update</title>
+</head>
+<body>
+  <p>Dear ${bloodDonation?.name},</p>
+
+  <p>We'd like to inform you that your request for blood donation has been completed!</p>
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+  await sendEmail({
+    email: bloodDonation?.user?.email,
+    subject: "Blood Bridge: Blood Donation Update",
+    message: html,
+  });
+
+  bloodDonation.donationStatus = "Completed";
+  await bloodDonation.save({ validateBeforeSave: true });
+  sendSuccessResponse(res, "Blood request has been updated");
+};
+
+// REJECT BLOOD DONATION -
+const rejectDonation = async (bloodDonation, res) => {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Donation Update</title>
+</head>
+<body>
+  <p>Dear ${bloodDonation?.name},</p>
+
+  <p>We apologize to inform you that we are unable to fulfill your blood donation at this time.</p>
+  <p>For further information, please reach out to us at <b>${bloodDonation?.bloodBank.contact}</b>.<p/>  
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+  await sendEmail({
+    email: bloodDonation?.user?.email,
+    subject: "Blood Bridge: Blood Donation Update",
+    message: html,
+  });
+
+  bloodDonation.donationStatus = "Rejected";
+  await bloodDonation.save({ validateBeforeSave: true });
+  sendSuccessResponse(res, "Blood request has been updated");
+};
