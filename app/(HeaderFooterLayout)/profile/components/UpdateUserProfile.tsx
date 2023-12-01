@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/accordion"
 import UpdateUserForm from '@/app/(HeaderFooterLayout)/profile/components/UpdateUserForm'
 import UpdateUserPassword from '@/app/(HeaderFooterLayout)/profile/components/UpdateUserPassword'
+import { userUpdatePasswordUrl } from '@/app/axios-api/Endpoint'
 
 const UpdateUserProfile = () => {
     const [isEdit, setIsEdit] = useState<boolean>(false)
+    const url = userUpdatePasswordUrl();
     return (
         <div className='flex flex-col justify-between w-full relative'>
             <h3 className='text-black font-RobotoBold text-xl mb-6'>Account</h3>
@@ -23,7 +25,7 @@ const UpdateUserProfile = () => {
                 <AccordionItem className='!border-none' value="showPassword">
                     <AccordionTrigger className='text-black font-RobotoBold text-xl mb-4 hover:no-underline bg-white !py-1.5 mt-4 px-3 rounded-md'>Password</AccordionTrigger>
                     <AccordionContent>
-                        <UpdateUserPassword changeDetails={isEdit} setChangeDetails={setIsEdit} />
+                        <UpdateUserPassword changeDetails={isEdit} setChangeDetails={setIsEdit} url={url} />
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>

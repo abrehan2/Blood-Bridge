@@ -19,7 +19,8 @@ const ReVerifyLinkUI = ({ url }: { url: string }) => {
             withCredentials: true
         }).then(res => {
             setIsVerified(true);
-            push('/profile/user/account')
+            toast.success(res!.data!.message!);
+            push('/')
         }).catch((err) => {
             toast.error(err!.response!.data!.message!);
             setIsError(true);

@@ -24,9 +24,11 @@ interface UpdateUserData {
 interface UpdateUserPasswordProps {
     changeDetails: boolean;
     setChangeDetails: React.Dispatch<React.SetStateAction<boolean>>;
+    url: string;
+    isForBloodBank?: boolean;
 }
 
-const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPasswordProps) => {
+const UpdateUserPassword = ({ changeDetails, setChangeDetails, url, isForBloodBank }: UpdateUserPasswordProps) => {
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [typedPasswordStrength, setTypedPasswordStrength] = useState<string>('')
     const schema: ZodType<UpdateUserData> = z.object({
@@ -43,7 +45,6 @@ const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPassw
     })
 
     const SubmitData = (data: UpdateUserData) => {
-        const url = userUpdatePasswordUrl();
         const updateData = new FormData();
 
         updateData.append('oldPassword', data.oldPassword);
@@ -80,7 +81,7 @@ const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPassw
         <form onSubmit={handleSubmit(SubmitData)} className='w-full flex flex-col gap-y-2'>
             <div className='flex flex-col'>
                 <label className='text-black font-RobotoMedium mb-0.5 ps-3 capitalize' htmlFor="oldPassword">Current Password</label>
-                <input {...register("oldPassword")} className='bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0' type="password" readOnly={!changeDetails ? true : false}/>
+                <input {...register("oldPassword")} className={cx('bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0', {'!rounded-[5px]': isForBloodBank})} type="password" readOnly={!changeDetails ? true : false}/>
             </div>
 
             <div className='relative mb-5'>
@@ -91,7 +92,7 @@ const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPassw
                             setTypedPasswordStrength(passwordStrength(e.target.value).value);
                         }
                     }
-                    )} type={isShowPassword ? 'text' : 'password'} placeholder="New Password" className={cx('bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0 text-red-500', { '!text-black': typedPasswordStrength === 'Strong' })} readOnly={!changeDetails ? true : false}/>
+                    )} type={isShowPassword ? 'text' : 'password'} placeholder="New Password" className={cx('bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0 text-red-500', { '!text-black': typedPasswordStrength === 'Strong' }, {'!rounded-[5px]': isForBloodBank})} readOnly={!changeDetails ? true : false}/>
                 </div>
                 <div className='absolute bottom-3 my-auto right-3 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                     {isShowPassword ? <ShowPassword /> : <HidePassword />}
@@ -107,7 +108,7 @@ const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPassw
             <div className='relative'>
                 <div className='w-full flex flex-col'>
                     <label htmlFor="confirmPassword" className='text-black font-RobotoMedium mb-0.5 ps-3 capitalize'>Confirm Password</label>
-                    <input {...register("confirmPassword")} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className='bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0' readOnly={!changeDetails ? true : false}/>
+                    <input {...register("confirmPassword")} type={isShowPassword ? 'text' : 'password'} placeholder="Confirm Password" className={cx('bg-white rounded-3xl w-full py-2 px-3.5 focus:outline-0', {'!rounded-[5px]': isForBloodBank})} readOnly={!changeDetails ? true : false}/>
                 </div>
                 <div className='absolute bottom-3 my-auto right-3 cursor-pointer' onClick={() => setIsShowPassword(!isShowPassword)}>
                     {isShowPassword ? <ShowPassword /> : <HidePassword />}
@@ -115,9 +116,15 @@ const UpdateUserPassword = ({ changeDetails, setChangeDetails }: UpdateUserPassw
             </div>
 
             {changeDetails &&
-                <Button type='submit' className='!w-max !rounded-3xl !bg-darkRed hover:!bg-red-800 mt-1 !h-auto !py-2 min-w-[150px] !text-base'>
+            <>
+                {isForBloodBank ? 
+                <Button type='submit' className='!w-max !rounded-3xl !bg-darkRed hover:!bg-red-800 mt-1 !h-auto !py-1.5 min-w-[140px] !text-sm'>
                     Change Password
-                </Button>}
+                </Button> : <Button type='submit' className='!w-max !rounded-3xl !bg-darkRed hover:!bg-red-800 mt-1 !h-auto !py-2 min-w-[140px] !text-base'>
+                    Change Password
+                </Button>
+                }
+                </>}
         </form>
     )
 }

@@ -43,3 +43,19 @@ export const bloodBankForgotPasswordUrl = () => {
 export const getBloodBankDetailsUrl = () => {
   return encodeURI(`bloodBank/me`);
 };
+
+export const bloodBankUpdateDetailsUrl = () => {
+  return encodeURI(`bloodBank/me/update`);
+};
+
+export const bloodBankUpdatePasswordUrl = () => {
+  return encodeURI(`bloodBank/password/update`);
+};
+
+export const BBProfileCompleteUrl = () => {
+  return encodeURI(`bloodBank/profileCompletion`);
+};
+
+export const deactivateBloodBankUrl = () => {
+  return encodeURI(`bloodBank/deactivate`);
+};

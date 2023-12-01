@@ -68,7 +68,7 @@ const BloodBankNavigation = () => {
                     <p className={cx('text-[#1C1A19] font-DMSansBold capitalize', { '!text-bloodBankNavRed': isBBDonation })}>Donation</p>
                 </div>
             </Link>
-            <Link href={'/profile/bloodBank/settings'}>
+            <Link href={'/profile/bloodBank/settings/management'}>
                 <div className='w-full relative flex items-center gap-x-2 py-2 ps-5'>
                     <div className={cx('hidden absolute top-0 left-0 h-full border-l-[3px] border-bloodBankNavRed', { '!block': isBBSettings })} />
                     <Settings svgClass='w-[22px] h-[22px]' color={isBBSettings ? '#BF372A' : '#1C1A19'} />

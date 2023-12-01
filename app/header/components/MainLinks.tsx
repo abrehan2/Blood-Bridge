@@ -44,7 +44,7 @@ const MainLinks = () => {
 
     const handleProfile = () => {
         if (user.role === 'bloodBank') {
-            push('/profile/bloodBank/settings/details')
+            push('/profile/bloodBank/settings/management')
         }
         else {
             push('/profile/user/donations')
@@ -89,11 +89,11 @@ const MainLinks = () => {
                                 <p className={cx('text-black font-RobotoBold tracking-[2.75px] uppercase', { '!font-LatoMedium !capitalize !tracking-normal': user.role === 'bloodBank' })}>{user?.role === "user" ? user.firstName.split(' ')[0] : user.name}</p>
                                 <div className={cx('w-5 h-5 cursor-pointer', { '!w-7 !h-7': user?.role === 'bloodBank' })} onClick={user?.role === 'bloodBank' ? handleProfile : () => setShowDropdown(!showDropdown)}>
                                     {user?.role === 'bloodBank' ? <>
-                                        <Image src={user.avatar.url} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20}/>
+                                        <Image src={user.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20}/>
                                     </> : <>
                                         {user?.avatar?.url ?
                                             <>
-                                                <Image src={user?.avatar?.url} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
+                                                <Image src={user?.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
                                             </> :
                                             <User className='w-full h-full text-zinc-500' />
                                         }

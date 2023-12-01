@@ -32,7 +32,6 @@ export const auth = createSlice({
             return { value: { ...initialState.value, isLoading: false } }
         },
         logIn: (state, action: PayloadAction<LogInPayload>) => {
-            console.log(action.payload.user);
             storageHelper.saveItem(storageHelper.StorageKeys.Role, action.payload.user?.role);
             if (action.payload.user) {
                 return {
@@ -58,8 +57,11 @@ export const auth = createSlice({
         notFound: () => {
             return { value: { ...initialState.value, isLoading: false } }
         },
+        completeProfile: (state) => {
+            state.value.user = { ...state.value.user, profileVerified: true };
+        }
     },
 });
 
-export const { logOut, logIn, notFound, updateUser } = auth.actions;
+export const { logOut, logIn, notFound, updateUser, completeProfile } = auth.actions;
 export default auth.reducer;

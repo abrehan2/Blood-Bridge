@@ -43,7 +43,7 @@ const EnsureLogin = () => {
         if (user?.role === 'bloodBank') {
             if (user) {
                 if (!user.profileVerified) {
-                    push('/profile/bloodBank/settings/details')
+                    push('/profile/bloodBank/settings/management')
                 }
             }
         }

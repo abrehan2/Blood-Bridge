@@ -1,20 +1,24 @@
 "use client"
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import Image from 'next/image'
 import bloodDonationIcon from '@/assets/bloodDonationIcon.png'
 import bloodDonationBlackIcon from '@/assets/bloodDonationBlackIcon.png'
 import { useBBSelector } from '@/redux/store'
-import { ChevronRight, MessagesSquare, Newspaper, User2 } from 'lucide-react'
+import { ChevronRight, MessagesSquare, Newspaper, User2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import cx from 'classnames'
 import { UploadCloud } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { axiosInstance } from '@/app/axios-api/axios'
+import { axiosInstance as axios } from '@/app/axios-api/axios'
 import { userUpdateDetailsUrl } from '@/app/axios-api/Endpoint'
+import { FileUpload } from '@/app/components/FileUpload'
+import { updateUser } from '@/redux/features/authSlice'
 
 const UserInfo = () => {
-    const [previewImage, setPreviewImage] = useState<any>();
+    const dispatch = useDispatch()
+    const [isShowUpload, setIsShowUplaod] = useState<boolean>(false);
     const { push } = useRouter();
     const path = usePathname();
     const isLoading = useBBSelector(state => state.authReducer.value.isLoading)
@@ -33,47 +37,40 @@ const UserInfo = () => {
     const isAccountActive = isCurrentPath("/profile/user/account")
     const isFeedbackActive = isCurrentPath("/profile/user/feedback")
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
     const handleUpload = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
+        setIsShowUplaod(true)
     };
 
-    const handleFileSelect = (event: any) => {
-        const reader = new FileReader();
-        const selectedFile = event.target.files[0];
-        if (selectedFile && selectedFile.type.startsWith('image/')) {
-            const dataURL = reader.result;
-            reader.onload = () => {
-                setPreviewImage(dataURL);
-            };
-            reader.readAsDataURL(selectedFile);
+    const handleImageChange = (url?: string) => {
+        const apiUrl = userUpdateDetailsUrl();
+        axios.put(apiUrl, {avatar: url}, {
+            withCredentials: true,
+            headers: {
+                "Content-Type": ["multipart/form-data"]
+            }
+        }).then((res) => {
+            dispatch(updateUser({user: res.data.updated_user} as any))
+            toast.success("Profile Picture Changed Successfully")
+            setIsShowUplaod(false)
+        }).catch((err) => {
+            console.log(err)
+            toast.error(err.response.data.message)
+            setIsShowUplaod(false)
+        })
+    }
 
-            const profileData = new FormData();
-            profileData.set('avatar', dataURL as any);
-
-            const url = userUpdateDetailsUrl();
-            axiosInstance.put(url, profileData, {
-                withCredentials: true,
-                headers: {
-                    "Content-Type": ["multipart/form-data"]
-                }
-            }).then((res) => {
-                console.log(res)
-                // toast.success("Profile Picture Changed Successfully")
-            }).catch((err) => {
-                console.log(err)
-                toast.error(err.response.data.message)
-            })
-        } else {
-            toast.error('Please select a valid image file');
-        }
-    };
+    const handleCancel = () => {
+        setIsShowUplaod(false)
+    }
 
     return (
         <div className='w-[30%] mb-5'>
+            <div className={cx('w-full h-full absolute left-0 top-0 z-10 bg-black bg-opacity-30 hidden items-center justify-center', {'!flex': isShowUpload})}>
+                <div className='w-3/5 h-[60vh] bg-white rounded-3xl flex items-center justify-center relative'>
+                    <X className='absolute top-2.5 right-2.5 cursor-pointer' size={20} color='#000' onClick={handleCancel}/>
+                    <FileUpload onChange={handleImageChange} value='abc' endpoint='serverImage' />
+                </div>
+            </div>
             {isLoading ? <>
                 <div className='w-full bg-[#EEEBEB] flex flex-col justify-center items-center min-h-[80vh] rounded-[33px]'>
                     <div className='w-24 h-24 animate-spin border-t-[3px] border-darkRed rounded-full' />
@@ -85,22 +82,14 @@ const UserInfo = () => {
                         <p className='capitalize text-black text-4xl font-LateefRegular'>Profile</p>
                         <div onClick={isAccountActive ? handleUpload : () => { }}
                             className={cx('relative w-44 h-44', { 'group cursor-pointer': isAccountActive })}>
-                            <Image
-                                className='!w-44 !h-44 object-cover rounded-full'
-                                src={previewImage ? previewImage : user?.avatar.url}
-                                alt='User Profile'
+                            <img src={user?.avatar}
+                                alt="Profile Image"
                                 width={176}
-                                height={176} />
+                                height={176}
+                                className='!w-44 !h-44 object-cover rounded-full' />
                             <div className='hidden group-hover:flex absolute top-0 left-0 w-full h-full bg-zinc-100 bg-opacity-80 rounded-full flex-col items-center justify-center'>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    ref={fileInputRef}
-                                    className='hidden'
-                                    onChange={handleFileSelect}
-                                />
                                 <UploadCloud strokeWidth={3} size={40} />
-                                <p className='text-black font-RobotoMedium'>Upload Profile Picture</p>
+                                <p className='text-black font-RobotoMedium'>Click to Upload</p>
                             </div>
                         </div>
                         <p className='capitalize text-black text-3xl font-LateefRegular'>{`${user?.firstName} ${user?.lastName}`}</p>
