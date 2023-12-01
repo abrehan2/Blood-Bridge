@@ -132,7 +132,7 @@ exports.getUserBloodRequests = catchAsyncErr(async (req, res) => {
 });
 
 // UPDATE BLOOD REQUEST STATUS -
-exports.updateStatus = catchAsyncErr(async (req, res, next) => {
+exports.updateRequestStatus = catchAsyncErr(async (req, res, next) => {
   const { status, message } = req.body;
 
   const bloodRequest = await bloodRequestModel
@@ -145,8 +145,7 @@ exports.updateStatus = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Blood request not found", 404));
   }
 
-  // console.log(bloodRequest);
-
+  // NECESSARY CONDITIONS FOR TESTING -
   if (bloodRequest.reqStatus === "Completed" && status === "Completed") {
     return next(new ErrorHandler("Blood request is already completed", 400));
   }
@@ -155,12 +154,30 @@ exports.updateStatus = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Blood request is already accepted", 400));
   }
 
+  if (bloodRequest.reqStatus === "Rejected" && status === "Rejected") {
+    return next(new ErrorHandler("Blood request is already rejected", 400));
+  }
+
+  if (
+    (bloodRequest.reqStatus === "Accepted" ||
+      bloodRequest.reqStatus === "Completed") &&
+    status === "Rejected"
+  ) {
+    return next(
+      new ErrorHandler(
+        `You cannot reject the request while it is ${bloodRequest.reqStatus}`,
+        400
+      )
+    );
+  }
+
+  // BLOOD REQUESTING RENDERING -
   if (status === "Accepted" && bloodRequest.reqStatus === "Pending") {
     await emailUser(bloodRequest, message, req, res, next);
   } else if (status === "Completed" && bloodRequest.reqStatus === "Accepted") {
     await updateStock(bloodRequest, req, res);
   } else if (status === "Rejected") {
-    await removeRequest(bloodRequest, res);
+    await rejectRequest(bloodRequest, res);
   }
 });
 
@@ -175,12 +192,13 @@ const sendSuccessResponse = (res, message) => {
 // EMAIL USER -
 const emailUser = async (bloodRequest, message, req, res) => {
   const bloodType = await checkBloodGroup(req, bloodRequest);
-  //  console.log(bloodType)
 
   if (bloodType.stock < bloodRequest?.bloodBags) {
-    await removeRequest(bloodRequest, res);
+    await rejectRequest(bloodRequest, res);
     return;
   }
+
+  const location = `${bloodRequest?.bloodBank.sector}, ${bloodRequest?.bloodBank.address}, ${bloodRequest?.bloodBank.city}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -193,7 +211,7 @@ const emailUser = async (bloodRequest, message, req, res) => {
 
   <p>We'd like to inform you that your request for blood has been accepted!</p>
   <p>Please visit us on <b>${message?.day}</b> at <b>${message?.time}</b>.</p>
-  <p><b>Location:</b> ${bloodRequest?.bloodBank.address}</p>
+  <p><b>Location:</b> ${location}.</p>
 
   <p>Best,</p>
   <p><b>Blood Bridge Team</b></p>
@@ -215,7 +233,6 @@ const emailUser = async (bloodRequest, message, req, res) => {
 // UPDATE STOCK -
 const updateStock = async (bloodRequest, req, res) => {
   const bloodType = await checkBloodGroup(req, bloodRequest);
-  console.log(bloodType);
 
   bloodType?.reservedBags.push({
     user: bloodRequest?.user?._id,
@@ -223,6 +240,9 @@ const updateStock = async (bloodRequest, req, res) => {
     cnic: bloodRequest?.user?.cnic,
     bloodBags: bloodRequest?.bloodBags,
   });
+
+  // CALLING EMAIL FOR BLOOD COMPLETION -
+  await completionMail(bloodRequest);
 
   bloodType.stock -= bloodRequest?.bloodBags;
   bloodRequest.reqStatus = "Completed";
@@ -251,8 +271,33 @@ const checkBloodGroup = async (req, bloodRequest) => {
   return bloodType;
 };
 
+// BLOOD REQUEST COMPLETION MAIL -
+const completionMail = async (bloodRequest) => {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blood Bridge: Blood Request Update</title>
+</head>
+<body>
+  <p>Dear ${bloodRequest?.name},</p>
+
+  <p>We'd like to inform you that your request for blood has been completed!</p>
+
+  <p>Best,</p>
+  <p><b>Blood Bridge Team</b></p>
+</body>
+</html>`;
+
+  await sendEmail({
+    email: bloodRequest?.user?.email,
+    subject: "Blood Bridge: Blood Donation Update",
+    message: html,
+  });
+};
+
 // REMOVE BLOOD REQUEST -
-const removeRequest = async (bloodRequest, res) => {
+const rejectRequest = async (bloodRequest, res) => {
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -276,6 +321,8 @@ const removeRequest = async (bloodRequest, res) => {
     message: html,
   });
 
-  await bloodRequest.deleteOne();
+  bloodRequest.reqStatus = "Rejected";
+  await bloodRequest.save({ validateBeforeSave: true });
+
   sendSuccessResponse(res, "Blood request has been updated");
 };
