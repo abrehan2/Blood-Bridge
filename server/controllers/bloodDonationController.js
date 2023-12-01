@@ -89,3 +89,17 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
       "Your blood donation request has been processed and we will contact you soon regarding the next steps.",
   });
 });
+
+// GET ALL DONATION REQUESTS FOR BLOOD BANK-
+exports.getBloodDonations = catchAsyncErr(async (req, res) => {
+
+  const bloodDonations = await bloodDonationModel.find({bloodBank: req.authUser.id}).populate({
+    path: "user", select: "cnic"
+  }).populate("bloodGroup", "bloodGroup");
+
+   res.status(200).json({
+     success: true,
+     bloodDonations,
+   });
+
+});
