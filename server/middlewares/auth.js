@@ -8,14 +8,13 @@ const catchAsyncErr = require("./catchAsyncErr");
 exports.authenticate = (model) =>
   catchAsyncErr(async (req, res, next) => {
     const { token } = req.cookies;
-  
+
     if (!token) {
       return next(new ErrorHandler("Please login to continue", 401));
     }
 
     const decode = jwt.verify(token, process.env.JWT_SECRET);
     req.authUser = await model.findById(decode.id);
-   
 
     next();
   });

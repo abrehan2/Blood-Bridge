@@ -53,16 +53,16 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Blood type not found", 404));
   }
 
-const startOfThreeMonthsAgo = moment()
-  .utc()
-  .subtract(3, "months")
-  .startOf("month")
-  .toDate();
-const startOfTwoMonthsAgo = moment()
-  .utc()
-  .subtract(2, "months")
-  .startOf("month")
-  .toDate();
+  const startOfThreeMonthsAgo = moment()
+    .utc()
+    .subtract(3, "months")
+    .startOf("month")
+    .toDate();
+  const startOfTwoMonthsAgo = moment()
+    .utc()
+    .subtract(2, "months")
+    .startOf("month")
+    .toDate();
   const lastRequest = await bloodDonationModel.find({
     user: req.authUser.id,
     $or: [
@@ -74,12 +74,12 @@ const startOfTwoMonthsAgo = moment()
       },
       { donationStatus: { $in: ["Pending", "Accepted"] } },
     ],
-  })
-// console.log(lastRequest);
+  });
+
   const threeMonthsLater = moment().utc().add(3, "months").toDate();
 
   const lastLatestEL = lastRequest[lastRequest.length - 1];
-console.log(lastLatestEL);
+  console.log(lastLatestEL);
   if (lastLatestEL && lastLatestEL?.donationStatus !== "Rejected") {
     return next(
       new ErrorHandler(

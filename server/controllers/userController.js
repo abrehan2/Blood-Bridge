@@ -9,7 +9,6 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
 
-
 // PARTIALS -
 const imageBuffer =
   "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
@@ -106,16 +105,12 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
 
-
-  
-
   if (!user) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
 
   if (user.isActive === false) {
     user.isActive = true;
-   
   }
 
   if (!user.verified) {
@@ -457,13 +452,17 @@ exports.getUserLocation = catchAsyncErr(async (req, res) => {
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
   const id = req.authUser.id;
 
-  const updatedUser = await userModel.findByIdAndUpdate(id, {
-    isActive: false,
-  }, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false
-  });
+  const updatedUser = await userModel.findByIdAndUpdate(
+    id,
+    {
+      isActive: false,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
 
   if (!updatedUser) {
     return next(new ErrorHandler("User not found", 404));
@@ -482,11 +481,24 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL BLOOD BANKS -
 exports.getBloodBanks = catchAsyncErr(async (req, res) => {
-  const bloodBanks = await bloodBankModel.find();
+  const bloodBanks = await bloodBankModel.find({ status: "open" });
 
-   res.status(200).json({
-     success: true,
-     bloodBanks,
-   });
+  res.status(200).json({
+    success: true,
+    bloodBanks,
+  });
+});
 
-})
+///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
+
+// GET ALL USERS -
+exports.getAllUsers = catchAsyncErr(async (req, res) => {
+const users = await userModel.find({
+  _id: { $ne: req.authUser.id },
+});
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
