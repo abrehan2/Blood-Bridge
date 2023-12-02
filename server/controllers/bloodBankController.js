@@ -491,3 +491,15 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
     message: "Your account has been deactivated",
   });
 });
+
+///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
+
+// GET ALL BLOOD BANKS -
+exports.getAllBloodBanks = catchAsyncErr(async (req, res) => {
+const bloodBanks = await bloodBankModel.find();
+
+  res.status(200).json({
+    success: true,
+    bloodBanks,
+  });
+});
