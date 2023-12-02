@@ -493,12 +493,41 @@ exports.getBloodBanks = catchAsyncErr(async (req, res) => {
 
 // GET ALL USERS -
 exports.getAllUsers = catchAsyncErr(async (req, res) => {
-const users = await userModel.find({
-  _id: { $ne: req.authUser.id },
-});
+  const users = await userModel.find({
+    _id: { $ne: req.authUser.id },
+  });
 
   res.status(200).json({
     success: true,
     users,
+  });
+});
+
+// VIEW ANY USER -
+exports.viewUser = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler(`User not found`, 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// DELETE USER -
+exports.deleteUser = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler(`User not found`, 404));
+  }
+
+  await user.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
   });
 });
