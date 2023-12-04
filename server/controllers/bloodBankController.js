@@ -3,6 +3,7 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const bloodBankModel = require("../models/bloodBankModel");
 const verificationModel = require("../models/verificationModel");
+const reviewModel = require("../models/reviewModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
@@ -492,6 +493,15 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
   });
 });
 
+// GET BLOOD BANK REVIEWS -
+exports.getAllReviews = catchAsyncErr(async (req, res, next) => {
+  const reviews = await reviewModel.find({ bloodBank: req.authUser.id });
+
+  res.status(200).json({
+    success: true,
+    reviews,
+  });
+});
 
 ///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
 

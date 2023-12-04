@@ -36,6 +36,7 @@ router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
 router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"), resendEmailVerification)
 router.route("/bloodBank/location").get(getBloodBankLocation);
 router.route("/bloodBank/deactivate").put(authenticateBloodBank, authorizeRoles("bloodBank"), deactivateAccount)
+router.route("/bloodBank/reviews").get(authenticateBloodBank, authorizeRoles("bloodBank"), getAllReviews);
 
 // ADMIN ROUTES -
 router.route("/admin/bloodBank/all").get(authenticateUser, authorizeRoles("admin"), getAllBloodBanks);
