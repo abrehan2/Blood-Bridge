@@ -494,8 +494,10 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 });
 
 // GET BLOOD BANK REVIEWS -
-exports.getAllReviews = catchAsyncErr(async (req, res, next) => {
-  const reviews = await reviewModel.find({ bloodBank: req.authUser.id });
+exports.getAllReviews = catchAsyncErr(async (req, res) => {
+  const reviews = await reviewModel
+    .find({ bloodBank: req.authUser.id })
+    .populate("user", "firstName lastName");
 
   res.status(200).json({
     success: true,

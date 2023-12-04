@@ -108,6 +108,15 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
 
+  if (user.block === true) {
+    return next(
+      new ErrorHandler(
+        "We've temporarily restricted your account access. Please reach out to our support team for further assistance",
+        403
+      )
+    );
+  }
+
   if (!user) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
@@ -581,6 +590,33 @@ exports.viewUser = catchAsyncErr(async (req, res, next) => {
   res.status(200).json({
     success: true,
     user,
+  });
+});
+
+// BLOCK USER -
+exports.blockUser = catchAsyncErr(async (req, res, next) => {
+  const { status } = req.body;
+  const user = await userModel.findById(req.params.id);
+  let flag = "";
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (status === "blocked") {
+    user.block = true;
+    flag = "blocked"
+  }
+
+  if (status === "unblocked") {
+  user.block = false;
+  flag = "unblocked";}
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: `${user.firstName} ${user.lastName} has been ${flag}`,
   });
 });
 
