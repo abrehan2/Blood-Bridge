@@ -20,6 +20,9 @@ const {
   getAllReviews,
   viewBloodBank,
   blockBloodBank,
+  deleteBloodBank,
+  getBloodRequests,
+  getBloodDonations,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
 
@@ -45,6 +48,9 @@ router.route("/admin/bloodBank/all").get(authenticateUser, authorizeRoles("admin
 router
   .route("/admin/bloodBank/:id")
   .get(authenticateUser, authorizeRoles("admin"), viewBloodBank)
-  .put(authenticateUser, authorizeRoles("admin"), blockBloodBank);
+  .put(authenticateUser, authorizeRoles("admin"), blockBloodBank)
+  .delete(authenticateUser, authorizeRoles("admin"), deleteBloodBank);
+  router.route("/admin/bloodBank/blood/requests").get(authenticateUser, authorizeRoles("admin"), getBloodRequests);
+  router.route("/admin/bloodBank/blood/donations").get(authenticateUser, authorizeRoles("admin"), getBloodDonations);
   
 module.exports = router;

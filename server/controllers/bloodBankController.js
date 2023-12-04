@@ -571,16 +571,37 @@ exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
 });
 
 // DELETE USER -
-// exports.deleteUser = catchAsyncErr(async (req, res, next) => {
-//   const user = await userModel.findById(req.params.id);
+exports.deleteBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
 
-//   if (!user) {
-//     return next(new ErrorHandler("User not found", 404));
-//   }
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
 
-//   await user.deleteOne();
-//   res.status(200).json({
-//     success: true,
-//     message: "User deleted successfully",
-//   });
-// });
+  await bloodBank.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "Blood bank deleted successfully",
+  });
+});
+
+// GET ALL BLOOD REQUESTS -
+exports.getBloodRequests = catchAsyncErr(async (req, res) => {
+  const bloodRequests = await bloodRequestModel.find().populate("bloodBank bloodGroup", "name bloodGroup");
+
+  res.status(200).json({
+    success: true,
+    bloodRequests,
+  });
+});
+
+
+// GET ALL BLOOD DONATIONS -
+exports.getBloodDonations = catchAsyncErr(async (req, res) => {
+  const bloodDonations = await bloodDonationModel.find().populate("bloodBank bloodGroup", "name bloodGroup");;
+
+  res.status(200).json({
+    success: true,
+    bloodDonations,
+  });
+});

@@ -635,3 +635,28 @@ exports.deleteUser = catchAsyncErr(async (req, res, next) => {
     message: "User deleted successfully",
   });
 });
+
+// GET ALL REVIEWS -
+exports.getAllReviews = catchAsyncErr(async (req, res) => {
+  const reviews = await reviewModel.find().populate("bloodBank", "name");
+
+  res.status(200).json({
+    success: true,
+    reviews,
+  });
+});
+
+// DELETE A REVIEW -
+exports.deleteReview = catchAsyncErr(async (req, res, next) => {
+   const review = await reviewModel.findById(req.params.id);
+
+   if (!review) {
+     return next(new ErrorHandler("Review not found", 404));
+   }
+
+   await review.deleteOne();
+   res.status(200).json({
+     success: true,
+     message: "Review deleted successfully",
+   });
+});
