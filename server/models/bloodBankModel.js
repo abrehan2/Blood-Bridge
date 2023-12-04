@@ -59,26 +59,6 @@ const bloodBankSchema = new mongoose.Schema({
     default: "close",
   },
 
-  reviews: [
-    {
-      user: {
-        type: mongoose.Schema.ObjectId,
-        ref: "User",
-        required: true,
-      },
-
-      name: {
-        type: String,
-        required: true,
-      },
-        
-      comment: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-
   avatar: {
     type: String,
     required: true,

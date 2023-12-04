@@ -4,6 +4,9 @@ const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const verificationModel = require("../models/verificationModel");
 const bloodBankModel = require("../models/bloodBankModel");
+const reviewModel = require("../models/reviewModel");
+const bloodRequestModel = require("../models/bloodRequestModel");
+const bloodDonationModel = require("../models/bloodDonationModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
@@ -489,6 +492,70 @@ exports.getBloodBanks = catchAsyncErr(async (req, res) => {
   });
 });
 
+// REVIEW A BLOOD BANK -
+exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const { comment, bloodBankId } = req.body;
+
+  if (!comment) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const bloodBank = await bloodBankModel.findById(bloodBankId);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank found", 404));
+  }
+
+  const lastReview = await reviewModel
+    .findOne({ user: req.authUser.id, bloodBank: bloodBankId })
+    .sort({ createdAt: -1 });
+
+  if (!lastReview) {
+    await reviewModel.create({
+      comment,
+      user: req.authUser.id,
+      bloodBank,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: `Your first review has been submitted to ${bloodBank.name}`,
+    });
+  }
+
+  const bloodRequest = await bloodRequestModel.findOne({
+    user: req.authUser.id,
+    createdAt: { $gt: lastReview.createdAt },
+  });
+
+  const bloodDonation = await bloodDonationModel.findOne({
+    user: req.authUser.id,
+    createdAt: { $gt: lastReview.createdAt },
+  });
+
+  console.log(bloodRequest, bloodDonation);
+
+  if (!bloodRequest && !bloodDonation) {
+    return next(
+      new ErrorHandler(
+        "You must make a new blood request or donation before reviewing the blood bank again",
+        400
+      )
+    );
+  }
+
+  await reviewModel.create({
+    comment,
+    user: req.authUser.id,
+    bloodBank,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: `Your review has been submitted to ${bloodBank.name}`,
+  });
+});
+
 ///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
 
 // GET ALL USERS -
@@ -529,34 +596,5 @@ exports.deleteUser = catchAsyncErr(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "User deleted successfully",
-  });
-});
-
-// REVIEW A BLOOD BANK -
-exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
-  const { comment, bloodBankId } = req.body;
-
-  if (!comment) {
-    return next(new ErrorHandler("Please fill in all required fields", 400));
-  }
-
-  const bloodBank = await bloodBankModel.findById(bloodBankId);
-
-  if (!bloodBank) {
-    return next(new ErrorHandler("Blood bank not found", 404));
-  }
-
-  let review = {
-    comment,
-    user: req.authUser.id,
-    name: `${req.authUser.firstName} ${req.authUser.lastName}`,
-  };
-
-  bloodBank?.reviews.push(review);
-  await bloodBank.save({ validateBeforeSave: true });
-
-  res.status(200).json({
-    success: true,
-    message: `Your review has been submitted to ${bloodBank.name}`,
   });
 });

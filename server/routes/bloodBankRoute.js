@@ -17,6 +17,7 @@ const {
   completeProfile,
   deactivateAccount,
   getAllBloodBanks,
+  getAllReviews,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
 

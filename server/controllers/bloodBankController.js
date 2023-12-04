@@ -475,7 +475,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
       runValidators: true,
       useFindAndModify: false,
     }
-  );  
+  );
 
   if (!updatedBloodBank) {
     return next(new ErrorHandler("Blood bank not found", 404));
@@ -492,11 +492,12 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
   });
 });
 
+
 ///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
 
 // GET ALL BLOOD BANKS -
 exports.getAllBloodBanks = catchAsyncErr(async (req, res) => {
-const bloodBanks = await bloodBankModel.find();
+  const bloodBanks = await bloodBankModel.find();
 
   res.status(200).json({
     success: true,
