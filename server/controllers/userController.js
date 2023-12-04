@@ -531,3 +531,32 @@ exports.deleteUser = catchAsyncErr(async (req, res, next) => {
     message: "User deleted successfully",
   });
 });
+
+// REVIEW A BLOOD BANK -
+exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const { comment, bloodBankId } = req.body;
+
+  if (!comment) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const bloodBank = await bloodBankModel.findById(bloodBankId);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  let review = {
+    comment,
+    user: req.authUser.id,
+    name: `${req.authUser.firstName} ${req.authUser.lastName}`,
+  };
+
+  bloodBank?.reviews.push(review);
+  await bloodBank.save({ validateBeforeSave: true });
+
+  res.status(200).json({
+    success: true,
+    message: `Your review has been submitted to ${bloodBank.name}`,
+  });
+});

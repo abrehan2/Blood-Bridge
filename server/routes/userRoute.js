@@ -1,7 +1,7 @@
 // IMPORTS -
 const express = require("express");
 const router = express.Router();
-const { registerUser, verifyUser, loginUser, logoutUser, forgotPassword, resetPassword, getUserDetails, updatePassword, updateProfile, verifyEmail, resendEmailVerification, userFeedBack, getUserLocation, deactivateAccount, getBloodBanks, getAllUsers, viewUser } = require("../controllers/userController");
+const { registerUser, verifyUser, loginUser, logoutUser, forgotPassword, resetPassword, getUserDetails, updatePassword, updateProfile, verifyEmail, resendEmailVerification, userFeedBack, getUserLocation, deactivateAccount, getBloodBanks, getAllUsers, viewUser, reviewBloodBank } = require("../controllers/userController");
 const { authenticateUser, authorizeRoles } = require("../middlewares/auth");
 
 
@@ -21,6 +21,7 @@ router.route("/user/feedback").post(authenticateUser, authorizeRoles("user"), us
 router.route("/user/location").get(getUserLocation);
 router.route("/user/deactivate").put(authenticateUser, authorizeRoles("user", "admin"), deactivateAccount);
 router.route("/user/bloodBanks/all").get(authenticateUser, authorizeRoles("user"), getBloodBanks);
+router.route("/user/review/bloodBank").post(authenticateUser, authorizeRoles("user"), reviewBloodBank);
 
 // ADMIN ROUTES -
 router.route("/admin/user/all").get(authenticateUser, authorizeRoles("admin"), getAllUsers);
