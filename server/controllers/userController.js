@@ -108,6 +108,10 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
 
+  if (!user) {
+    return next(new ErrorHandler("Your email or password is incorrect", 401));
+  }
+
   if (user.block === true) {
     return next(
       new ErrorHandler(
@@ -115,10 +119,6 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
         403
       )
     );
-  }
-
-  if (!user) {
-    return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
 
   if (user.isActive === false) {
@@ -605,12 +605,13 @@ exports.blockUser = catchAsyncErr(async (req, res, next) => {
 
   if (status === "blocked") {
     user.block = true;
-    flag = "blocked"
+    flag = "blocked";
   }
 
   if (status === "unblocked") {
-  user.block = false;
-  flag = "unblocked";}
+    user.block = false;
+    flag = "unblocked";
+  }
 
   await user.save({ validateBeforeSave: false });
 

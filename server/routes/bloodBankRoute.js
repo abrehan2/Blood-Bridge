@@ -18,6 +18,8 @@ const {
   deactivateAccount,
   getAllBloodBanks,
   getAllReviews,
+  viewBloodBank,
+  blockBloodBank,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
 
@@ -40,5 +42,9 @@ router.route("/bloodBank/reviews").get(authenticateBloodBank, authorizeRoles("bl
 
 // ADMIN ROUTES -
 router.route("/admin/bloodBank/all").get(authenticateUser, authorizeRoles("admin"), getAllBloodBanks);
-
+router
+  .route("/admin/bloodBank/:id")
+  .get(authenticateUser, authorizeRoles("admin"), viewBloodBank)
+  .put(authenticateUser, authorizeRoles("admin"), blockBloodBank);
+  
 module.exports = router;

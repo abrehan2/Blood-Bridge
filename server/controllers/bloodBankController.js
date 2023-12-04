@@ -8,6 +8,8 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+const bloodRequestModel = require("../models/bloodRequestModel");
+const bloodDonationModel = require("../models/bloodDonationModel");
 
 // PARTIALS -
 const imageBuffer =
@@ -98,6 +100,15 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
   if (!bloodBank) {
     return next(
       new ErrorHandler("Your license number or password is incorrect", 401)
+    );
+  }
+
+  if (bloodBank.block === true) {
+    return next(
+      new ErrorHandler(
+        "We've temporarily restricted your account access. Please reach out to our support team for further assistance",
+        403
+      )
     );
   }
 
@@ -516,3 +527,60 @@ exports.getAllBloodBanks = catchAsyncErr(async (req, res) => {
     bloodBanks,
   });
 });
+
+// VIEW ANY BLOOD BANK -
+exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    bloodBank,
+  });
+});
+
+// BLOCK USER -
+exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
+  const { status } = req.body;
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+  let flag = "";
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (status === "blocked") {
+    bloodBank.block = true;
+    flag = "blocked";
+  }
+
+  if (status === "unblocked") {
+    bloodBank.block = false;
+    flag = "unblocked";
+  }
+
+  await bloodBank.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: `${bloodBank.name} has been ${flag}`,
+  });
+});
+
+// DELETE USER -
+// exports.deleteUser = catchAsyncErr(async (req, res, next) => {
+//   const user = await userModel.findById(req.params.id);
+
+//   if (!user) {
+//     return next(new ErrorHandler("User not found", 404));
+//   }
+
+//   await user.deleteOne();
+//   res.status(200).json({
+//     success: true,
+//     message: "User deleted successfully",
+//   });
+// });

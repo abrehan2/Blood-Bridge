@@ -74,11 +74,6 @@ const bloodBankSchema = new mongoose.Schema({
     default: false,
   },
 
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-
   profileVerified: {
     type: Boolean,
     default: false,
@@ -94,8 +89,18 @@ const bloodBankSchema = new mongoose.Schema({
     default: true,
   },
 
+  block: {
+    type: Boolean,
+    default: false,
+  },
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Check if the password is already hashed -
