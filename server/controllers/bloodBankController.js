@@ -33,7 +33,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     password,
     licenseNo,
     contact,
-    avatar: imageBuffer,
+    avatar: imageBuffer
   });
 
   const token = await new verificationModel({

@@ -7,6 +7,7 @@ const bloodBankModel = require("../models/bloodBankModel");
 const reviewModel = require("../models/reviewModel");
 const bloodRequestModel = require("../models/bloodRequestModel");
 const bloodDonationModel = require("../models/bloodDonationModel");
+const bloodGroup = require("../models/BloodGroupModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
@@ -494,10 +495,27 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 // GET ALL BLOOD BANKS -
 exports.getBloodBanks = catchAsyncErr(async (req, res) => {
   const bloodBanks = await bloodBankModel.find({ status: "open" });
+  const bloodTypes = await bloodGroup.find();
+  const formatBloodBanks = new Map();
+
+  bloodBanks.forEach((bank) => {
+    const bloodGroupsForBank = bloodTypes.filter(
+      (type) => type?.bloodBank.toString() === bank?._id.toString()
+    );
+
+    if (bloodGroupsForBank.length > 0) {
+      formatBloodBanks.set(bank?._id.toString(), {
+        bloodBank: bank,
+        bloodGroups: bloodGroupsForBank,
+      });
+    }
+  });
+
+  const result = Array.from(formatBloodBanks.values());
 
   res.status(200).json({
     success: true,
-    bloodBanks,
+    result,
   });
 });
 
@@ -648,15 +666,15 @@ exports.getAllReviews = catchAsyncErr(async (req, res) => {
 
 // DELETE A REVIEW -
 exports.deleteReview = catchAsyncErr(async (req, res, next) => {
-   const review = await reviewModel.findById(req.params.id);
+  const review = await reviewModel.findById(req.params.id);
 
-   if (!review) {
-     return next(new ErrorHandler("Review not found", 404));
-   }
+  if (!review) {
+    return next(new ErrorHandler("Review not found", 404));
+  }
 
-   await review.deleteOne();
-   res.status(200).json({
-     success: true,
-     message: "Review deleted successfully",
-   });
+  await review.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "Review deleted successfully",
+  });
 });
