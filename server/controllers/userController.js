@@ -508,6 +508,11 @@ exports.getBloodBanks = catchAsyncErr(async (req, res) => {
         bloodBank: bank,
         bloodGroups: bloodGroupsForBank,
       });
+    } else {
+      formatBloodBanks.set(bank?._id.toString(), {
+        bloodBank: bank,
+        bloodGroups: null,
+      });
     }
   });
 
