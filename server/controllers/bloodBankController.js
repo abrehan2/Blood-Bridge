@@ -3,10 +3,13 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const bloodBankModel = require("../models/bloodBankModel");
 const verificationModel = require("../models/verificationModel");
+const reviewModel = require("../models/reviewModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+const bloodRequestModel = require("../models/bloodRequestModel");
+const bloodDonationModel = require("../models/bloodDonationModel");
 
 // PARTIALS -
 const imageBuffer =
@@ -97,6 +100,15 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
   if (!bloodBank) {
     return next(
       new ErrorHandler("Your license number or password is incorrect", 401)
+    );
+  }
+
+  if (bloodBank.block === true) {
+    return next(
+      new ErrorHandler(
+        "We've temporarily restricted your account access. Please reach out to our support team for further assistance",
+        403
+      )
     );
   }
 
@@ -475,7 +487,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
       runValidators: true,
       useFindAndModify: false,
     }
-  );  
+  );
 
   if (!updatedBloodBank) {
     return next(new ErrorHandler("Blood bank not found", 404));
@@ -489,5 +501,107 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Your account has been deactivated",
+  });
+});
+
+// GET BLOOD BANK REVIEWS -
+exports.getAllReviews = catchAsyncErr(async (req, res) => {
+  const reviews = await reviewModel
+    .find({ bloodBank: req.authUser.id })
+    .populate("user", "firstName lastName");
+
+  res.status(200).json({
+    success: true,
+    reviews,
+  });
+});
+
+///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
+
+// GET ALL BLOOD BANKS -
+exports.getAllBloodBanks = catchAsyncErr(async (req, res) => {
+  const bloodBanks = await bloodBankModel.find();
+
+  res.status(200).json({
+    success: true,
+    bloodBanks,
+  });
+});
+
+// VIEW ANY BLOOD BANK -
+exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    bloodBank,
+  });
+});
+
+// BLOCK USER -
+exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
+  const { status } = req.body;
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+  let flag = "";
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (status === "blocked") {
+    bloodBank.block = true;
+    flag = "blocked";
+  }
+
+  if (status === "unblocked") {
+    bloodBank.block = false;
+    flag = "unblocked";
+  }
+
+  await bloodBank.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: `${bloodBank.name} has been ${flag}`,
+  });
+});
+
+// DELETE USER -
+exports.deleteBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  await bloodBank.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "Blood bank deleted successfully",
+  });
+});
+
+// GET ALL BLOOD REQUESTS -
+exports.getBloodRequests = catchAsyncErr(async (req, res) => {
+  const bloodRequests = await bloodRequestModel.find().populate("bloodBank bloodGroup", "name bloodGroup");
+
+  res.status(200).json({
+    success: true,
+    bloodRequests,
+  });
+});
+
+
+// GET ALL BLOOD DONATIONS -
+exports.getBloodDonations = catchAsyncErr(async (req, res) => {
+  const bloodDonations = await bloodDonationModel.find().populate("bloodBank bloodGroup", "name bloodGroup");;
+
+  res.status(200).json({
+    success: true,
+    bloodDonations,
   });
 });

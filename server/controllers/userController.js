@@ -4,11 +4,13 @@ const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const userModel = require("../models/userModel");
 const verificationModel = require("../models/verificationModel");
 const bloodBankModel = require("../models/bloodBankModel");
+const reviewModel = require("../models/reviewModel");
+const bloodRequestModel = require("../models/bloodRequestModel");
+const bloodDonationModel = require("../models/bloodDonationModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
-
 
 // PARTIALS -
 const imageBuffer =
@@ -106,16 +108,21 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   const user = await userModel.findOne({ email }).select("+password");
 
-
-  
-
   if (!user) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
 
+  if (user.block === true) {
+    return next(
+      new ErrorHandler(
+        "We've temporarily restricted your account access. Please reach out to our support team for further assistance",
+        403
+      )
+    );
+  }
+
   if (user.isActive === false) {
     user.isActive = true;
-   
   }
 
   if (!user.verified) {
@@ -457,13 +464,17 @@ exports.getUserLocation = catchAsyncErr(async (req, res) => {
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
   const id = req.authUser.id;
 
-  const updatedUser = await userModel.findByIdAndUpdate(id, {
-    isActive: false,
-  }, {
-    new: true,
-    runValidators: true,
-    useFindAndModify: false
-  });
+  const updatedUser = await userModel.findByIdAndUpdate(
+    id,
+    {
+      isActive: false,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
 
   if (!updatedUser) {
     return next(new ErrorHandler("User not found", 404));
@@ -482,11 +493,170 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL BLOOD BANKS -
 exports.getBloodBanks = catchAsyncErr(async (req, res) => {
-  const bloodBanks = await bloodBankModel.find();
+  const bloodBanks = await bloodBankModel.find({ status: "open" });
 
+  res.status(200).json({
+    success: true,
+    bloodBanks,
+  });
+});
+
+// REVIEW A BLOOD BANK -
+exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const { comment, bloodBankId } = req.body;
+
+  if (!comment) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  const bloodBank = await bloodBankModel.findById(bloodBankId);
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank found", 404));
+  }
+
+  const lastReview = await reviewModel
+    .findOne({ user: req.authUser.id, bloodBank: bloodBankId })
+    .sort({ createdAt: -1 });
+
+  if (!lastReview) {
+    await reviewModel.create({
+      comment,
+      user: req.authUser.id,
+      bloodBank,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: `Your first review has been submitted to ${bloodBank.name}`,
+    });
+  }
+
+  const bloodRequest = await bloodRequestModel.findOne({
+    user: req.authUser.id,
+    createdAt: { $gt: lastReview.createdAt },
+  });
+
+  const bloodDonation = await bloodDonationModel.findOne({
+    user: req.authUser.id,
+    createdAt: { $gt: lastReview.createdAt },
+  });
+
+  console.log(bloodRequest, bloodDonation);
+
+  if (!bloodRequest && !bloodDonation) {
+    return next(
+      new ErrorHandler(
+        "You must make a new blood request or donation before reviewing the blood bank again",
+        400
+      )
+    );
+  }
+
+  await reviewModel.create({
+    comment,
+    user: req.authUser.id,
+    bloodBank,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: `Your review has been submitted to ${bloodBank.name}`,
+  });
+});
+
+///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
+
+// GET ALL USERS -
+exports.getAllUsers = catchAsyncErr(async (req, res) => {
+  const users = await userModel.find({
+    _id: { $ne: req.authUser.id },
+  });
+
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+// VIEW ANY USER -
+exports.viewUser = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+// BLOCK USER -
+exports.blockUser = catchAsyncErr(async (req, res, next) => {
+  const { status } = req.body;
+  const user = await userModel.findById(req.params.id);
+  let flag = "";
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (status === "blocked") {
+    user.block = true;
+    flag = "blocked";
+  }
+
+  if (status === "unblocked") {
+    user.block = false;
+    flag = "unblocked";
+  }
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: `${user.firstName} ${user.lastName} has been ${flag}`,
+  });
+});
+
+// DELETE USER -
+exports.deleteUser = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  await user.deleteOne();
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
+
+// GET ALL REVIEWS -
+exports.getAllReviews = catchAsyncErr(async (req, res) => {
+  const reviews = await reviewModel.find().populate("bloodBank", "name");
+
+  res.status(200).json({
+    success: true,
+    reviews,
+  });
+});
+
+// DELETE A REVIEW -
+exports.deleteReview = catchAsyncErr(async (req, res, next) => {
+   const review = await reviewModel.findById(req.params.id);
+
+   if (!review) {
+     return next(new ErrorHandler("Review not found", 404));
+   }
+
+   await review.deleteOne();
    res.status(200).json({
      success: true,
-     bloodBanks,
+     message: "Review deleted successfully",
    });
-
-})
+});

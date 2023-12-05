@@ -59,31 +59,6 @@ const bloodBankSchema = new mongoose.Schema({
     default: "close",
   },
 
-  reviews: [
-    {
-      user: {
-        type: mongoose.Schema.ObjectId,
-        ref: "User",
-        required: true,
-      },
-
-      name: {
-        type: String,
-        required: true,
-      },
-
-      rating: {
-        type: Number,
-        required: true,
-      },
-
-      comment: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-
   avatar: {
     type: String,
     required: true,
@@ -97,11 +72,6 @@ const bloodBankSchema = new mongoose.Schema({
   verified: {
     type: Boolean,
     default: false,
-  },
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
   },
 
   profileVerified: {
@@ -119,8 +89,18 @@ const bloodBankSchema = new mongoose.Schema({
     default: true,
   },
 
+  block: {
+    type: Boolean,
+    default: false,
+  },
+
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Check if the password is already hashed -

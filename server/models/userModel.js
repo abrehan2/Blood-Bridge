@@ -75,11 +75,6 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-
   emailVerified: {
     type: Boolean,
     default: null,
@@ -87,19 +82,29 @@ const userSchema = new mongoose.Schema({
 
   isActive: {
     type: Boolean,
-    default: true
+    default: true,
+  },
+
+  block: {
+    type: Boolean,
+    default: false,
   },
 
   feedback: [
     {
       type: String,
       required: [true, "Please enter your feedback"],
-      //   maxLength: [true, "Please keep your response to 500 words or less"],
+      maxLength: [200, "Please keep your response to 200 words or less"],
     },
   ],
 
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Check if the password is already hashed -

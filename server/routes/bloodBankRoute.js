@@ -16,9 +16,17 @@ const {
   getBloodBankLocation,
   completeProfile,
   deactivateAccount,
+  getAllBloodBanks,
+  getAllReviews,
+  viewBloodBank,
+  blockBloodBank,
+  deleteBloodBank,
+  getBloodRequests,
+  getBloodDonations,
 } = require("../controllers/bloodBankController");
-const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
+const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
 
+// BLOOD BANK ROUTES -
 router.route("/auth/bloodBank/register").post(registerBloodBank);
 router.route("/auth/bloodBank/:id/verify/:token").get(verifyBloodBank);
 router.route("/auth/bloodBank/login").post(loginBloodBank);
@@ -33,5 +41,16 @@ router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
 router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"), resendEmailVerification)
 router.route("/bloodBank/location").get(getBloodBankLocation);
 router.route("/bloodBank/deactivate").put(authenticateBloodBank, authorizeRoles("bloodBank"), deactivateAccount)
+router.route("/bloodBank/reviews").get(authenticateBloodBank, authorizeRoles("bloodBank"), getAllReviews);
 
+// ADMIN ROUTES -
+router.route("/admin/bloodBank/all").get(authenticateUser, authorizeRoles("admin"), getAllBloodBanks);
+router
+  .route("/admin/bloodBank/:id")
+  .get(authenticateUser, authorizeRoles("admin"), viewBloodBank)
+  .put(authenticateUser, authorizeRoles("admin"), blockBloodBank)
+  .delete(authenticateUser, authorizeRoles("admin"), deleteBloodBank);
+  router.route("/admin/bloodBank/blood/requests").get(authenticateUser, authorizeRoles("admin"), getBloodRequests);
+  router.route("/admin/bloodBank/blood/donations").get(authenticateUser, authorizeRoles("admin"), getBloodDonations);
+  
 module.exports = router;
