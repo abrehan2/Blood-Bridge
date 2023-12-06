@@ -18,6 +18,7 @@ const imageBuffer =
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
   const { name, email, password, licenseNo, contact } = req.body;
+   const { longitude, latitude } = await parseLocation();
 
   let bloodBank = await bloodBankModel.findOne({ email });
 
@@ -33,7 +34,11 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     password,
     licenseNo,
     contact,
-    avatar: imageBuffer
+    avatar: imageBuffer,
+    location: {
+      longitude, 
+      latitude
+    }
   });
 
   const token = await new verificationModel({

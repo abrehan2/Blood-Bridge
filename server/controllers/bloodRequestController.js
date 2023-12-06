@@ -224,8 +224,21 @@ const emailUser = async (bloodRequest, message, req, res) => {
     message: html,
   });
 
+  // NEED TO EDIT THIS -
+  bloodType?.reservedBags.push({
+    user: bloodRequest?.user?._id,
+    name: bloodRequest?.name,
+    cnic: bloodRequest?.user?.cnic,
+    bloodBags: bloodRequest?.bloodBags,
+  });
+
   bloodRequest.reqStatus = "Accepted";
-  await bloodRequest.save({ validateBeforeSave: true });
+  bloodType.stock -= bloodRequest?.bloodBags;
+
+  await Promise.all([
+    bloodType.save({ validateBeforeSave: true }),
+    bloodRequest.save({ validateBeforeSave: true }),
+  ]);
 
   sendSuccessResponse(res, "Blood request has been updated");
 };
@@ -234,17 +247,16 @@ const emailUser = async (bloodRequest, message, req, res) => {
 const updateStock = async (bloodRequest, req, res) => {
   const bloodType = await checkBloodGroup(req, bloodRequest);
 
-  bloodType?.reservedBags.push({
-    user: bloodRequest?.user?._id,
-    name: bloodRequest?.name,
-    cnic: bloodRequest?.user?.cnic,
-    bloodBags: bloodRequest?.bloodBags,
+  bloodType.reservedBags = bloodType.reservedBags.filter((bag) => {
+    const bagUserId = bag?.user?.toString();
+    const requestUserId = bloodRequest?.user?._id?.toString();
+
+    return bagUserId !== requestUserId;
   });
 
   // CALLING EMAIL FOR BLOOD COMPLETION -
   await completionMail(bloodRequest);
 
-  bloodType.stock -= bloodRequest?.bloodBags;
   bloodRequest.reqStatus = "Completed";
 
   await Promise.all([
