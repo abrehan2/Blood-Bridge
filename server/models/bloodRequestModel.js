@@ -27,14 +27,13 @@ const bloodRequestSchema = new mongoose.Schema({
   receivedBlood: [
     {
       type: String,
-      default: null
+      default: null,
     },
   ],
 
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true,
   },
 
   bloodBags: {
@@ -52,6 +51,11 @@ const bloodRequestSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Accepted", "Completed", "Rejected"],
     default: "Pending",
+  },
+
+  requestType: {
+    type: String,
+    enum: ["System", "Site"],
   },
 
   createdAt: {
