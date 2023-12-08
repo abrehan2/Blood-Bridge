@@ -368,9 +368,9 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
 
 // COMPLETE BLOOD BANK PROFILE -
 exports.completeProfile = catchAsyncErr(async (req, res, next) => {
-  const { city, address, sector } = req.body;
+  const { city, address, sector, giveBlood } = req.body;
 
-  if (!city || !address || !sector) {
+  if (!city || !address || !sector || !giveBlood) {
     return next(new ErrorHandler("Please fill in all required fields", 400));
   }
 
@@ -388,6 +388,7 @@ exports.completeProfile = catchAsyncErr(async (req, res, next) => {
         city,
         address,
         sector,
+        giveBlood,
       },
     },
     {
