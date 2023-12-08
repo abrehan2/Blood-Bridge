@@ -123,11 +123,15 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
   });
 });
 
+// MANUAL BLOOD REQUEST -
+exports.manualRequest = catchAsyncErr(async (req, res, next) => {
+  
+})
+
 // GET ALL BLOOD REQUESTS FOR BLOOD BANK -
 exports.getBloodRequests = catchAsyncErr(async (req, res) => {
   const bloodRequests = await bloodRequestModel
-    .find({ bloodBank: req.authUser.id })
-    .populate({ path: "user", select: "cnic" })
+    .find({ bloodBank: req.authUser.id })    
     .populate("bloodGroup", "bloodGroup");
 
   res.status(200).json({
