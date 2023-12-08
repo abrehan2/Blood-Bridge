@@ -3,6 +3,12 @@ const mongoose = require("mongoose");
 const moment = require("moment");
 
 const bloodDonationSchema = new mongoose.Schema({
+  bloodGroup: {
+    type: String,
+    required: [true, "Please select the blood type"],
+    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+  },
+
   name: {
     type: String,
     required: [true, "Please enter your name"],
@@ -24,16 +30,9 @@ const bloodDonationSchema = new mongoose.Schema({
     required: true,
   },
 
-  bloodGroup: {
-    type: mongoose.Schema.ObjectId,
-    ref: "bloodGroup",
-    required: true,
-  },
-
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true,
   },
 
   disease: {
@@ -56,6 +55,11 @@ const bloodDonationSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Accepted", "Completed", "Rejected"],
     default: "Pending",
+  },
+
+  donationType: {
+    type: String,
+    enum: ["System", "Site"],
   },
 
   createdAt: {

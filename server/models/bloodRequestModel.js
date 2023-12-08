@@ -9,7 +9,7 @@ const bloodRequestSchema = new mongoose.Schema({
 
   contact: {
     type: String,
-    required: [true, "Please enter your contact"],   
+    required: [true, "Please enter your contact"],
   },
 
   bloodBank: {
@@ -23,6 +23,13 @@ const bloodRequestSchema = new mongoose.Schema({
     ref: "bloodGroup",
     required: true,
   },
+
+  receivedBlood: [
+    {
+      type: String,
+      default: null
+    },
+  ],
 
   user: {
     type: mongoose.Schema.ObjectId,
@@ -42,9 +49,9 @@ const bloodRequestSchema = new mongoose.Schema({
   },
 
   reqStatus: {
-    type: String,   
+    type: String,
     enum: ["Pending", "Accepted", "Completed", "Rejected"],
-    default: "Pending"
+    default: "Pending",
   },
 
   createdAt: {

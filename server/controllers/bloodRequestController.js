@@ -10,8 +10,15 @@ const sendEmail = require("../utils/email");
 
 // CREATE BLOOD REQUEST -
 exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
-  const { name, contact, bloodBank, bloodGroup, bloodBags, bloodNeededOn } =
-    req.body;
+  const {
+    name,
+    contact,
+    bloodBank,
+    bloodGroup,
+    bloodBags,
+    bloodNeededOn,
+    receivedBlood,
+  } = req.body;
 
   if (
     !name ||
@@ -49,6 +56,12 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
 
   if (!bloodBankExist) {
     return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  if ((bloodBankExist.giveBlood === "true") & !receivedBlood) {
+    return next(
+      new ErrorHandler("Specify the blood type(s) you are willing to give", 400)
+    );
   }
 
   // CHECK IF THE BLOOD GROUP EXISTS -
@@ -89,12 +102,16 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     );
   }
 
+  let takeBlood = [];
+  receivedBlood && takeBlood.push(...receivedBlood);
+
   await bloodRequestModel.create({
     name,
     contact,
     bloodBank: bloodBankExist._id,
     bloodGroup: bloodGroupExist._id,
     user: userExist._id,
+    receivedBlood: takeBlood || null,
     bloodBags,
     bloodNeededOn,
   });

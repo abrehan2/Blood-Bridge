@@ -2,11 +2,13 @@
 const express = require("express");
 const router = express.Router();
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
-const { createBloodDonation, getBloodDonations, getUserBloodDonations, updateDonationStatus } = require("../controllers/bloodDonationController");
+const { createBloodDonation, getBloodDonations, getUserBloodDonations, updateDonationStatus, manualDonation } = require("../controllers/bloodDonationController");
 
 // USER -
 router.route("/bloodBank/blood/donation").post(authenticateUser, authorizeRoles("user"), createBloodDonation);
+router.route("/bloodBank/blood/manualDonation").post(authenticateUser, authorizeRoles("user"), manualDonation);
 router.route("/user/blood/donation/all").get(authenticateUser, authorizeRoles("user"), getUserBloodDonations);
+
 
 // BLOOD BANK -
 router.route("/bloodBank/blood/donation/all").get(authenticateBloodBank, authorizeRoles("bloodBank"), getBloodDonations);
