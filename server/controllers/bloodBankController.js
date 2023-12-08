@@ -7,7 +7,7 @@ const reviewModel = require("../models/reviewModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
-const parseLocation = require("../utils/getIp");
+// const parseLocation = require("../utils/getIp");
 const bloodRequestModel = require("../models/bloodRequestModel");
 const bloodDonationModel = require("../models/bloodDonationModel");
 
@@ -468,15 +468,15 @@ exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
 });
 
 // GET BLOOD BANK COORDINATES -
-exports.getBloodBankLocation = catchAsyncErr(async (req, res) => {
-  const { longitude, latitude } = await parseLocation();
+// exports.getBloodBankLocation = catchAsyncErr(async (req, res) => {
+//   const { longitude, latitude } = await parseLocation();
 
-  res.status(200).json({
-    success: true,
-    longitude,
-    latitude,
-  });
-});
+//   res.status(200).json({
+//     success: true,
+//     longitude,
+//     latitude,
+//   });
+// });
 
 // DEACTIVATE BLOOD BANK ACCOUNT -
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
