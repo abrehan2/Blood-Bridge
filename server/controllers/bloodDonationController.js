@@ -44,15 +44,6 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Blood bank not found", 404));
   }
 
-  // CHECK IF THE BLOOD GROUP EXISTS -
-  const bloodGroupExist = await bloodGroupModel.findOne({
-    $and: [{ bloodGroup }, { bloodBank: bloodBankExist._id }],
-  });
-
-  if (!bloodGroupExist) {
-    return next(new ErrorHandler("Blood type not found", 404));
-  }
-
   const startOfThreeMonthsAgo = moment()
     .utc()
     .subtract(3, "months")
@@ -94,28 +85,51 @@ exports.createBloodDonation = catchAsyncErr(async (req, res, next) => {
     contact,
     age,
     bloodBank: bloodBankExist._id,
-    bloodGroup: bloodGroupExist._id,
+    bloodGroup,
     user: userExist._id,
     disease,
     donationDate,
+    donationType: "System",
   });
 
   res.status(201).json({
     success: true,
     message:
-      "Your blood donation request has been processed and we will contact you soon regarding the next steps.",
+      "Your blood donation request has been processed and we will contact you soon regarding the next steps",
+  });
+});
+
+// MANUAL BLOOD DONATION -
+exports.manualDonation = catchAsyncErr(async (req, res, next) => {
+  const { name, contact, age, bloodGroup, donationDate, disease } = req.body;
+
+  if (!name || !contact || !age || !bloodGroup || !donationDate || !disease) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  await bloodDonationModel.create({
+    name,
+    contact,
+    age,
+    bloodBank: req.authUser.id,
+    bloodGroup,
+    disease,
+    donationDate,
+    donationType: "Site",
+    donationStatus: "Completed",
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Blood dontion request has been processed",
   });
 });
 
 // GET ALL DONATION REQUESTS FOR BLOOD BANK-
 exports.getBloodDonations = catchAsyncErr(async (req, res) => {
-  const bloodDonations = await bloodDonationModel
-    .find({ bloodBank: req.authUser.id })
-    .populate({
-      path: "user",
-      select: "cnic",
-    })
-    .populate("bloodGroup", "bloodGroup");
+  const bloodDonations = await bloodDonationModel.find({
+    bloodBank: req.authUser.id,
+  });
 
   res.status(200).json({
     success: true,
@@ -260,7 +274,7 @@ const completeDonation = async (bloodDonation, res) => {
 
   bloodDonation.donationStatus = "Completed";
   await bloodDonation.save({ validateBeforeSave: true });
-  sendSuccessResponse(res, "Blood request has been updated");
+  sendSuccessResponse(res, "Blood donation has been updated");
 };
 
 // REJECT BLOOD DONATION -
@@ -290,5 +304,5 @@ const rejectDonation = async (bloodDonation, res) => {
 
   bloodDonation.donationStatus = "Rejected";
   await bloodDonation.save({ validateBeforeSave: true });
-  sendSuccessResponse(res, "Blood request has been updated");
+  sendSuccessResponse(res, "Blood donation has been updated");
 };

@@ -77,7 +77,8 @@ const bloodBankSchema = new mongoose.Schema({
   },
 
   giveBlood: {
-    type: String,   
+    type: String,
+    enum: ["true", "false"],
   },
 
   role: {
