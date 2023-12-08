@@ -9,7 +9,6 @@ router.route("/bloodBank/blood/donation").post(authenticateUser, authorizeRoles(
 router.route("/bloodBank/blood/manualDonation").post(authenticateUser, authorizeRoles("user"), manualDonation);
 router.route("/user/blood/donation/all").get(authenticateUser, authorizeRoles("user"), getUserBloodDonations);
 
-
 // BLOOD BANK -
 router.route("/bloodBank/blood/donation/all").get(authenticateBloodBank, authorizeRoles("bloodBank"), getBloodDonations);
 router.route("/bloodBank/blood/donation/:id").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateDonationStatus);

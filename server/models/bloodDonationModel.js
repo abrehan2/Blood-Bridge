@@ -57,11 +57,6 @@ const bloodDonationSchema = new mongoose.Schema({
     default: "Pending",
   },
 
-  donationType: {
-    type: String,
-    enum: ["System", "Site"],
-  },
-
   createdAt: {
     type: Date,
     default: () => moment().utc().startOf("day").toDate(),
