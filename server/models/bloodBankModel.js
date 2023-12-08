@@ -64,6 +64,18 @@ const bloodBankSchema = new mongoose.Schema({
     required: true,
   },
 
+  location: {
+    longitude: {
+      type: Number,
+      required: true,
+    },
+
+    latitude: {
+      type: Number,
+      required: true,
+    },
+  },
+
   role: {
     type: String,
     default: "bloodBank",
