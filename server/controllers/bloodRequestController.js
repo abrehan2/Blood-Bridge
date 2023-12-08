@@ -114,7 +114,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     receivedBlood: takeBlood || null,
     bloodBags,
     bloodNeededOn,
-    requestType: "System"
+    requestType: "System",
   });
 
   res.status(201).json({
@@ -126,13 +126,52 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
 
 // MANUAL BLOOD REQUEST -
 exports.manualRequest = catchAsyncErr(async (req, res, next) => {
+  const { name, contact, bloodGroup, bloodBags, bloodNeededOn } = req.body;
 
-})
+  if (!name || !contact || !bloodGroup || !bloodBags || !bloodNeededOn) {
+    return next(new ErrorHandler("Please fill in all required fields", 400));
+  }
+
+  // CHECK IF THE BLOOD GROUP EXISTS -
+  const bloodGroupExist = await bloodGroupModel.findOne({
+    $and: [{ bloodGroup }, { bloodBank: req.authUser.id }],
+  });
+
+  if (!bloodGroupExist) {
+    return next(new ErrorHandler("Blood type not found", 404));
+  }
+
+  // CHECK IF THE REQUESTED BLOOD BAGS ARE IN RANGE OF THE BLOOD BANK'S CURRENT INVENTORY -
+  if (bloodBags > bloodGroupExist?.stock) {
+    return next(
+      new ErrorHandler(
+        `Our current inventory of ${bloodGroup} blood is insufficient to meet the request`,
+        422
+      )
+    );
+  }
+
+  await bloodRequestModel.create({
+    name,
+    contact,
+    bloodBank: req.authUser.id,
+    bloodGroup: bloodGroupExist._id,
+    bloodBags,
+    bloodNeededOn,
+    requestType: "Site",
+    reqStatus: "Completed",
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Blood request has been processed",
+  });
+});
 
 // GET ALL BLOOD REQUESTS FOR BLOOD BANK -
 exports.getBloodRequests = catchAsyncErr(async (req, res) => {
   const bloodRequests = await bloodRequestModel
-    .find({ bloodBank: req.authUser.id })    
+    .find({ bloodBank: req.authUser.id })
     .populate("bloodGroup", "bloodGroup");
 
   res.status(200).json({

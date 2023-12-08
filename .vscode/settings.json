@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "undefined/subscriptions/86e2455e-8532-4f55-b8b3-9eebdc0c5a95/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/Blood-Bridge-Server",
+  "appService.deploySubpath": "."
+}
