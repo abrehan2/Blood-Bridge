@@ -17,8 +17,8 @@ const imageBuffer =
 
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
-  const { name, email, password, licenseNo, contact } = req.body;
-   const { longitude, latitude } = await parseLocation();
+  const { name, email, password, licenseNo, contact, longitude, latitude } =
+    req.body;
 
   let bloodBank = await bloodBankModel.findOne({ email });
 
@@ -36,9 +36,9 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     contact,
     avatar: imageBuffer,
     location: {
-      longitude, 
-      latitude
-    }
+      longitude,
+      latitude,
+    },
   });
 
   const token = await new verificationModel({
@@ -593,7 +593,9 @@ exports.deleteBloodBank = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL BLOOD REQUESTS -
 exports.getBloodRequests = catchAsyncErr(async (req, res) => {
-  const bloodRequests = await bloodRequestModel.find().populate("bloodBank bloodGroup", "name bloodGroup");
+  const bloodRequests = await bloodRequestModel
+    .find()
+    .populate("bloodBank bloodGroup", "name bloodGroup");
 
   res.status(200).json({
     success: true,
@@ -601,10 +603,11 @@ exports.getBloodRequests = catchAsyncErr(async (req, res) => {
   });
 });
 
-
 // GET ALL BLOOD DONATIONS -
 exports.getBloodDonations = catchAsyncErr(async (req, res) => {
-  const bloodDonations = await bloodDonationModel.find().populate("bloodBank bloodGroup", "name bloodGroup");;
+  const bloodDonations = await bloodDonationModel
+    .find()
+    .populate("bloodBank bloodGroup", "name bloodGroup");
 
   res.status(200).json({
     success: true,
