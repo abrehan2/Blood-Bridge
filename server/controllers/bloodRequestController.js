@@ -114,7 +114,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     receivedBlood: takeBlood || null,
     bloodBags,
     bloodNeededOn,
-    requestType: "Site"
+    requestType: "System"
   });
 
   res.status(201).json({
