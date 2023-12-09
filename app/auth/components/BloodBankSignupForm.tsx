@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import InputField from '@/app/auth/components/inputField'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,12 +24,15 @@ export interface BloodBankSignupData {
     contact: string;
     password?: string;
     confirmPassword?: string;
+    latitude?: number;
+    longitude?: number;
 }
 
 export type BloodBankfieldTypes = "email" | "password" | "name" | "contact" | "licenseNo" | "confirmPassword";
 
 const BloodBankSignupForm = () => {
     const token = useParams();
+    const [userLocation, setUserLocation] = useState<{ lat: number, lng: number }>({ lat: 0, lng: 0 })
 
     const [isShowPassword, setIsShowPassword] = useState<boolean>(false)
     const [agreeConditions, setAgreeConditions] = useState<boolean>(false)
@@ -55,7 +58,34 @@ const BloodBankSignupForm = () => {
 
     const { push } = useRouter();
 
-    const SubmitData = (data: BloodBankSignupData) => {
+    const getLocation = useCallback(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    let userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    };
+                    setUserLocation(userLocation);
+                },
+                (error) => {
+                    console.error('Error getting location:', error.message);
+                    toast.error(`Location Denied, Please Allow location access to continue`)
+                    push('/')
+                }, {
+                enableHighAccuracy: true,
+            }
+            );
+        } else {
+            toast.error('Geolocation is not supported by this browser.');
+        }
+    }, []);
+
+    useEffect(() => {
+        getLocation();
+    }, [getLocation]);
+
+    const SubmitData = async (data: BloodBankSignupData) => {
         if (!agreeConditions) {
             toast.error('Please agree to the terms and conditions');
             return
@@ -64,6 +94,15 @@ const BloodBankSignupForm = () => {
             toast.error('Password Must be Strong');
             return
         }
+
+        if(userLocation.lat === 0 && userLocation.lng === 0) {
+            toast.error('Please allow location access to continue');
+            return
+        } else {
+            data.latitude = userLocation.lat;
+            data.longitude = userLocation.lng;
+        }
+        
         const url = registerBloodBankUrl();
         axios.post(url, data)
             .then((res) => {

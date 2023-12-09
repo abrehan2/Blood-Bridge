@@ -194,7 +194,7 @@ const UserData = () => {
                 <ChevronLeft size={22} className='mt-1.5 cursor-pointer relative -left-1.5' onClick={() => setChangeProfilePic(false)} />
                 <div className='w-full flex flex-col items-center gap-y-2 my-1.5'>
                     <Image src={bloodBank?.avatar} alt='Profile' className='!w-[186px] !h-[186px] object-cover rounded-full' width={186} height={186} />
-                    <div className='p-1.5 rounded-[5px] bg-zinc-300'>
+                    <div className='p-1.5 rounded-[5px]'>
                         <UploadCloud strokeWidth={3} size={32} />
                     </div>
                     <p className='text text-slate-950 text-opacity-80 font-LatoRegular'>To upload photo, click on Upload</p>

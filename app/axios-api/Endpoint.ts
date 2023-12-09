@@ -1,4 +1,4 @@
-export const BASE = "http://localhost:5000/api/";
+export const BASE = "https://blood-bridge-server.up.railway.app/api/";
 
 export const registerUserUrl = () => {
   return encodeURI(`auth/user/register`);
@@ -26,6 +26,14 @@ export const userUpdateDetailsUrl = () => {
 
 export const userUpdatePasswordUrl = () => {
   return encodeURI(`user/password/update`);
+};
+
+export const getUserLocationUrl = () => {
+  return encodeURI(`user/location`);
+};
+
+export const getAllBloodBanksUrl = () => {
+  return encodeURI(`user/bloodBanks/all`);
 };
 
 export const registerBloodBankUrl = () => {

@@ -1,8 +1,9 @@
 import React from 'react'
+import BloodBanksRenderer from './components/BloodBanksRenderer'
 
 const page = () => {
   return (
-    <div>Blood Banks page</div>
+    <BloodBanksRenderer />
   )
 }
 

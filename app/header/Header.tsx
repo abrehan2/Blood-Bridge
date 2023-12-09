@@ -18,6 +18,8 @@ const Header = () => {
     const user = useBBSelector(state => state.authReducer.value.user)
     const isLoading = useBBSelector(state => state.authReducer.value.isLoading)
 
+    const showNavbarBB = pathname.startsWith('/profile/bloodBank/') ? false : true
+
     useEffect(() => {
     }, [isLoading])
 
@@ -29,7 +31,7 @@ const Header = () => {
                 </div>
                 : <>
                     <div className={cx('relative w-full pl-[6%] pr-[3%] flex items-center justify-between pt-2 lg:pt-5', { '!pt-0 lg:!pt-0 !pl-0 !pr-0': user?.role === 'bloodBank' })}>
-                        <Link className={cx({'bg-white w-[164px] py-2': user?.role === 'bloodBank' }, { [shadow.lightShadow]: pathname.startsWith('/profile/bloodBank/') })} href='/'>
+                        <Link className={cx({ 'bg-white w-[164px] py-2': user?.role === 'bloodBank' }, { [shadow.lightShadow]: pathname.startsWith('/profile/bloodBank/') })} href='/'>
                             <div className={cx('w-full flex items-center', { 'justify-center': user?.role === 'bloodBank' })}>
                                 <div className='w-10 lg:w-12 h-10 lg:h-12'>
                                     <Image className='min-w-[2.5rem] w-full h-full object-contain' src={redLogo} alt='Logo' />
@@ -59,8 +61,11 @@ const Header = () => {
                                 </div>
                             </>}
                         {user?.role === 'bloodBank' &&
-                            <div className='pr-[2%]'>
-                                <MainLinks />
+                            <div className={cx({'flex flex-col items-end pr-[2%] gap-y-1': showNavbarBB})}>
+                                <div className={cx({'pr-[2%]': !showNavbarBB})}>
+                                    <MainLinks />
+                                </div>
+                                {showNavbarBB && <Navbar />}
                             </div>
                         }
                     </div>

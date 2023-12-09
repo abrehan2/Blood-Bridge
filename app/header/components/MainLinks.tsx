@@ -86,12 +86,12 @@ const MainLinks = () => {
                     </> :
                         <div className='relative'>
                             <div className='flex items-center gap-x-1.5'>
-                                <p className={cx('text-black font-RobotoBold tracking-[2.75px] uppercase', { '!font-LatoMedium !capitalize !tracking-normal': user.role === 'bloodBank' })}>{user?.role === "user" ? user.firstName.split(' ')[0] : user.name}</p>
+                                <p className={cx('text-black font-RobotoBold tracking-[2.75px] uppercase', { '!font-LatoMedium !capitalize !tracking-normal w-max': user.role === 'bloodBank' })}>{user?.role === "user" ? user.firstName.split(' ')[0] : user.name}</p>
                                 <div className={cx('w-5 h-5 cursor-pointer', { '!w-7 !h-7': user?.role === 'bloodBank' })} onClick={user?.role === 'bloodBank' ? handleProfile : () => setShowDropdown(!showDropdown)}>
                                     {user?.role === 'bloodBank' ? <>
                                         <Image src={user.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20}/>
                                     </> : <>
-                                        {user?.avatar?.url ?
+                                        {user?.avatar ?
                                             <>
                                                 <Image src={user?.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
                                             </> :
