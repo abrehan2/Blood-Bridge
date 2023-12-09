@@ -31,6 +31,7 @@ app.use(
     credentials: true,
     origin: process.env.BASE_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
+    optionsSuccessStatus: 204
   })
 );
 
