@@ -2,10 +2,10 @@
   "name": "main-server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "SET NODE_ENV=production & node server.js",
-    "dev": "SET NODE_ENV=development & nodemon server.js"
+    "start": "SET NODE_ENV=production & node app.js",
+    "dev": "SET NODE_ENV=development & nodemon app.js"
   },
   "keywords": [],
   "author": "",

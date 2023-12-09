@@ -39,7 +39,7 @@ exports.getAllBloodTypes = catchAsyncErr(async (req, res) => {
     bloodBank: req.authUser.id,
   });
 
-  res.status(201).json({
+  res.status(200).json({
     success: true,
     bloodTypes,
   });
