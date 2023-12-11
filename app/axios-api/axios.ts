@@ -1,7 +1,7 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "https://blood-bridge-server.up.railway.app/api/",
+  baseURL: "http://localhost:5000/api/",
 });
 const ResponseInterceptor = (response: AxiosResponse) => {
   return response;
