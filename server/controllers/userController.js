@@ -12,6 +12,7 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 const parseLocation = require("../utils/getIp");
+const bloodGroupModel = require("../models/BloodGroupModel");
 
 // PARTIALS -
 const imageBuffer =
@@ -448,18 +449,46 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
   });
 });
 
-// NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
+// VIEW BLOOD BANK -
+exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
 
-// GET USER COORDINATES -
-exports.getUserLocation = catchAsyncErr(async (req, res) => {
-  const { longitude, latitude } = await parseLocation();
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  const bloodGroups = await bloodGroupModel.find({ bloodBank: req.params.id });
+  console.log(bloodGroup);
 
   res.status(200).json({
     success: true,
-    longitude,
-    latitude,
+    bloodBank: {
+      ...bloodBank._doc,
+      bloodGroups: bloodGroups,
+    },
   });
 });
+
+// NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
+
+// // GET USER COORDINATES -
+// exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
+//  const {getEvents} = require("../utils/location");
+//  const { latitude, longitude } = getEvents();
+
+//  if (req.authUser && req.authUser.role === "user") {
+// const userIdAsString = req.authUser.id;
+//  userLocationCache.set(JSON.stringify("123"), JSON.stringify(getEvents()));
+
+//  }
+
+// else {
+//   return next(new ErrorHandler("No near by users", 404));
+// }
+
+// console.log(userLocationCache.get(JSON.parse("123")));
+
+// });
 
 // DEACTIVATE USER ACCOUNT -
 exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
@@ -470,6 +499,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
     {
       isActive: false,
     },
+
     {
       new: true,
       runValidators: true,
@@ -564,8 +594,6 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
     user: req.authUser.id,
     createdAt: { $gt: lastReview.createdAt },
   });
-
-  console.log(bloodRequest, bloodDonation);
 
   if (!bloodRequest && !bloodDonation) {
     return next(
