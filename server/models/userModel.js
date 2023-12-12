@@ -64,6 +64,16 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
+  location: {
+    longitude: {
+      type: Number,
+    },
+
+    latitude: {
+      type: Number,
+    },
+  },
+
   role: {
     type: String,
     enum: ["user", "admin"],

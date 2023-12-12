@@ -38,9 +38,9 @@ app.use(
 );
 
 // FOR TESTING - 
-// app.get("/", (req, res) => {
-//   return res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
+app.get("/", (req, res) => {
+  return res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // IMPORT ROUTES -
 const userRoute = require("./routes/userRoute");
