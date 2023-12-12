@@ -477,9 +477,7 @@ exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
   });
 });
 
-// NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
-
-// // GET USER COORDINATES -
+// GET USER COORDINATES -
 exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id);
   const { latitude, longitude, event } = getEvents();

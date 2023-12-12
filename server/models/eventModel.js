@@ -2,6 +2,12 @@
 const mongoose = require("mongoose");
 
 const eventSchema = new mongoose.Schema({
+  bloodBank: {
+    type: mongoose.Schema.ObjectId,
+    ref: "bloodBank",
+    required: true,
+  },
+
   eventName: {
     type: String,
     required: [true, "Please enter the name of your event"],
@@ -52,3 +58,6 @@ const eventSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+const eventModel = mongoose.model("event", eventSchema);
+module.exports = eventModel;

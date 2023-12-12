@@ -44,17 +44,19 @@ app.get("/", (req, res) => {
 
 // IMPORT ROUTES -
 const userRoute = require("./routes/userRoute");
-const bloodBank = require("./routes/bloodBankRoute");
-const bloodGroup = require("./routes/bloodGroupRoute");
-const bloodRequest = require("./routes/bloodRequestRoute");
-const bloodDonation = require("./routes/bloodDonationRoute");
+const bloodBankRoute = require("./routes/bloodBankRoute");
+const bloodGroupRoute = require("./routes/bloodGroupRoute");
+const bloodRequestRoute = require("./routes/bloodRequestRoute");
+const bloodDonationRoute = require("./routes/bloodDonationRoute");
+const eventRoute = require("./routes/eventRoute");
 
 // ROUTES -
 app.use("/api", userRoute);
-app.use("/api", bloodBank);
-app.use("/api", bloodGroup);
-app.use("/api", bloodRequest);
-app.use("/api", bloodDonation);
+app.use("/api", bloodBankRoute);
+app.use("/api", bloodGroupRoute);
+app.use("/api", bloodRequestRoute);
+app.use("/api", bloodDonationRoute);
+app.use("/api", eventRoute);
 
 // MIDDLEWARE FOR ERROR-HANDLING -
 app.use(errorMiddleware);
