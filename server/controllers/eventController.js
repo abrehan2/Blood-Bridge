@@ -109,6 +109,10 @@ exports.notifyUsers = catchAsyncErr(async (req, res, next) => {
     .populate("bloodBank", "name")
     .lean();
 
+  if (!event) {
+    return next(new ErrorHandler("Event not found", 404));
+  }
+
   if (!users) {
     return next(new ErrorHandler("Users not found", 404));
   }
