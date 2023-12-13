@@ -158,3 +158,13 @@ exports.notifyUsers = catchAsyncErr(async (req, res, next) => {
     message: "Users have been notified",
   });
 });
+
+// GET ALL EVENTS FOR ADMIN -
+exports.getAdminEvents = catchAsyncErr(async (req, res, next) => {
+  const events = await eventModel.find();
+
+  res.status(200).json({
+    success: true,
+    events,
+  });
+});
