@@ -1,7 +1,6 @@
 // IMPORTS -
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
-const bloodBankModel = require("../models/bloodBankModel");
 const userModel = require("../models/userModel");
 const eventModel = require("../models/eventModel");
 const sendEmail = require("../utils/email");

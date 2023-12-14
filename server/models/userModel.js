@@ -65,13 +65,21 @@ const userSchema = new mongoose.Schema({
   },
 
   location: {
-    longitude: {
-      type: Number,
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
     },
-
-    latitude: {
-      type: Number,
-    },
+    coordinates: [
+      {
+        type: Number,
+        required: true,
+      },
+      {
+        type: Number,
+        required: true,
+      },
+    ],
   },
 
   role: {
@@ -149,6 +157,9 @@ userSchema.methods.getResetPasswordToken = function () {
 
   return resetToken;
 };
+
+// Add a 2dsphere index on the location field -
+userSchema.index({ location: "2dsphere" });
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;

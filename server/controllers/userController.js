@@ -51,6 +51,10 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
     password,
     avatar: imageBuffer,
     contact,
+    location: {
+      type: "Point",
+      coordinates: [0, 0],
+    },
   });
 
   const token = await new verificationModel({
@@ -161,13 +165,15 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   // SAVING COORDINATES -
   const { longitude, latitude } = getEvents();
+  console.log(longitude, latitude);
 
   user.location = {
-    longitude,
-    latitude,
-  };
+    type: "Point",
+    coordinates: [Number(longitude), Number(latitude)],
+  }; 
 
   await user.save({ validateBeforeSave: true });
+
   setToken(user, 200, res);
 });
 
@@ -482,24 +488,30 @@ exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id);
   const { latitude, longitude, event } = getEvents();
 
-  //  console.log(latitude, longitude, event);
+  console.log(latitude, longitude, event);
 
-  if ((event === "Error") || (user.location.latitude === null && user.location.longitude === null)) {
+  if (event === "Error") {
     return next(new ErrorHandler("User denied the access to location", 404));
   }
 
-  if (
-    user.location.latitude !== latitude &&
-    user.location.longitude !== longitude) {
-    user.location = {
-      longitude,
-      latitude,
-    };
-
-    await user.save({ validateBeforeSave: true });
+  if (latitude === "" || longitude=== "" || event === "") {
+return next(new ErrorHandler("Please refresh your window", 404));
   }
+  
+    if (
+      user.location.coordinates[0] !== longitude &&
+      user.location.coordinates[1] !== latitude
+    ) {
+      user.location = {
+        type: "Point",
+        coordinates: [Number(longitude), Number(latitude)],
+      };
+
+      await user.save({ validateBeforeSave: true });
+    }
+
   res.status(200).json({
-    success: true,
+    success: true,   
   });
 });
 

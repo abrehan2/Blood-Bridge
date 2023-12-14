@@ -21,6 +21,9 @@
     (error) => {
       console.error('Error getting location:', error.message);
       socket.emit('Error', error.message);
+    },
+    {
+      enableHighAccuracy: true
     }
   );
   })

@@ -35,8 +35,11 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     contact,
     avatar: imageBuffer,
     location: {
-      longitude,
-      latitude,
+      type: "Point", 
+      coordinates: [
+        Number(longitude), 
+        Number(latitude), 
+      ], 
     },
   });
 
