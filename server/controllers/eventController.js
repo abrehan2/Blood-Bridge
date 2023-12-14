@@ -161,7 +161,7 @@ exports.notifyUsers = catchAsyncErr(async (req, res, next) => {
 
 // GET ALL EVENTS FOR ADMIN -
 exports.getAdminEvents = catchAsyncErr(async (req, res, next) => {
-  const events = await eventModel.find();
+  const events = await eventModel.find().populate("bloodBank", "name");
 
   res.status(200).json({
     success: true,
