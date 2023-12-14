@@ -13,7 +13,6 @@ const {
   updateProfile,
   verifyEmail,
   resendEmailVerification,
-  getBloodBankLocation,
   completeProfile,
   deactivateAccount,
   getAllBloodBanks,
@@ -39,7 +38,6 @@ router.route("/bloodBank/password/update").put(authenticateBloodBank, authorizeR
 router.route("/bloodBank/me/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateProfile);
 router.route("/bloodBank/:id/verify/:token").get(verifyEmail);
 router.route("/bloodBank/email/resend").get(authenticateBloodBank, authorizeRoles("bloodBank"), resendEmailVerification)
-// router.route("/bloodBank/location").get(getBloodBankLocation);
 router.route("/bloodBank/deactivate").put(authenticateBloodBank, authorizeRoles("bloodBank"), deactivateAccount)
 router.route("/bloodBank/reviews").get(authenticateBloodBank, authorizeRoles("bloodBank"), getAllReviews);
 

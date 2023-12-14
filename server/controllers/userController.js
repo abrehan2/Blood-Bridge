@@ -11,7 +11,8 @@ const bloodGroup = require("../models/BloodGroupModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
-const parseLocation = require("../utils/getIp");
+const bloodGroupModel = require("../models/BloodGroupModel");
+const { getEvents } = require("../utils/location");
 
 // PARTIALS -
 const imageBuffer =
@@ -157,6 +158,14 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Your email or password is incorrect", 401));
   }
+
+  // SAVING COORDINATES -
+  const { longitude, latitude } = getEvents();
+
+  user.location = {
+    longitude,
+    latitude,
+  };
 
   await user.save({ validateBeforeSave: true });
   setToken(user, 200, res);
@@ -448,16 +457,49 @@ exports.userFeedBack = catchAsyncErr(async (req, res, next) => {
   });
 });
 
-// NEED TO FETCH BLOOD BANKS BASED ON LOCATION WITH THEIR STATUS ON
+// VIEW BLOOD BANK -
+exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
+  const bloodBank = await bloodBankModel.findById(req.params.id);
 
-// GET USER COORDINATES -
-exports.getUserLocation = catchAsyncErr(async (req, res) => {
-  const { longitude, latitude } = await parseLocation();
+  if (!bloodBank) {
+    return next(new ErrorHandler("Blood bank not found", 404));
+  }
+
+  const bloodGroups = await bloodGroupModel.find({ bloodBank: req.params.id });
+  console.log(bloodGroup);
 
   res.status(200).json({
     success: true,
-    longitude,
-    latitude,
+    bloodBank: {
+      ...bloodBank._doc,
+      bloodGroups: bloodGroups,
+    },
+  });
+});
+
+// GET USER COORDINATES -
+exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
+  const user = await userModel.findById(req.authUser.id);
+  const { latitude, longitude, event } = getEvents();
+
+  //  console.log(latitude, longitude, event);
+
+  if ((event === "Error") || (user.location.latitude === null && user.location.longitude === null)) {
+    return next(new ErrorHandler("User denied the access to location", 404));
+  }
+
+  if (
+    user.location.latitude !== latitude &&
+    user.location.longitude !== longitude) {
+    user.location = {
+      longitude,
+      latitude,
+    };
+
+    await user.save({ validateBeforeSave: true });
+  }
+  res.status(200).json({
+    success: true,
   });
 });
 
@@ -470,6 +512,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
     {
       isActive: false,
     },
+
     {
       new: true,
       runValidators: true,
@@ -564,8 +607,6 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
     user: req.authUser.id,
     createdAt: { $gt: lastReview.createdAt },
   });
-
-  console.log(bloodRequest, bloodDonation);
 
   if (!bloodRequest && !bloodDonation) {
     return next(

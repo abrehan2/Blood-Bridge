@@ -3,13 +3,12 @@ const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErr = require("../middlewares/catchAsyncErr");
 const bloodBankModel = require("../models/bloodBankModel");
 const verificationModel = require("../models/verificationModel");
-const reviewModel = require("../models/reviewModel");
+const bloodRequestModel = require("../models/bloodRequestModel");
+const bloodDonationModel = require("../models/bloodDonationModel");
 const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
-// const parseLocation = require("../utils/getIp");
-const bloodRequestModel = require("../models/bloodRequestModel");
-const bloodDonationModel = require("../models/bloodDonationModel");
+
 
 // PARTIALS -
 const imageBuffer =

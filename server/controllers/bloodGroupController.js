@@ -5,6 +5,7 @@ const bloodGroupModel = require("../models/BloodGroupModel");
 
 // CREATE BLOOD TYPE -
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {
+
   const { bloodGroup, stock } = req.body;
 
   if (!bloodGroup || !stock) {
