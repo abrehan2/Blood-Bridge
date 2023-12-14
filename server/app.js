@@ -49,6 +49,7 @@ const bloodGroupRoute = require("./routes/bloodGroupRoute");
 const bloodRequestRoute = require("./routes/bloodRequestRoute");
 const bloodDonationRoute = require("./routes/bloodDonationRoute");
 const eventRoute = require("./routes/eventRoute");
+const placeRequestRoute = require("./routes/placeRequestRoute");
 
 // ROUTES -
 app.use("/api", userRoute);
@@ -57,6 +58,8 @@ app.use("/api", bloodGroupRoute);
 app.use("/api", bloodRequestRoute);
 app.use("/api", bloodDonationRoute);
 app.use("/api", eventRoute);
+app.use("/api", placeRequestRoute);
+
 
 // MIDDLEWARE FOR ERROR-HANDLING -
 app.use(errorMiddleware);
