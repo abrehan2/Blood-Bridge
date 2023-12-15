@@ -170,7 +170,7 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   user.location = {
     type: "Point",
     coordinates: [Number(longitude), Number(latitude)],
-  }; 
+  };
 
   await user.save({ validateBeforeSave: true });
 
@@ -494,24 +494,24 @@ exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("User denied the access to location", 404));
   }
 
-  if (latitude === "" || longitude=== "" || event === "") {
-return next(new ErrorHandler("Please refresh your window", 404));
+  if (latitude === "" || longitude === "" || event === "") {
+    return next(new ErrorHandler("Please refresh your window", 404));
   }
-  
-    if (
-      user.location.coordinates[0] !== longitude &&
-      user.location.coordinates[1] !== latitude
-    ) {
-      user.location = {
-        type: "Point",
-        coordinates: [Number(longitude), Number(latitude)],
-      };
 
-      await user.save({ validateBeforeSave: true });
-    }
+  if (
+    user.location.coordinates[0] !== longitude &&
+    user.location.coordinates[1] !== latitude
+  ) {
+    user.location = {
+      type: "Point",
+      coordinates: [Number(longitude), Number(latitude)],
+    };
+
+    await user.save({ validateBeforeSave: true });
+  }
 
   res.status(200).json({
-    success: true,   
+    success: true,
   });
 });
 

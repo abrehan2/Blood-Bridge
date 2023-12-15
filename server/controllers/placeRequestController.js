@@ -20,7 +20,7 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
           type: "Point",
           coordinates: [longitude, latitude],
         },
-        $maxDistance: 4000, // meters
+        $maxDistance: 45000, // meters
         $minDistance: 0,
       },
     },
@@ -28,5 +28,21 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
     role: { $ne: "admin" },
   });
 
-  console.log("Nearby Users:", nearbyUsers);
+   const nearbyBloodBanks = await bloodBankModel.find({
+     location: {
+       $nearSphere: {
+         $geometry: {
+           type: "Point",
+           coordinates: [longitude, latitude],
+         },
+         $maxDistance: 45000, // meters
+         $minDistance: 0,
+       },
+     },
+
+     _id: { $ne: req.authUser.id },
+   });
+  
+
+  console.log("Nearby bb:", nearbyBloodBanks);
 });
