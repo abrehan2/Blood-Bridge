@@ -1,6 +1,5 @@
 import React from 'react'
 import Header from '@/app/header/Header';
-import Footer from '@/app/footer/Footer';
 
 export default function RootLayout({
     children,
@@ -13,7 +12,6 @@ export default function RootLayout({
             <div className='flex-1'>
                 {children}
             </div>
-            <Footer />
         </div>
     );
 }

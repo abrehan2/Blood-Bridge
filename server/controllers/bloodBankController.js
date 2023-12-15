@@ -59,6 +59,7 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
+    bloodBank: bloodBank._id,
     message:
       "Your account has been created! Please verify your email address to log in",
   });

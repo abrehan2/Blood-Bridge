@@ -97,10 +97,10 @@ const Map = ({ bloodBanks, userLocation, selectedBloodGroup, setSelectedBloodGro
                     {bloodBanks.map((BB_Data, index) => (
                         <Marker
                             key={index}
-                            position={{ lat: BB_Data?.bloodBank?.location?.latitude, lng: BB_Data?.bloodBank?.location?.longitude }}
+                            position={{ lat: BB_Data?.bloodBank?.location?.coordinates?.[1], lng: BB_Data?.bloodBank?.location?.coordinates?.[0] }}
                             icon={"https://uploadthing.com/f/f800f3eb-bdde-4a93-ae9d-7ff4cef35f02-dth3ms.png"}
                             onClick={() => {
-                                map.setCenter({ lat: BB_Data?.bloodBank?.location?.latitude, lng: BB_Data?.bloodBank?.location?.longitude });
+                                map.setCenter({ lat: BB_Data?.bloodBank?.location?.coordinates?.[1], lng: BB_Data?.bloodBank?.location?.coordinates?.[0] });
                                 map.setZoom(14);
                                 setShowInfoWindowIndex(index)
                             }}
@@ -113,7 +113,7 @@ const Map = ({ bloodBanks, userLocation, selectedBloodGroup, setSelectedBloodGro
                                 } onCloseClick={() => {
                                     setShowInfoWindowIndex(undefined)
                                     map.setZoom(14);
-                                    map.setCenter({ lat: BB_Data?.bloodBank?.location?.latitude, lng: BB_Data?.bloodBank?.location?.longitude });
+                                    map.setCenter({ lat: BB_Data?.bloodBank?.location?.coordinates?.[1], lng: BB_Data?.bloodBank?.location?.coordinates?.[0] });
                                 }}>
                                     <div className='flex flex-col gap-y-1'>
                                         <div className='flex items-center gap-x-1'>

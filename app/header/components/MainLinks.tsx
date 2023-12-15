@@ -53,7 +53,7 @@ const MainLinks = () => {
     }
 
     return (
-        <div className={cx('flex items-center justify-center', {'!gap-x-1.5': user?.role === 'bloodBank'})}>
+        <div className={cx('flex items-center justify-center', { '!gap-x-1.5': user?.role === 'bloodBank' })}>
             {user?.role !== 'bloodBank' && <>
                 <Button variant={'ghost'} className='!py-0 !px-1 !rounded-[3px] !h-auto flex items-center gap-x-1.5'>
                     <Image className='!w-5 !h-5 object-contain' src={mapIcon} alt="Map Icon" />
@@ -62,9 +62,13 @@ const MainLinks = () => {
                     </p>
                 </Button>
                 <div className='border-r-2 border-zinc-500 h-3 mx-2' />
-                <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Donate</Button>
+                <Link href={'/blood-banks'}>
+                    <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Donate</Button>
+                </Link>
                 <div className='border-r-2 border-zinc-500 h-3 mx-2' />
-                <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Request</Button>
+                <Link href={'/blood-banks'}>
+                    <Button className='!bg-red-700 !bg-opacity-70 !py-0 !px-1 !rounded-[3px] !h-auto text-xs sm:text-sm font-LatoRegular uppercase tracking-[2px]'>Request</Button>
+                </Link>
                 <div className='border-r-2 border-zinc-500 h-3 mx-2' />
             </>}
             {user?.role === 'bloodBank' &&
@@ -89,7 +93,7 @@ const MainLinks = () => {
                                 <p className={cx('text-black font-RobotoBold tracking-[2.75px] uppercase', { '!font-LatoMedium !capitalize !tracking-normal w-max': user.role === 'bloodBank' })}>{user?.role === "user" ? user.firstName.split(' ')[0] : user.name}</p>
                                 <div className={cx('w-5 h-5 cursor-pointer', { '!w-7 !h-7': user?.role === 'bloodBank' })} onClick={user?.role === 'bloodBank' ? handleProfile : () => setShowDropdown(!showDropdown)}>
                                     {user?.role === 'bloodBank' ? <>
-                                        <Image src={user.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20}/>
+                                        <Image src={user.avatar} alt="Profile" className='!w-full !h-full object-cover rounded-full' width={20} height={20} />
                                     </> : <>
                                         {user?.avatar ?
                                             <>

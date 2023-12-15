@@ -46,34 +46,28 @@ const BloodBanksRenderer = () => {
   }, [user])
 
   //get user location
-  const getLocation = useCallback(() => {
+  const getUserCoordinates = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          let userLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUserLocation(userLocation);
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ lat: latitude, lng: longitude });
         },
-        (error) => {
-          console.error('Error getting location:', error.message);
-          toast.error(`Location Denied, Please Allow location access to continue`)
+        (err) => {
+          toast.error("Allow Location Access to Continue");
           push('/')
-        }, {
-        enableHighAccuracy: true,
-      }
+        }
       );
     } else {
-      toast.error('Geolocation is not supported by this browser.');
+      toast.error('Geolocation is not supported in this browser.');
     }
-  }, []);
+  };
 
   useEffect(() => {
-    if(userLocation.lat === 0 && userLocation.lng === 0) {
-      getLocation();
+    if (userLocation.lat === 0 && userLocation.lng === 0) {
+      getUserCoordinates();
     }
-  }, [getLocation]);
+  }, []);
 
   //get address from lat long
   async function reverseGeocode(latitude: any, longitude: any, apiKey: any): Promise<string | null> {
@@ -132,8 +126,8 @@ const BloodBanksRenderer = () => {
         longitude: userLocation.lng
       },
       to: {
-        latitude: BB_Data?.bloodBank?.location?.latitude,
-        longitude: BB_Data?.bloodBank?.location?.longitude
+        latitude: BB_Data?.bloodBank?.location?.coordinates?.[1],
+        longitude: BB_Data?.bloodBank?.location?.coordinates?.[0]
       }
     })
     bloodBanksWithDistance[index] = {
@@ -148,18 +142,21 @@ const BloodBanksRenderer = () => {
   ))
 
   useMemo(() => {
-    if(userLocation.lat !== 0 && userLocation.lng !== 0) {
+    if (userLocation.lat !== 0 && userLocation.lng !== 0) {
       const address = reverseGeocode(userLocation.lat, userLocation.lng, "66a04f2311294362a82cbfc1f33d860c")
       address.then((res) => {
         if (res) {
           setSelectedSector(`${res.split('/')[0]}`)
-          console.log('Reverse Geocoded Address:', res.split('/')[0]);
         }
       }).catch((err) => {
         console.log(err)
       })
     }
   }, [userLocation])
+
+  useEffect(() => {
+
+  }, [userLocation, bloodBanks])
 
   return (
     <div>

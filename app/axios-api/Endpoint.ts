@@ -67,3 +67,35 @@ export const BBProfileCompleteUrl = () => {
 export const deactivateBloodBankUrl = () => {
   return encodeURI(`bloodBank/deactivate`);
 };
+
+export const viewSpecificBloodBank = () => {
+  return encodeURI(`user/bloodBank/`);
+};
+
+export const requestBloodUrl = () => {
+  return encodeURI(`bloodBank/blood/request`);
+};
+
+export const donateBloodUrl = () => {
+  return encodeURI(`bloodBank/blood/donation`);
+};
+
+export const addBloodGroup = () => {
+  return encodeURI(`bloodBank/bloodType/new`);
+};
+
+export const BBgetAllBloodRequestes = () => {
+  return encodeURI(`bloodBank/blood/request/all`);
+};
+
+export const BBUpdateRequestStatus = () => {
+  return encodeURI(`bloodBank/blood/request/`);
+};
+
+export const BBgetAllBloodDonations = () => {
+  return encodeURI(`bloodBank/blood/donation/all`);
+};
+
+export const BBUpdateDonationStatus = () => {
+  return encodeURI(`bloodBank/blood/donation/`);
+};

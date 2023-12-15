@@ -18,6 +18,8 @@ class _Constants {
     /^\s*\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.[a-zA-Z0-9\-]{2,})+\s*$/;
 
   readonly DEFAULT_APP_LOCALE = "en-US";
+
+  readonly bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 }
 
 export const Constants = new _Constants();
