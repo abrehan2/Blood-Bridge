@@ -608,13 +608,15 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
 
   const bloodRequest = await bloodRequestModel.findOne({
     user: req.authUser.id,
-    createdAt: { $gt: lastReview.createdAt },
+    createdAt: { $gte: lastReview?.createdAt.getTime() },
   });
 
   const bloodDonation = await bloodDonationModel.findOne({
     user: req.authUser.id,
-    createdAt: { $gt: lastReview.createdAt },
+    createdAt: { $gte: lastReview?.createdAt.getTime() },
   });
+
+  console.log(bloodDonation, bloodRequest);
 
   if (!bloodRequest && !bloodDonation) {
     return next(
