@@ -37,8 +37,8 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     location: {
       type: "Point", 
       coordinates: [
-        Number(longitude), 
-        Number(latitude), 
+        longitude,  
+        latitude,  
       ], 
     },
   });
@@ -311,6 +311,7 @@ exports.updateProfile = catchAsyncErr(async (req, res, next) => {
     status: req.body.status,
     contact: req.body.contact,
     avatar: req.body.avatar,
+    giveBlood: req.body.giveBlood,
   };
 
   if (req.body.email !== undefined) {

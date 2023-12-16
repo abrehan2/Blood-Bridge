@@ -106,18 +106,4 @@ exports.removeBloodType = catchAsyncErr(async (req, res, next) => {
   });
 });
 
-// GET ALL BLOOD TYPES FOR USER -
-exports.getUserBloodTypes = catchAsyncErr(async (req, res) => {
-  const bloodTypes = await bloodGroupModel.find({
-    bloodBank: req.params.id,
-  });
 
-  if (!bloodTypes) {
-    return next(new ErrorHandler("Blood types found", 404));
-  }
-
-  res.status(200).json({
-    success: true,
-    bloodTypes,
-  });
-});

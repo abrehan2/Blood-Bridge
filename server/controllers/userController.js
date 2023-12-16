@@ -165,7 +165,6 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
 
   // SAVING COORDINATES -
   const { longitude, latitude } = getEvents();
-  console.log(longitude, latitude);
 
   user.location = {
     type: "Point",
@@ -472,7 +471,6 @@ exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
   }
 
   const bloodGroups = await bloodGroupModel.find({ bloodBank: req.params.id });
-  console.log(bloodGroup);
 
   res.status(200).json({
     success: true,
@@ -488,8 +486,6 @@ exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id);
   const { latitude, longitude, event } = getEvents();
 
-  console.log(latitude, longitude, event);
-
   if (event === "Error") {
     return next(new ErrorHandler("User denied the access to location", 404));
   }
@@ -504,7 +500,7 @@ exports.getUserLocation = catchAsyncErr(async (req, res, next) => {
   ) {
     user.location = {
       type: "Point",
-      coordinates: [Number(longitude), Number(latitude)],
+      coordinates: [longitude, latitude],
     };
 
     await user.save({ validateBeforeSave: true });

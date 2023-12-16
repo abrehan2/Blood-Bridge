@@ -10,7 +10,4 @@ router.route("/bloodBank/bloodType/all").get(authenticateBloodBank, authorizeRol
 router.route("/bloodBank/bloodType/update").put(authenticateBloodBank, authorizeRoles("bloodBank"), updateBloodType);
 router.route("/bloodBank/bloodType/delete").delete(authenticateBloodBank, authorizeRoles("bloodBank"), removeBloodType);
 
-// USER -
-router.route("/user/bloodType/bloodBank/:id").get(authenticateUser, authorizeRoles("user"), getUserBloodTypes);
-
 module.exports = router;

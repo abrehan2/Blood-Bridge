@@ -4,7 +4,7 @@ const { getNearBy } = require("../controllers/placeRequestController");
 const { authenticateBloodBank, authorizeRoles } = require("../middlewares/auth");
 const router = express.Router();
 
-router.route("/bloodBank/action").get(authenticateBloodBank, authorizeRoles("bloodBank"), getNearBy);
-
+// BLOOD BANK -
+router.route("/bloodBank/action").post(authenticateBloodBank, authorizeRoles("bloodBank"), getNearBy);
 
 module.exports = router;

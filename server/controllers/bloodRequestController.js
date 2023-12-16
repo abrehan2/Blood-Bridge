@@ -200,7 +200,7 @@ exports.updateRequestStatus = catchAsyncErr(async (req, res, next) => {
     .findById(req.params.id)
     .populate("bloodGroup", "bloodGroup")
     .populate({ path: "user", select: "email cnic" })
-    .populate({ path: "bloodBank", select: "address contact" });
+    .populate({ path: "bloodBank", select: "address contact city sector" });
 
   if (!bloodRequest) {
     return next(new ErrorHandler("Blood request not found", 404));
@@ -258,12 +258,12 @@ const emailUser = async (bloodRequest, message, req, res) => {
     await rejectRequest(bloodRequest, res);
     return;
   }
-
+  console.log(bloodRequest);
   const location = `${bloodRequest?.bloodBank.sector}, ${bloodRequest?.bloodBank.address}, ${bloodRequest?.bloodBank.city}`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
-<head>
+<head> 
   <meta charset="UTF-8">
   <title>Blood Bridge: Blood Request Update</title>
 </head>
