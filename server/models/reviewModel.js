@@ -19,16 +19,6 @@ const reviewSchema = new mongoose.Schema({
     required: true,
   },
 
-  bloodRequest: {
-    type: mongoose.Schema.ObjectId,
-    ref: "bloodRequest",
-  },
-
-  bloodDonation: {
-    type: mongoose.Schema.ObjectId,
-    ref: "bloodDonation",
-  },
-
   createdAt: {
     type: Date,
     default: Date.now,
