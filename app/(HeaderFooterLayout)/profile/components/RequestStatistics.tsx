@@ -13,9 +13,14 @@ import {
 } from "@/components/ui/table"
 import { BBUpdateRequestStatus, BBgetAllBloodRequestes } from '@/app/axios-api/Endpoint'
 import toast from 'react-hot-toast'
+import { X } from 'lucide-react'
+import cx from 'classnames'
 
 const RequestStatistics = () => {
     const [bloodRequests, setBloodRequests] = useState<any[]>()
+    const [updateStatus, setUpdateStatus] = useState<{ value: string, index: number }>()
+    const [message, setMessage] = useState<{ day: string, time: string }>({ day: '', time: '' })
+    const [showModal, setShowModal] = useState(false)
 
     useEffect(() => {
         const url = BBgetAllBloodRequestes();
@@ -29,12 +34,26 @@ const RequestStatistics = () => {
         })
     }, [])
 
+    const handleSubmitTime = () => {
+        if (message.time === '' || message.day === '') {
+            toast.error('Please select time to update')
+            return
+        }
+        handleUpdateStatus(updateStatus?.value!, updateStatus?.index!)
+    }
+
     const handleUpdateStatus = (value: string, index: number) => {
-        if(value === '') {
+        if (value === '') {
+            return
+        }
+
+        if (value === 'Accepted' && message?.time === '' && message?.day === '') {
+            setUpdateStatus({ value: value.split('T')[0], index })
+            setShowModal(true)
             return
         }
         const url = BBUpdateRequestStatus() + `${bloodRequests?.[index]._id}`;
-        axios.put(url, {status: value, message: ''}, {
+        axios.put(url, { status: value, message }, {
             withCredentials: true
         }).then(res => {
             toast.success("Status Updated Successfully")
@@ -51,6 +70,30 @@ const RequestStatistics = () => {
     }
     return (
         <div className='w-full'>
+            {
+                <div className={cx('w-full bg-black bg-opacity-50 hidden justify-between items-center absolute top-0 left-0 z-10', [shadow.bloodBankNavHeight], { '!flex': showModal })}>
+                    <div className='w-1/2 mx-auto h-[50vh] bg-white rounded-2xl relative pt-10 px-4'>
+                        <X size={22} className='absolute top-4 right-4 cursor-pointer' onClick={() => setShowModal(false)} />
+                        <p className='font-DMSansRegular text-black'>Select Time for {bloodRequests?.[0]?.name} to visit for collection</p>
+                        <div className='flex flex-col gap-y-4 mt-3'>
+                            <div className='flex flex-col gap-y-1'>
+                                <p className='font-DMSansRegular text-black'>Date</p>
+                                <input type="date" className='rounded-md border border-black border-opacity-10 outline-none p-1' value={bloodRequests?.[updateStatus?.index!]?.bloodNeededOn.split('T')[0]} readOnly />
+                            </div>
+                            <div className='flex flex-col gap-y-1'>
+                                <p className='font-DMSansRegular text-black'>Time</p>
+                                <input type="time" className='rounded-md border border-black border-opacity-10 outline-none p-1' onChange={(e) => setMessage({ day: (bloodRequests?.[updateStatus?.index!].bloodNeededOn.split('T')[0]), time: e.target.value })} />
+                            </div>
+                            <div className='flex justify-end'>
+                                <button className='bg-[#AC3E31] text-white font-DMSansRegular rounded-md px-4 py-1.5' onClick={() => {
+                                    handleSubmitTime();
+                                    setShowModal(false)
+                                }}>Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
             <div className='w-full flex gap-x-7 items-center'>
                 <div className='py-3 px-4 rounded-xl bg-[#20283E] min-w-[155px]'>
                     <h3 className='font-PlayfairDisplayBold capitalize text-white text-lg leading-5'>Total Requests</h3>
