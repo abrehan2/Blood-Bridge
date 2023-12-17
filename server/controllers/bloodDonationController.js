@@ -129,7 +129,7 @@ exports.manualDonation = catchAsyncErr(async (req, res, next) => {
 exports.getBloodDonations = catchAsyncErr(async (req, res) => {
   const bloodDonations = await bloodDonationModel.find({
     bloodBank: req.authUser.id,
-  });
+  }).populate({path: "user"});
 
   res.status(200).json({
     success: true,
@@ -142,7 +142,8 @@ exports.getUserBloodDonations = catchAsyncErr(async (req, res) => {
   const bloodDonations = await bloodDonationModel
     .find({ user: req.authUser.id })
     .populate({
-      path: "user",      
+      path: "user",
+      select: "cnic",
     })
     .populate("bloodGroup bloodBank", "bloodGroup name city");
 
