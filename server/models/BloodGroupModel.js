@@ -46,6 +46,19 @@ const bloodGroupSchema = new mongoose.Schema({
     },
   ],
 
+  stockHistory: [
+    {
+      stock: {
+        type: Number,
+        required: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,
@@ -53,6 +66,17 @@ const bloodGroupSchema = new mongoose.Schema({
 });
 
 bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
+
+
+bloodGroupSchema.pre("save", function (next) {
+  if (this.isModified("stock")) {
+    this.stockHistory.push({
+      stock: this.stock,
+      createdAt: Date.now(),
+    });
+  }
+  next();
+});
 
 const bloodGroup = mongoose.model("bloodGroup", bloodGroupSchema);
 module.exports = bloodGroup;
