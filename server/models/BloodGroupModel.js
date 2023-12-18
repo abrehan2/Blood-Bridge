@@ -67,7 +67,6 @@ const bloodGroupSchema = new mongoose.Schema({
 
 bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
 
-
 bloodGroupSchema.pre("save", function (next) {
   if (this.isModified("stock")) {
     this.stockHistory.push({
