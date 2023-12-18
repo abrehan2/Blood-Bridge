@@ -67,15 +67,36 @@ const bloodGroupSchema = new mongoose.Schema({
 
 bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
 
-bloodGroupSchema.pre("save", function (next) {
-  if (this.isModified("stock")) {
-    this.stockHistory.push({
-      stock: this.stock,
-      createdAt: Date.now(),
-    });
+// bloodGroupSchema.pre("save", function (next) {
+
+
+  
+//   if (this.isModified("stock")) {
+//     this.stockHistory.push({
+//       stock: this.stock,
+//       createdAt: Date.now(),
+//     });
+//   }
+//   next();
+// });
+
+bloodGroupSchema.pre("save", async function (next) {
+  try {
+    const originalDocument = await this.constructor.findOne({ _id: this._id });
+
+    if (originalDocument && this.isModified("stock")) {
+      this.stockHistory.push({
+        stock: originalDocument.stock,
+        createdAt: Date.now(),
+      });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
+
 
 const bloodGroup = mongoose.model("bloodGroup", bloodGroupSchema);
 module.exports = bloodGroup;
