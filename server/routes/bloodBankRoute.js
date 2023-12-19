@@ -22,6 +22,7 @@ const {
   deleteBloodBank,
   getBloodRequests,
   getBloodDonations,
+  updateAccountStatus,
 } = require("../controllers/bloodBankController");
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../middlewares/auth");
 
@@ -48,6 +49,7 @@ router
   .get(authenticateUser, authorizeRoles("admin"), viewBloodBank)
   .put(authenticateUser, authorizeRoles("admin"), blockBloodBank)
   .delete(authenticateUser, authorizeRoles("admin"), deleteBloodBank);
+  router.route("/admin/bloodBank/verification/:id").put(authenticateUser, authorizeRoles("admin"), updateAccountStatus);
   router.route("/admin/bloodBank/blood/requests").get(authenticateUser, authorizeRoles("admin"), getBloodRequests);
   router.route("/admin/bloodBank/blood/donations").get(authenticateUser, authorizeRoles("admin"), getBloodDonations);
   

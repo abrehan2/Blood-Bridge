@@ -5,10 +5,14 @@ const app = require("./app");
 const connectDatabase = require("./config/database");
 const {initializeSocket} = require("./utils/location");
 
+// CONFIG -
+if (process.env.NODE_ENV !== "PRODUCTION") {
+  dotenv.config({ path: "./config/config.env" });
+}
+
 // PARTIALS -
 const server = http.createServer(app);
 initializeSocket(server);
-
 
 // HANDLING UNCAUGHT EXCEPTION -
 process.on("uncaughtException", (err) => {
@@ -16,11 +20,6 @@ process.on("uncaughtException", (err) => {
   console.log("SHUTTING DOWN SERVER DUE TO UNCAUGHT EXCEPTION");
   process.exit(1);
 });
-
-// CONFIG -
-if (process.env.NODE_ENV !== "PRODUCTION") {
-  dotenv.config({ path: "./config/config.env" });
-}
 
 // CONNECTING DATABASE -
 connectDatabase();

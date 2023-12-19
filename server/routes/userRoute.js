@@ -18,7 +18,7 @@ router.route("/user/me/update").put(authenticateUser, authorizeRoles("user", "ad
 router.route("/user/:id/verify/:token").get(verifyEmail);
 router.route("/user/email/resend").get(authenticateUser, authorizeRoles("user", "admin"), resendEmailVerification);
 router.route("/user/feedback").post(authenticateUser, authorizeRoles("user"), userFeedBack);
-router.route("/user/location").get(authenticateUser, getUserLocation,  authorizeRoles("user"));
+router.route("/user/location").get(authenticateUser,  authorizeRoles("user"), getUserLocation);
 router.route("/user/deactivate").put(authenticateUser, authorizeRoles("user", "admin"), deactivateAccount);
 router.route("/user/bloodBanks/all").get(authenticateUser, authorizeRoles("user"), getBloodBanks);
 router.route("/user/review/bloodBank").post(authenticateUser, authorizeRoles("user"), reviewBloodBank);

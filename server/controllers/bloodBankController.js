@@ -9,7 +9,6 @@ const setToken = require("../utils/jwtToken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/email");
 
-
 // PARTIALS -
 const imageBuffer =
   "https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp";
@@ -35,11 +34,8 @@ exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
     contact,
     avatar: imageBuffer,
     location: {
-      type: "Point", 
-      coordinates: [
-        longitude,  
-        latitude,  
-      ], 
+      type: "Point",
+      coordinates: [longitude, latitude],
     },
   });
 
@@ -551,11 +547,47 @@ exports.viewBloodBank = catchAsyncErr(async (req, res, next) => {
   });
 });
 
+// UPDATE ACCOUNT STATUS -
+exports.updateAccountStatus = catchAsyncErr(async (req, res, next) => {
+  const { status } = req.body;
+  const bloodBank = await bloodBankModel.findById(req.params.id);
+  let flag = "pending";
+
+  if (!status) {
+    return next(new ErrorHandler("Status is missing", 404));
+  }
+
+  if (!bloodBank) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (status === "verified" && bloodBank.accountVerified === "pending") {
+    bloodBank.accountVerified = "verified";
+    flag = "verified";
+  }
+
+  if (status === "pending" && bloodBank.accountVerified === "verified") {
+    bloodBank.accountVerified = "pending";
+    flag = "pending";
+  }
+
+  await bloodBank.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+    message: `${bloodBank.name} is ${flag}`,
+  });
+});
+
 // BLOCK USER -
 exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
   const { status } = req.body;
   const bloodBank = await bloodBankModel.findById(req.params.id);
   let flag = "";
+
+  if (!status) {
+    return next(new ErrorHandler("Status is missing", 404));
+  }
 
   if (!bloodBank) {
     return next(new ErrorHandler("User not found", 404));

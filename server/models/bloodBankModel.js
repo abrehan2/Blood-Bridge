@@ -120,6 +120,12 @@ const bloodBankSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 
+  accountVerified: {
+    type: String,
+    enum: ["pending", "verified"],
+    default: "pending",
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
