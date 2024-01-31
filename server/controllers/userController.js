@@ -181,21 +181,8 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
     user,
   });
 
-  // setToken(user, 200, res);
+
 });
-
-// LOGOUT -
-// exports.logoutUser = catchAsyncErr(async (req, res, next) => {
-//   res.cookie("token", null, {
-//     expires: new Date(Date.now()),
-//     httpOnly: true,
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//     message: "You have been logged out of your account",
-//   });
-// });
 
 // GENERATE TOKEN FOR FORGOT PASSWORD -
 exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
@@ -323,8 +310,7 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
     message: "Password has been updated",  
   
   });
-  // setToken(user, 200, res);
-});
+  });
 
 // UPDATE PROFILE -
 exports.updateProfile = catchAsyncErr(async (req, res, next) => {

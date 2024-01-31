@@ -167,3 +167,13 @@ exports.getAdminEvents = catchAsyncErr(async (req, res, next) => {
     events,
   });
 });
+
+// GET ALL EVENTS FOR USERS -
+exports.getUserEvents = catchAsyncErr(async (req, res, next) => {
+  const events = await eventModel.find();
+
+  res.status(200).json({
+    success: true,
+    events,
+  });
+});
