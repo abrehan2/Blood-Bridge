@@ -13,6 +13,8 @@ router.route("/bloodBank/event/create").post(authenticateBloodBank, authorizeRol
 router.route("/bloodBank/events/all").get(authenticateBloodBank, authorizeRoles("bloodBank"), getAllEvents);
 router.route("/bloodBank/event").put(authenticateBloodBank, authorizeRoles("bloodBank"), editEvent).delete(authenticateBloodBank, authorizeRoles("bloodBank"), removeEvent);
 router.route("/bloodBank/event/notify").get(authenticateBloodBank, authorizeRoles("bloodBank"), notifyUsers);
+
+// USER ROUTES -
 router.route("/user/events/all").get(getUserEvents);
 
 // ADMIN ROUTES -
