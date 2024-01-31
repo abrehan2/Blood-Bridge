@@ -301,13 +301,11 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
   await bloodBank.save();
   // setToken(bloodBank, 200, res);
 
-  const token = user.getJsonWebToken();
+  // const token = user.getJsonWebToken();
 
   res.status(200).json({
     success: true,
-    message: "Password has been updated",
-    token,
-    bloodBank,
+    message: "Password has been updated",    
   });
 });
 

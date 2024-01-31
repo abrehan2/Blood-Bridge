@@ -316,13 +316,12 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
   user.password = newPassword;
   await user.save();
 
-  const token = user.getJsonWebToken();
+  // const token = user.getJsonWebToken();
 
   res.status(200).json({
     success: true,
-    message: "Password has been updated",
-    token,
-    user,
+    message: "Password has been updated",  
+  
   });
   // setToken(user, 200, res);
 });
