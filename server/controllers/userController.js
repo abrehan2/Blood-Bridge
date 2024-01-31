@@ -172,22 +172,30 @@ exports.loginUser = catchAsyncErr(async (req, res, next) => {
   };
 
   await user.save({ validateBeforeSave: true });
-
-  setToken(user, 200, res);
-});
-
-// LOGOUT -
-exports.logoutUser = catchAsyncErr(async (req, res, next) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-  });
+  const token = user.getJsonWebToken();
 
   res.status(200).json({
     success: true,
-    message: "You have been logged out of your account",
+    message: "You are logged in!",
+    token,
+    user,
   });
+
+  // setToken(user, 200, res);
 });
+
+// LOGOUT -
+// exports.logoutUser = catchAsyncErr(async (req, res, next) => {
+//   res.cookie("token", null, {
+//     expires: new Date(Date.now()),
+//     httpOnly: true,
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     message: "You have been logged out of your account",
+//   });
+// });
 
 // GENERATE TOKEN FOR FORGOT PASSWORD -
 exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
@@ -307,7 +315,16 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
 
   user.password = newPassword;
   await user.save();
-  setToken(user, 200, res);
+
+  const token = user.getJsonWebToken();
+
+  res.status(200).json({
+    success: true,
+    message: "Password has been updated",
+    token,
+    user,
+  });
+  // setToken(user, 200, res);
 });
 
 // UPDATE PROFILE -

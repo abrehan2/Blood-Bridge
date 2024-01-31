@@ -154,21 +154,30 @@ exports.loginBloodBank = catchAsyncErr(async (req, res, next) => {
   }
 
   await bloodBank.save({ validateBeforeSave: true });
-  setToken(bloodBank, 200, res);
-});
+  // setToken(bloodBank, 200, res);
 
-// LOGOUT BLOOD BANK-
-exports.logoutBloodBank = catchAsyncErr(async (req, res, next) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-  });
+  const token = user.getJsonWebToken();
 
   res.status(200).json({
     success: true,
-    message: "You have been logged out of your account",
+    message: "You are logged in!",
+    token,
+    bloodBank,
   });
 });
+
+// LOGOUT BLOOD BANK-
+// exports.logoutBloodBank = catchAsyncErr(async (req, res, next) => {
+//   res.cookie("token", null, {
+//     expires: new Date(Date.now()),
+//     httpOnly: true,
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     message: "You have been logged out of your account",
+//   });
+// });
 
 // GENERATE TOKEN FOR FORGOT PASSWORD -
 exports.forgotPassword = catchAsyncErr(async (req, res, next) => {
@@ -290,7 +299,16 @@ exports.updatePassword = catchAsyncErr(async (req, res, next) => {
 
   bloodBank.password = newPassword;
   await bloodBank.save();
-  setToken(bloodBank, 200, res);
+  // setToken(bloodBank, 200, res);
+
+  const token = user.getJsonWebToken();
+
+  res.status(200).json({
+    success: true,
+    message: "Password has been updated",
+    token,
+    bloodBank,
+  });
 });
 
 // UPDATE BLOOD BANK PROFILE -

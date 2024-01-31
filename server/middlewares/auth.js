@@ -7,13 +7,13 @@ const catchAsyncErr = require("./catchAsyncErr");
 
 exports.authenticate = (model) =>
   catchAsyncErr(async (req, res, next) => {
-    const { token } = req.cookies;
+     const { accesstoken } = req.headers;
 
-    if (!token) {
+    if (!accesstoken) {
       return next(new ErrorHandler("Please login to continue", 401));
     }
 
-    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    const decode = jwt.verify(accesstoken, process.env.JWT_SECRET);
     req.authUser = await model.findById(decode.id);
 
     next();
@@ -39,8 +39,8 @@ exports.authorizeRoles = (...roles) => {
   };
 };
 
-// Middleware for authenticating users
+// MIDDLEWARE FOR AUTHENTICATING USERS -
 exports.authenticateUser = exports.authenticate(userModel);
 
-// Middleware for authenticating blood banks
+// MIDDLEWARE FOR AUTHENTICATING BLOOD BANKS -
 exports.authenticateBloodBank = exports.authenticate(bloodBankModel);

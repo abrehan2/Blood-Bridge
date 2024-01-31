@@ -4,8 +4,7 @@ const router = express.Router();
 const {
   registerBloodBank,
   verifyBloodBank,
-  loginBloodBank,
-  logoutBloodBank,
+  loginBloodBank,  
   forgotPassword,
   resetPassword, 
   getBloodBank,
@@ -30,7 +29,7 @@ const { authenticateBloodBank, authorizeRoles, authenticateUser } = require("../
 router.route("/auth/bloodBank/register").post(registerBloodBank);
 router.route("/auth/bloodBank/:id/verify/:token").get(verifyBloodBank);
 router.route("/auth/bloodBank/login").post(loginBloodBank);
-router.route("/auth/bloodBank/logout").get(logoutBloodBank);
+// router.route("/auth/bloodBank/logout").get(logoutBloodBank);
 router.route("/auth/bloodBank/forgot").post(forgotPassword);
 router.route("/auth/bloodBank/reset/:token").put(resetPassword);
 router.route("/bloodBank/profileCompletion").post(authenticateBloodBank, authorizeRoles("bloodBank"), completeProfile)
