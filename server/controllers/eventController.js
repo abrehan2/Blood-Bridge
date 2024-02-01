@@ -21,7 +21,7 @@ exports.createEvent = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Please fill in all required fields", 400));
   }
 
-  await eventModel.create({
+  const event = await eventModel.create({
     bloodBank: req.authUser.id,
     eventName,
     description,
@@ -35,6 +35,7 @@ exports.createEvent = catchAsyncErr(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Your event has been created!",
+    event,
   });
 });
 
