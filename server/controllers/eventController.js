@@ -57,8 +57,7 @@ exports.editEvent = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler("Event not found", 404));
   }
 
-  const existingGuests = event.guests || [];
-  const updatedGuests = [...existingGuests, ...(req.body.guests || [])];
+  const updatedGuests = [...(req.body.guests || [])];
 
   const updatedEvent = {
     eventName: req.body.eventName,
