@@ -100,13 +100,7 @@ exports.removeEvent = catchAsyncErr(async (req, res, next) => {
 // NOTIFY USERS -
 exports.notifyUsers = catchAsyncErr(async (req, res, next) => {
   const users = await userModel.find();
-  const event = await eventModel
-    .findOne({
-      bloodBank: req.authUser.id,
-    })
-    .sort({ createdAt: -1 })
-    .populate("bloodBank", "name")
-    .lean();
+  const event = await eventModel.findOne(req.body.eventId);
 
   if (!event) {
     return next(new ErrorHandler("Event not found", 404));
