@@ -20,7 +20,7 @@ const imageBuffer = 'https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
   const { firstName, lastName, email, cnic, city, dob, password, bloodGroup, contact } = req.body
-
+ 
   let user = await userModel.findOne({ email })
 
   if (user) {
