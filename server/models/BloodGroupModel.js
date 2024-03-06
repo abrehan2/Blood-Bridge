@@ -1,23 +1,23 @@
 // IMPORTS -
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const bloodGroupSchema = new mongoose.Schema({
   bloodGroup: {
     type: String,
-    required: [true, "Please select the blood type"],
-    enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+    required: [true, 'Please select the blood type'],
+    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
   },
 
   stock: {
     type: Number,
-    required: [true, "Please enter the blood type stock"],
-    max: [1000, "Stock cannot exceed 1000 units"],
+    required: [true, 'Please enter the blood type stock'],
+    max: [1000, 'Stock cannot exceed 1000 units'],
     default: 0,
   },
 
   bloodBank: {
     type: mongoose.Schema.ObjectId,
-    ref: "bloodBank",
+    ref: 'bloodBank',
     required: true,
   },
 
@@ -25,7 +25,7 @@ const bloodGroupSchema = new mongoose.Schema({
     {
       user: {
         type: mongoose.Schema.ObjectId,
-        ref: "User",
+        ref: 'User',
         required: true,
       },
 
@@ -63,14 +63,12 @@ const bloodGroupSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
+bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true })
 
 // bloodGroupSchema.pre("save", function (next) {
 
-
-  
 //   if (this.isModified("stock")) {
 //     this.stockHistory.push({
 //       stock: this.stock,
@@ -80,23 +78,22 @@ bloodGroupSchema.index({ bloodGroup: 1, bloodBank: 1 }, { unique: true });
 //   next();
 // });
 
-bloodGroupSchema.pre("save", async function (next) {
+bloodGroupSchema.pre('save', async function (next) {
   try {
-    const originalDocument = await this.constructor.findOne({ _id: this._id });
+    const originalDocument = await this.constructor.findOne({ _id: this._id })
 
-    if (originalDocument && this.isModified("stock")) {
+    if (originalDocument && this.isModified('stock')) {
       this.stockHistory.push({
         stock: originalDocument.stock,
         createdAt: Date.now(),
-      });
+      })
     }
 
-    next();
+    next()
   } catch (error) {
-    next(error);
+    next(error)
   }
-});
+})
 
-
-const bloodGroup = mongoose.model("bloodGroup", bloodGroupSchema);
-module.exports = bloodGroup;
+const bloodGroup = mongoose.model('bloodGroup', bloodGroupSchema)
+module.exports = bloodGroup

@@ -1,22 +1,22 @@
 // IMPORTS -
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const reviewSchema = new mongoose.Schema(
   {
     comment: {
       type: String,
-      required: [true, "Please enter your review"],
+      required: [true, 'Please enter your review'],
     },
 
     user: {
       type: mongoose.Schema.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
 
     bloodBank: {
       type: mongoose.Schema.ObjectId,
-      ref: "bloodBank",
+      ref: 'bloodBank',
       required: true,
     },
 
@@ -27,8 +27,8 @@ const reviewSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
-const reviewModel = mongoose.model("review", reviewSchema);
-module.exports = reviewModel;
+const reviewModel = mongoose.model('review', reviewSchema)
+module.exports = reviewModel

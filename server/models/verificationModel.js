@@ -1,15 +1,15 @@
 // IMPORTS -
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const verificationSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: 'User',
   },
 
   BloodBankId: {
     type: mongoose.Schema.ObjectId,
-    ref: "bloodBank",
+    ref: 'bloodBank',
   },
 
   token: {
@@ -20,7 +20,7 @@ const verificationSchema = new mongoose.Schema({
   purpose: {
     type: String,
     required: true,
-    enum: ["accountVerify", "emailVerify"],
+    enum: ['accountVerify', 'emailVerify'],
   },
 
   createdAt: {
@@ -28,7 +28,7 @@ const verificationSchema = new mongoose.Schema({
     default: Date.now,
     expires: 3600, // 1 hour
   },
-});
+})
 
-const Verification = mongoose.model("Verification", verificationSchema);
-module.exports = Verification;
+const Verification = mongoose.model('Verification', verificationSchema)
+module.exports = Verification

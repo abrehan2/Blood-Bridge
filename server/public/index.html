@@ -1,33 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Coordinates</title>
   </head>
   <body>
     <h1>Hi, I am working!</h1>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-    const socket = io("http://localhost:5000");   
+      const socket = io('http://localhost:5000')
 
-  document.addEventListener("DOMContentLoaded", () => {
-    navigator.geolocation.watchPosition(
-    (position) => {
-      let {latitude, longitude} = position.coords;
-            
-      socket.emit('sendLocation', {latitude, longitude});
-    }, 
-    (error) => {
-      console.error('Error getting location:', error.message);
-      socket.emit('Error', error.message);
-    },
-    {
-      enableHighAccuracy: true, 
-    }
-  );
-  })
-       
+      document.addEventListener('DOMContentLoaded', () => {
+        navigator.geolocation.watchPosition(
+          (position) => {
+            let { latitude, longitude } = position.coords
+
+            socket.emit('sendLocation', { latitude, longitude })
+          },
+          (error) => {
+            console.error('Error getting location:', error.message)
+            socket.emit('Error', error.message)
+          },
+          {
+            enableHighAccuracy: true,
+          },
+        )
+      })
     </script>
   </body>
 </html>

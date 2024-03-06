@@ -1,62 +1,62 @@
 // IMPORTS -
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+const mongoose = require('mongoose')
+const validator = require('validator')
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, "Please enter your first name"],
-    maxLength: [30, "Please keep your first name to 30 characters or less"],
+    required: [true, 'Please enter your first name'],
+    maxLength: [30, 'Please keep your first name to 30 characters or less'],
   },
 
   lastName: {
     type: String,
-    required: [true, "Please enter your last name"],
-    maxLength: [30, "Please keep your last name to 30 characters or less"],
+    required: [true, 'Please enter your last name'],
+    maxLength: [30, 'Please keep your last name to 30 characters or less'],
   },
 
   email: {
     type: String,
-    required: [true, "Please enter your email"],
+    required: [true, 'Please enter your email'],
     unique: true,
-    validator: [validator.isEmail, "Please enter a valid email address"],
+    validator: [validator.isEmail, 'Please enter a valid email address'],
   },
 
   password: {
     type: String,
-    required: [true, "Please enter your password"],
-    minLength: [8, "Your password must be at least 8 characters long"],
+    required: [true, 'Please enter your password'],
+    minLength: [8, 'Your password must be at least 8 characters long'],
     select: false,
   },
 
   dob: {
     type: Date,
-    required: [true, "Please enter your date of birth"],
+    required: [true, 'Please enter your date of birth'],
   },
 
   city: {
     type: String,
-    required: [true, "Please enter your city"],
+    required: [true, 'Please enter your city'],
   },
 
   cnic: {
     type: String,
-    required: [true, "Please enter your cnic"],
+    required: [true, 'Please enter your cnic'],
     unique: true,
   },
 
   contact: {
     type: String,
-    required: [true, "Please enter your contact"],
+    required: [true, 'Please enter your contact'],
     unique: true,
   },
 
   bloodGroup: {
     type: String,
-    required: [true, "Please enter your blood group"],
+    required: [true, 'Please enter your blood group'],
   },
 
   avatar: {
@@ -67,8 +67,8 @@ const userSchema = new mongoose.Schema({
   location: {
     type: {
       type: String,
-      enum: ["Point"],
-      default: "Point",
+      enum: ['Point'],
+      default: 'Point',
     },
     coordinates: [
       {
@@ -84,8 +84,8 @@ const userSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["user", "admin"],
-    default: "user",
+    enum: ['user', 'admin'],
+    default: 'user',
   },
 
   verified: {
@@ -111,8 +111,8 @@ const userSchema = new mongoose.Schema({
   feedback: [
     {
       type: String,
-      required: [true, "Please enter your feedback"],
-      maxLength: [200, "Please keep your response to 200 words or less"],
+      required: [true, 'Please enter your feedback'],
+      maxLength: [200, 'Please keep your response to 200 words or less'],
     },
   ],
 
@@ -123,43 +123,40 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
 // Check if the password is already hashed -
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next()
   }
 
-  this.password = await bcrypt.hash(this.password, 10);
-});
+  this.password = await bcrypt.hash(this.password, 10)
+})
 
 // Compare passwords -
 userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
+  return await bcrypt.compare(enteredPassword, this.password)
+}
 
 // Json web token -
 userSchema.methods.getJsonWebToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
-  });
-};
+  })
+}
 
 // Reset forgot password -
 userSchema.methods.getResetPasswordToken = function () {
-  const resetToken = crypto.randomBytes(20).toString("hex");
-  this.resetPasswordToken = crypto
-    .createHash("sha256")
-    .update(resetToken)
-    .digest("hex");
-  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+  const resetToken = crypto.randomBytes(20).toString('hex')
+  this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000
 
-  return resetToken;
-};
+  return resetToken
+}
 
 // Add a 2dsphere index on the location field -
-userSchema.index({ location: "2dsphere" });
+userSchema.index({ location: '2dsphere' })
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+const User = mongoose.model('User', userSchema)
+module.exports = User

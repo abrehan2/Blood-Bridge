@@ -1,26 +1,23 @@
 // IMPORTS -
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const eventSchema = new mongoose.Schema({
   bloodBank: {
     type: mongoose.Schema.ObjectId,
-    ref: "bloodBank",
+    ref: 'bloodBank',
     required: true,
   },
 
   eventName: {
     type: String,
-    required: [true, "Please enter the name of your event"],
-    maxLength: [30, "Please keep your event name to 30 characters or less"],
+    required: [true, 'Please enter the name of your event'],
+    maxLength: [30, 'Please keep your event name to 30 characters or less'],
   },
 
   description: {
     type: String,
-    required: [true, "Please enter the description of your event"],
-    maxLength: [
-      500,
-      "Please keep your event description to 500 characters or less",
-    ],
+    required: [true, 'Please enter the description of your event'],
+    maxLength: [500, 'Please keep your event description to 500 characters or less'],
   },
 
   guests: [
@@ -32,20 +29,17 @@ const eventSchema = new mongoose.Schema({
 
   venue: {
     type: String,
-    required: [true, "Please enter the venue of your event"],
+    required: [true, 'Please enter the venue of your event'],
   },
 
   eventTime: {
     type: String,
-    required: [true, "Please enter the time of your event"],
+    required: [true, 'Please enter the time of your event'],
   },
 
   eventDate: {
     type: Date,
-    required: [
-      true,
-      "Please select the date you would like to schedule your event",
-    ],
+    required: [true, 'Please select the date you would like to schedule your event'],
   },
 
   image: {
@@ -57,7 +51,7 @@ const eventSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-const eventModel = mongoose.model("event", eventSchema);
-module.exports = eventModel;
+const eventModel = mongoose.model('event', eventSchema)
+module.exports = eventModel

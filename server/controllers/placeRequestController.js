@@ -1,22 +1,22 @@
 // IMPORTS -
-const ErrorHandler = require("../utils/errorHandler");
-const catchAsyncErr = require("../middlewares/catchAsyncErr");
-const userModel = require("../models/userModel");
-const bloodBankModel = require("../models/bloodBankModel");
-const bloodGroupModel = require("../models/BloodGroupModel");
-const sendEmail = require("../utils/email");
+const ErrorHandler = require('../utils/errorHandler')
+const catchAsyncErr = require('../middlewares/catchAsyncErr')
+const userModel = require('../models/userModel')
+const bloodBankModel = require('../models/bloodBankModel')
+const bloodGroupModel = require('../models/BloodGroupModel')
+const sendEmail = require('../utils/email')
 
 // GET NEAR BY USER(S) AND BLOOD BANK(S) -
 exports.getNearBy = catchAsyncErr(async (req, res, next) => {
-  const bloodBank = await bloodBankModel.findById(req.authUser.id);
-  const longitude = bloodBank.location.coordinates[0];
-  const latitude = bloodBank.location.coordinates[1];
+  const bloodBank = await bloodBankModel.findById(req.authUser.id)
+  const longitude = bloodBank.location.coordinates[0]
+  const latitude = bloodBank.location.coordinates[1]
 
   const nearbyUsers = await userModel.find({
     location: {
       $nearSphere: {
         $geometry: {
-          type: "Point",
+          type: 'Point',
           coordinates: [longitude, latitude],
         },
         $maxDistance: 4000, // meters
@@ -24,14 +24,14 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
       },
     },
 
-    role: { $ne: "admin" },
-  });
+    role: { $ne: 'admin' },
+  })
 
   const nearbyBloodBanks = await bloodBankModel.find({
     location: {
       $nearSphere: {
         $geometry: {
-          type: "Point",
+          type: 'Point',
           coordinates: [longitude, latitude],
         },
         $maxDistance: 4000, // meters
@@ -40,68 +40,62 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
     },
 
     _id: { $ne: req.authUser.id },
-    status: "open",
-  });
+    status: 'open',
+  })
 
-  let flag = await checkBloodType(
-    req,    
-    next,
-    nearbyUsers,
-    nearbyBloodBanks
-  );
+  let flag = await checkBloodType(req, next, nearbyUsers, nearbyBloodBanks)
 
   if (flag === false) {
     return next(
       new ErrorHandler(
         `The request for ${req.body.bloodType} blood type cannot be placed at this time`,
-        404
-      )
-    );
+        404,
+      ),
+    )
   }
 
   res.status(200).json({
     success: true,
     message: `The request for ${req.body.bloodType} blood type has been placed.`,
-  });
-  
-});
+  })
+})
 
 // CHECK BLOOD TYPE FOR BLOOD BANK -
 const checkBloodType = async (req, next, users, bloodBanks) => {
   const bloodType = await bloodGroupModel.findOne({
     bloodBank: req.authUser.id,
     bloodGroup: req.body.bloodType,
-  });
-  let flag = null;
-  let bloodBank = req.authUser;
+  })
+  let flag = null
+  let bloodBank = req.authUser
 
   if (!bloodType) {
-    return next(new ErrorHandler("Blood type not found", 404));
+    return next(new ErrorHandler('Blood type not found', 404))
   }
 
   if (bloodType.stock < 5) {
-    await doAction(bloodType, users, bloodBanks, bloodBank);
+    await doAction(bloodType, users, bloodBanks, bloodBank)
   } else {
-    flag = false;
+    flag = false
   }
 
-  return flag;
-};
+  return flag
+}
 
 // EMAIL USERS AND BLOOD BANKS -
 const doAction = async (bloodType, users, bloodBanks, bloodBank) => {
   if (users?.length > 0) {
-    await emailUsers(users, bloodType, bloodBank);
+    await emailUsers(users, bloodType, bloodBank)
   }
 
   if (bloodBanks?.length > 0) {
-    await emailBloodBanks(bloodBanks, bloodType, bloodBank);
+    await emailBloodBanks(bloodBanks, bloodType, bloodBank)
   }
-};
+}
 
 // EMAIL USERS -
 const emailUsers = async (users, bloodType, bloodBank) => {
-  const location = `${bloodBank?.sector}, ${bloodBank?.address}, ${bloodBank?.city}`;
+  const location = `${bloodBank?.sector}, ${bloodBank?.address}, ${bloodBank?.city}`
 
   for (const user of users) {
     const html = `
@@ -121,21 +115,21 @@ const emailUsers = async (users, bloodType, bloodBank) => {
           <p>Best,</p>
           <p><b>Blood Bridge Team</b></p>
         </body>
-      </html>`;
+      </html>`
 
     const emailPromise = sendEmail({
       email: user?.email,
-      subject: "Blood Bridge: Blood Type Request",
+      subject: 'Blood Bridge: Blood Type Request',
       message: html,
-    });
+    })
 
-    await Promise.all([emailPromise]);
+    await Promise.all([emailPromise])
   }
-};
+}
 
 // EMAIL BLOOD BANKS -
 const emailBloodBanks = async (bloodBanks, bloodType, bloodBank) => {
-  const location = `${bloodBank?.sector}, ${bloodBank?.address}, ${bloodBank?.city}`;
+  const location = `${bloodBank?.sector}, ${bloodBank?.address}, ${bloodBank?.city}`
 
   for (const bank of bloodBanks) {
     const html = `
@@ -155,14 +149,14 @@ const emailBloodBanks = async (bloodBanks, bloodType, bloodBank) => {
           <p>Best,</p>
           <p><b>Blood Bridge Team</b></p>
         </body>
-      </html>`;
+      </html>`
 
     const emailPromise = sendEmail({
       email: bank?.email,
-      subject: "Blood Bridge: Blood Type Request",
+      subject: 'Blood Bridge: Blood Type Request',
       message: html,
-    });
+    })
 
-    await Promise.all([emailPromise]);
+    await Promise.all([emailPromise])
   }
-};
+}
