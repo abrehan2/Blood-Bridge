@@ -1,13 +1,12 @@
 // IMPORTS -
 const express = require('express')
 const router = express.Router()
-const { authenticateBloodBank, authorizeRoles, authenticateUser } = require('../middlewares/auth')
+const { authenticateBloodBank, authorizeRoles } = require('../middlewares/auth')
 const {
   createBloodType,
   getAllBloodTypes,
   updateBloodType,
   removeBloodType,
-  getUserBloodTypes,
 } = require('../controllers/bloodGroupController')
 
 // BLOOD BANK -

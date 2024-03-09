@@ -83,7 +83,7 @@ exports.createBloodRequest = catchAsyncErr(async (req, res, next) => {
     )
   }
 
-  let takeBlood = []
+  const takeBlood = []
   receivedBlood && takeBlood.push(...receivedBlood)
 
   await bloodRequestModel.create({
@@ -214,7 +214,7 @@ exports.updateRequestStatus = catchAsyncErr(async (req, res, next) => {
   if (status === 'Accepted' && bloodRequest.reqStatus === 'Pending') {
     await emailUser(bloodRequest, message, req, res, next)
   } else if (status === 'Completed' && bloodRequest.reqStatus === 'Accepted') {
-    await updateStock(bloodRequest, req, res)
+    await updateStock(bloodRequest, req, res, next)
   } else if (status === 'Rejected') {
     await rejectRequest(bloodRequest, res)
   }
@@ -229,8 +229,8 @@ const sendSuccessResponse = (res, message) => {
 }
 
 // EMAIL USER -
-const emailUser = async (bloodRequest, message, req, res) => {
-  const bloodType = await checkBloodGroup(req, bloodRequest)
+const emailUser = async (bloodRequest, message, req, res, next) => {
+  const bloodType = await checkBloodGroup(req, bloodRequest, next)
 
   if (bloodType.stock < bloodRequest?.bloodBags) {
     await rejectRequest(bloodRequest, res)
@@ -283,8 +283,8 @@ const emailUser = async (bloodRequest, message, req, res) => {
 }
 
 // UPDATE STOCK -
-const updateStock = async (bloodRequest, req, res) => {
-  const bloodType = await checkBloodGroup(req, bloodRequest)
+const updateStock = async (bloodRequest, req, res, next) => {
+  const bloodType = await checkBloodGroup(req, bloodRequest, next)
 
   bloodType.reservedBags = bloodType.reservedBags.filter((bag) => {
     const bagUserId = bag?.user?.toString()
@@ -307,7 +307,7 @@ const updateStock = async (bloodRequest, req, res) => {
 }
 
 // CHECK BLOOD GROUP -
-const checkBloodGroup = async (req, bloodRequest) => {
+const checkBloodGroup = async (req, bloodRequest, next) => {
   const bloodType = await bloodGroupModel.findOne({
     $and: [{ bloodBank: req.authUser.id }, { bloodGroup: bloodRequest?.bloodGroup?.bloodGroup }],
   })

@@ -43,7 +43,7 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
     status: 'open',
   })
 
-  let flag = await checkBloodType(req, next, nearbyUsers, nearbyBloodBanks)
+  const flag = await checkBloodType(req, next, nearbyUsers, nearbyBloodBanks)
 
   if (flag === false) {
     return next(
@@ -67,7 +67,7 @@ const checkBloodType = async (req, next, users, bloodBanks) => {
     bloodGroup: req.body.bloodType,
   })
   let flag = null
-  let bloodBank = req.authUser
+  const bloodBank = req.authUser
 
   if (!bloodType) {
     return next(new ErrorHandler('Blood type not found', 404))

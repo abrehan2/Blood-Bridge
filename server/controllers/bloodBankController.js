@@ -5,7 +5,7 @@ const bloodBankModel = require('../models/bloodBankModel')
 const verificationModel = require('../models/verificationModel')
 const bloodRequestModel = require('../models/bloodRequestModel')
 const bloodDonationModel = require('../models/bloodDonationModel')
-const setToken = require('../utils/jwtToken')
+const reviewModel = require('../models/reviewModel')
 const crypto = require('crypto')
 const sendEmail = require('../utils/email')
 
@@ -395,7 +395,7 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 // RESEND EMAIL VERIFICATIO FOR UPDATED -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id)
-  let token = await verificationModel.findOne({ BloodBankId: bloodBank._id })
+  const token = await verificationModel.findOne({ BloodBankId: bloodBank._id })
 
   if (bloodBank.emailVerified || bloodBank.emailVerified === null) {
     return next(new ErrorHandler('Your account is already verified', 409))

@@ -11,7 +11,7 @@ function initializeSocket(server) {
   const io = socketIO(server)
 
   io.on('connection', (socket) => {
-    let socketId = socket.id
+    const socketId = socket.id
     socket.on('sendLocation', ({ latitude, longitude }) => {
       addEvent('sendLocation', { latitude, longitude, socketId })
     })

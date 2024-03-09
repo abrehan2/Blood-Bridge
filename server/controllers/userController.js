@@ -8,7 +8,6 @@ const reviewModel = require('../models/reviewModel')
 const bloodRequestModel = require('../models/bloodRequestModel')
 const bloodDonationModel = require('../models/bloodDonationModel')
 const bloodGroup = require('../models/BloodGroupModel')
-const setToken = require('../utils/jwtToken')
 const crypto = require('crypto')
 const sendEmail = require('../utils/email')
 const bloodGroupModel = require('../models/BloodGroupModel')
@@ -20,7 +19,7 @@ const imageBuffer = 'https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest
 // REGISTER USER -
 exports.registerUser = catchAsyncErr(async (req, res, next) => {
   const { firstName, lastName, email, cnic, city, dob, password, bloodGroup, contact } = req.body
- 
+
   let user = await userModel.findOne({ email })
 
   if (user) {
@@ -375,7 +374,7 @@ exports.verifyEmail = catchAsyncErr(async (req, res, next) => {
 // RESEND EMAIL VERIFICATION FOR UPDATED AN EMAIL -
 exports.resendEmailVerification = catchAsyncErr(async (req, res, next) => {
   const user = await userModel.findById(req.authUser.id)
-  let token = await verificationModel.findOne({ userId: user._id })
+  const token = await verificationModel.findOne({ userId: user._id })
 
   if (user.emailVerified || user.emailVerified === null) {
     return next(new ErrorHandler('Your email is already verified', 403))
