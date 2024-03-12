@@ -6,7 +6,7 @@ const bloodBankModel = require('../models/bloodBankModel')
 const bloodGroupModel = require('../models/BloodGroupModel')
 const sendEmail = require('../utils/email')
 
-// GET NEARBY BLOOD BANKS FOR BLOOD BNKA -
+// GET NEARBY BLOOD BANKS FOR BLOOD BANK -
 exports.getNearBloodBanks = catchAsyncErr(async (req, res) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id)
 
