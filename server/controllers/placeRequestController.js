@@ -6,6 +6,35 @@ const bloodBankModel = require('../models/bloodBankModel')
 const bloodGroupModel = require('../models/BloodGroupModel')
 const sendEmail = require('../utils/email')
 
+// GET NEARBY BLOOD BANKS FOR BLOOD BNKA -
+exports.getNearBloodBanks = catchAsyncErr(async (req, res) => {
+  const bloodBank = await bloodBankModel.findById(req.authUser.id)
+  console.log(bloodBank) 
+  const longitude = bloodBank.location.coordinates[0]
+  const latitude = bloodBank.location.coordinates[1]
+ 
+  const nearbyBloodBanks = await bloodBankModel.find({
+    location: {
+      $nearSphere: {
+        $geometry: {
+          type: 'Point',
+          coordinates: [longitude, latitude],
+        },
+        $maxDistance: 4000, // meters
+        $minDistance: 0,
+      },
+    },
+
+    _id: { $ne: req.authUser.id },
+    status: 'open',
+  })
+
+  res.status(200).json({
+    success: true,
+    nearbyBloodBanks,
+  })
+})
+
 // GET NEAR BY USER(S) AND BLOOD BANK(S) -
 exports.getNearBy = catchAsyncErr(async (req, res, next) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id)
