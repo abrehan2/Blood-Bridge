@@ -184,7 +184,7 @@ const emailBloodBanks = async (bloodBanks, bloodType, bloodBank) => {
       email: bank?.email,
       subject: 'Blood Bridge: Blood Type Request',
       message: html,
-    })
+    });
 
     await Promise.all([emailPromise])
   }
