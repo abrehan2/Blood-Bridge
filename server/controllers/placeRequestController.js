@@ -9,10 +9,10 @@ const sendEmail = require('../utils/email')
 // GET NEARBY BLOOD BANKS FOR BLOOD BNKA -
 exports.getNearBloodBanks = catchAsyncErr(async (req, res) => {
   const bloodBank = await bloodBankModel.findById(req.authUser.id)
-  console.log(bloodBank) 
+
   const longitude = bloodBank.location.coordinates[0]
   const latitude = bloodBank.location.coordinates[1]
- 
+
   const nearbyBloodBanks = await bloodBankModel.find({
     location: {
       $nearSphere: {

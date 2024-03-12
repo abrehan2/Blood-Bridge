@@ -9,9 +9,8 @@ router
   .route('/bloodBank/action')
   .post(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBy)
 
-  router
+router
   .route('/bloodBanks')
-  .get(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBloodBanks) 
+  .get(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBloodBanks)
 
 module.exports = router
-  
