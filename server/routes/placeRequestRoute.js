@@ -1,6 +1,10 @@
 // IMPORTS -
 const express = require('express')
-const { getNearBy, getNearBloodBanks } = require('../controllers/placeRequestController')
+const {
+  getNearBy,
+  getNearBloodBanks,
+  getRecords,
+} = require('../controllers/placeRequestController')
 const { authenticateBloodBank, authorizeRoles } = require('../middlewares/auth')
 const router = express.Router()
 
@@ -12,5 +16,9 @@ router
 router
   .route('/bloodBanks')
   .get(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBloodBanks)
+
+router
+  .route('/bloodBanks/records')
+  .get(authenticateBloodBank, authorizeRoles('bloodBank'), getRecords)
 
 module.exports = router
