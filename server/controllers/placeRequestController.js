@@ -89,6 +89,8 @@ exports.getNearBy = catchAsyncErr(async (req, res, next) => {
   })
 })
 
+// SAVE RECORD -
+
 // CHECK BLOOD TYPE FOR BLOOD BANK -
 const checkBloodType = async (req, next, users, bloodBanks) => {
   const bloodType = await bloodGroupModel.findOne({
@@ -184,7 +186,7 @@ const emailBloodBanks = async (bloodBanks, bloodType, bloodBank) => {
       email: bank?.email,
       subject: 'Blood Bridge: Blood Type Request',
       message: html,
-    });
+    })
 
     await Promise.all([emailPromise])
   }
