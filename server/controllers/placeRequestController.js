@@ -99,6 +99,7 @@ const saveRecord = async (req, bloodBanks) => {
     bloodType: req.body.bloodType,
     bloodBags: req.body.bloodBags,
     urgent: req.body.urgent,
+    area: req.body.area,
     bloodBanks,
   })
 }

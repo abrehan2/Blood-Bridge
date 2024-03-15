@@ -30,6 +30,11 @@ const requestRecordSchema = new mongoose.Schema({
     default: false,
   },
 
+  area: {
+    type: String,
+    required: true
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
