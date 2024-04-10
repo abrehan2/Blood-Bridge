@@ -23,7 +23,7 @@ exports.registerUser = catchAsyncErr(async (req, res, next) => {
   let user = await userModel.findOne({ email })
 
   if (user) {
-    return next(new ErrorHandler('The email address you entered is already in use', 409))
+    return next(new ErrorHandler('The email address you entered is already in use', 400))
   }
 
   user = await userModel.create({
