@@ -99,3 +99,16 @@ exports.removeBloodType = catchAsyncErr(async (req, res, next) => {
     message: 'Blood type has been removed',
   })
 })
+
+// ADMIN ROUTE TO FETCH ALL BLOOD TYPES -
+exports.getAllBloodTypesAdmin = catchAsyncErr(async (req, res) => { 
+
+  const bloodTypes = await bloodGroupModel.find();
+
+  res.status(200).json({
+    success: true,
+    bloodTypes,
+  });
+
+
+});

@@ -1,12 +1,13 @@
 // IMPORTS -
 const express = require('express')
 const router = express.Router()
-const { authenticateBloodBank, authorizeRoles } = require('../middlewares/auth')
+const { authenticateBloodBank, authorizeRoles, authenticateUser } = require('../middlewares/auth')
 const {
   createBloodType,
   getAllBloodTypes,
   updateBloodType,
   removeBloodType,
+  getAllBloodTypesAdmin,
 } = require('../controllers/bloodGroupController')
 
 // BLOOD BANK -
@@ -22,5 +23,12 @@ router
 router
   .route('/bloodBank/bloodType/delete')
   .delete(authenticateBloodBank, authorizeRoles('bloodBank'), removeBloodType)
+
+
+// ADMIN -
+router
+  .route('/admin/bloodType/all')
+  .get(authenticateUser, authorizeRoles('admin'), getAllBloodTypesAdmin)
+
 
 module.exports = router

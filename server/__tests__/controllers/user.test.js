@@ -4,17 +4,22 @@ const {
   getUserDetails,
   userFeedBack,
   viewBloodBank,
+  getUserLocation,
+  deactivateAccount
 } = require('../../controllers/userController')
 const userSchema = require('../../models/userModel')
 const bloodBankSchema = require('../../models/bloodBankModel')
 const bloodGroupSchema = require('../../models/BloodGroupModel')
 const ErrorHandler = require('../../utils/errorHandler')
+const { getEvents } = require('../../utils/location')
+
 
 // PARTIALS -
-jest.mock('../../models/userModel')
+jest.mock('../../models/userModel');
 jest.mock('../../utils/errorHandler')
 jest.mock('../../models/bloodBankModel')
 jest.mock('../../models/BloodGroupModel')
+jest.mock('../../utils/location')
 
 const imageBuffer = 'https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp'
 const mockData = {
@@ -45,7 +50,7 @@ const response = {
 
 const next = jest.fn()
 
-describe('Register user', () => {
+describe('Register User', () => {
   it('Registration fails on existing user, returning status code 400', async () => {
     userSchema.findOne.mockImplementationOnce(() => ({
       id: Math.floor(Math.random() * Date.now()),
@@ -55,7 +60,7 @@ describe('Register user', () => {
     expect(next).toHaveBeenCalledWith(expect.any(ErrorHandler))
   })
 
-  it('Create user', async () => {
+  it('Create User', async () => {
     userSchema.create.mockResolvedValueOnce(mockData)
 
     await registerUser(request, response, next)
@@ -81,7 +86,7 @@ it('Should return user details when user is logged in', async () => {
   expect(response.status).toHaveBeenCalledWith(200)
 })
 
-it('User feedback', async () => {
+it('User Feedback', async () => {
   const req = {
     body: {
       feedback: 'Great experience! Keep up the good work.',
@@ -106,7 +111,7 @@ it('User feedback', async () => {
 })
 
 describe('View Blood Bank', () => {
-  it('should return blood bank details with associated blood groups', async () => {
+  it('Should return blood bank details with associated blood groups', async () => {
     const req = {
       params: {
         id: Math.floor(Math.random() * Date.now()),
@@ -134,7 +139,7 @@ describe('View Blood Bank', () => {
     expect(next).not.toHaveBeenCalled()
   })
 
-  it('should handle blood bank not found', async () => {
+  it('Should handle blood bank not found', async () => {
     const req = {
       params: {
         id: 'invalidId',
@@ -150,4 +155,55 @@ describe('View Blood Bank', () => {
     expect(response.status).not.toHaveBeenCalled()
     expect(response.json).not.toHaveBeenCalled()
   })
+})
+
+describe('Get User Location', () => {
+
+  it('should handle user location retrieval and update successfully', async () => {
+    const req = { authUser: { id: 'userId' } };
+
+    const user = { location: { coordinates: [0, 0] }, save: jest.fn() };
+    const latitude = 40.7128;
+    const longitude = -74.0060;
+    const event = 'Success';
+
+    userSchema.findById.mockResolvedValue(user);
+    getEvents.mockReturnValue({ latitude, longitude, event });
+
+    await getUserLocation(req, response, next);
+
+    expect(userSchema.findById).toHaveBeenCalledWith('userId');
+    expect(getEvents).toHaveBeenCalled();
+    expect(user.location.coordinates[0]).toBe(longitude);
+    expect(user.location.coordinates[1]).toBe(latitude);
+    expect(user.save).toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
+  });
+
+});
+
+describe('Deactivate Account', () => {
+  it('should deactivate the user account successfully', async () => {
+    const req = { authUser: { id: 'userId' } };
+    const res = {
+      cookie: jest.fn().mockReturnThis(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    const updatedUser = { isActive: false };
+    userSchema.findByIdAndUpdate.mockResolvedValue(updatedUser);
+
+    await deactivateAccount(req, res, next);
+
+    expect(userSchema.findByIdAndUpdate).toHaveBeenCalledWith(
+      'userId',
+      { isActive: false },
+      { new: true, runValidators: true, useFindAndModify: false }
+    );
+    expect(res.cookie).toHaveBeenCalledWith('token', null, { expires: expect.any(Date), httpOnly: true });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Your account has been deactivated' });
+    expect(next).not.toHaveBeenCalled();
+  });
 })
