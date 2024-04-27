@@ -60,6 +60,7 @@ const response = {
 const next = jest.fn()
 
 describe('Register User', () => {
+  
   it('Registration fails on existing user, returning status code 400', async () => {
     userSchema.findOne.mockImplementationOnce(() => ({
       id: Math.floor(Math.random() * Date.now()),
@@ -120,6 +121,7 @@ it('User Feedback', async () => {
 })
 
 describe('View Blood Bank', () => {
+  
   it('Should return blood bank details with associated blood groups', async () => {
     const req = {
       params: {
@@ -167,6 +169,7 @@ describe('View Blood Bank', () => {
 })
 
 describe('Get User Location', () => {
+  
   it('Should handle user location retrieval and update successfully', async () => {
     const req = { authUser: { id: 'userId' } }
 
@@ -190,6 +193,7 @@ describe('Get User Location', () => {
 })
 
 describe('Deactivate Account', () => {
+  
   it('should deactivate the user account successfully', async () => {
     const req = { authUser: { id: 'userId' } }
     const res = {
@@ -222,6 +226,7 @@ describe('Deactivate Account', () => {
 })
 
 describe('Get Blood Banks', () => {
+  
   it('should retrieve blood banks and their associated blood groups successfully', async () => {
     const res = {
       status: jest.fn().mockReturnThis(),

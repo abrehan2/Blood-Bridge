@@ -527,7 +527,7 @@ exports.updateAccountStatus = catchAsyncErr(async (req, res, next) => {
   })
 })
 
-// BLOCK USER -
+// BLOCK BLOOD BANK -
 exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
   const { status } = req.body
   const bloodBank = await bloodBankModel.findById(req.params.id)
@@ -559,7 +559,7 @@ exports.blockBloodBank = catchAsyncErr(async (req, res, next) => {
   })
 })
 
-// DELETE USER -
+// DELETE BLOOD BANK -
 exports.deleteBloodBank = catchAsyncErr(async (req, res, next) => {
   const bloodBank = await bloodBankModel.findById(req.params.id)
 
