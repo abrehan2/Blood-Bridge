@@ -28,9 +28,15 @@ module.exports = (app) => {
   )
 
   // FOR TESTING -
-  app.get('/', (_req, res) => {
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'))
-  })
+  // app.get('/', (_req, res) => {
+  //   return res.sendFile(path.join(__dirname, 'public', 'index.html'))
+  // })
+
+  // FOR DEPLOYMENT -
+app.get("/", (_req, res) => {
+  res.send("<h1>Processing</h1>");
+});
+
 
   // IMPORT ROUTES -
   const userRoute = require('../routes/userRoute')
