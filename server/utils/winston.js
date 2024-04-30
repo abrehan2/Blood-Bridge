@@ -7,7 +7,7 @@ const logger = (level, m) => {
       level: level,
       format: winston.format.json(),
       defaultMeta: { service: 'user-service' },
-      transports: [new winston.transports.File({ filename: './logs/error.log' })],
+      transports: [new winston.transports.File({ filename: '../logs/error.log' })],
     })
     .log({
       level: level,
