@@ -28,14 +28,9 @@ module.exports = (app) => {
   )
 
   // FOR TESTING -
-  // app.get('/', (_req, res) => {
-  //   return res.sendFile(path.join(__dirname, 'public', 'index.html'))
-  // })
-
-  // FOR DEPLOYMENT -
-app.get("/", (_req, res) => {
-  res.send("<h1>Processing</h1>");
-});
+  app.get('/', (_req, res) => {
+    return res.sendFile(path.join(__dirname, '../public', 'index.html'))
+  })
 
 
   // IMPORT ROUTES -
