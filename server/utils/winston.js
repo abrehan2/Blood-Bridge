@@ -1,5 +1,6 @@
 // IMPORTS -
 const winston = require('winston')
+const path = require('path');
 
 const logger = (level, m) => {
   return winston
@@ -7,7 +8,7 @@ const logger = (level, m) => {
       level: level,
       format: winston.format.json(),
       defaultMeta: { service: 'user-service' },
-      transports: [new winston.transports.File({ filename: '../logs/error.log' })],
+      transports: [new winston.transports.File({ filename: path.join(__dirname, '..', 'logs', 'error.log') })],
     })
     .log({
       level: level,
