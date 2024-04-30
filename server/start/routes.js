@@ -26,10 +26,10 @@ module.exports = (app) => {
       optionsSuccessStatus: 204,
     }),
   )
-
+  
   // FOR TESTING -
   app.get('/', (_req, res) => {
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'))
+    return res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
   })
 
   // FOR DEPLOYMENT -
