@@ -13,8 +13,8 @@ require('./start/routes')(app)
 
 
 // // FOR DEPLOYMENT -
-// app.get("/", (req, res) => {
-//   res.send("<h1>Processing</h1>");
-// });
+app.get("/", (req, res) => {
+  res.send("<h1>Processing</h1>");
+});
 
 module.exports = app

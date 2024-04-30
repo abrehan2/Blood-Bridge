@@ -64,7 +64,7 @@ describe('Register User', () => {
   it('Registration fails on existing user, returning status code 400', async () => {
     userSchema.findOne.mockImplementationOnce(() => ({
       id: Math.floor(Math.random() * Date.now()),
-      email: 'email',
+      email: 'rehannajam2@gmail.com',
     }))
     await registerUser(request, response, next)
     expect(next).toHaveBeenCalledWith(expect.any(ErrorHandler))
