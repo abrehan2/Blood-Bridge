@@ -15,7 +15,7 @@ const {
 } = require('../../controllers/userController')
 const userSchema = require('../../models/userModel')
 const bloodBankSchema = require('../../models/bloodBankModel')
-const bloodGroupSchema = require('../../models/BloodGroupModel')
+const bloodGroupSchema = require('../../models/bloodGroupModel')
 const reviewSchema = require('../../models/reviewModel')
 const ErrorHandler = require('../../utils/errorHandler')
 const { getEvents } = require('../../utils/location')

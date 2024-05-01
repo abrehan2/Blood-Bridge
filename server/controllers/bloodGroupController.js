@@ -1,7 +1,7 @@
 // IMPORTS -
 const ErrorHandler = require('../utils/errorHandler')
 const catchAsyncErr = require('../middlewares/catchAsyncErr')
-const bloodGroupModel = require('../models/BloodGroupModel')
+const bloodGroupModel = require('../models/bloodGroupModel')
 
 // CREATE BLOOD TYPE -
 exports.createBloodType = catchAsyncErr(async (req, res, next) => {

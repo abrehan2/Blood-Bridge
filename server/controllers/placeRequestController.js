@@ -3,7 +3,7 @@ const ErrorHandler = require('../utils/errorHandler')
 const catchAsyncErr = require('../middlewares/catchAsyncErr')
 const userModel = require('../models/userModel')
 const bloodBankModel = require('../models/bloodBankModel')
-const bloodGroupModel = require('../models/BloodGroupModel')
+const bloodGroupModel = require('../models/bloodGroupModel')
 const saveRequestModel = require('../models/SaveRequestModel')
 const sendEmail = require('../utils/email')
 

@@ -7,10 +7,10 @@ const bloodBankModel = require('../models/bloodBankModel')
 const reviewModel = require('../models/reviewModel')
 const bloodRequestModel = require('../models/bloodRequestModel')
 const bloodDonationModel = require('../models/bloodDonationModel')
-const bloodGroup = require('../models/BloodGroupModel')
+const bloodGroup = require('../models/bloodGroupModel')
 const crypto = require('crypto')
 const sendEmail = require('../utils/email')
-const bloodGroupModel = require('../models/BloodGroupModel')
+const bloodGroupModel = require('../models/bloodGroupModel')
 const { getEvents } = require('../utils/location')
 
 // PARTIALS -
