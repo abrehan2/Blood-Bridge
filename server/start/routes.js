@@ -32,12 +32,6 @@ module.exports = (app) => {
     return res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
   })
 
-  // FOR DEPLOYMENT -
-// app.get("/", (_req, res) => {
-//   res.send("<h1>Processing</h1>");
-// });
-
-
   // IMPORT ROUTES -
   const userRoute = require('../routes/userRoute')
   const bloodBankRoute = require('../routes/bloodBankRoute')
