@@ -1,7 +1,7 @@
 // IMPORTS -
 const ErrorHandler = require('../utils/errorHandler')
 
-const errorMiddleware = (error, _req, res) => {
+const errorMiddleware = (error, _req, res, next) => {
   console.log(error)
   error.statusCode = error.statusCode || 500
   error.message = error.message || 'Internal server error'
