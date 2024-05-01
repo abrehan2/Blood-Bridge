@@ -7,7 +7,6 @@ const bloodBankModel = require('../models/bloodBankModel')
 const reviewModel = require('../models/reviewModel')
 const bloodRequestModel = require('../models/bloodRequestModel')
 const bloodDonationModel = require('../models/bloodDonationModel')
-const bloodGroup = require('../models/bloodGroupModel')
 const crypto = require('crypto')
 const sendEmail = require('../utils/email')
 const bloodGroupModel = require('../models/bloodGroupModel')
@@ -503,7 +502,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 // GET ALL BLOOD BANKS -
 exports.getBloodBanks = catchAsyncErr(async (req, res) => {
   const bloodBanks = await bloodBankModel.find({ status: 'open' })
-  const bloodTypes = await bloodGroup.find()
+  const bloodTypes = await bloodGroupModel.find()
   const formatBloodBanks = new Map()
 
   bloodBanks.forEach((bank) => {
