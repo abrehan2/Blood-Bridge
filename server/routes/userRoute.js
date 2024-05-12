@@ -57,7 +57,7 @@ router
   .post(authenticateUser, authorizeRoles('user'), reviewBloodBank)
 router.route('/user/bloodBank/:id').get(authenticateUser, authorizeRoles('user'), viewBloodBank)
 router.route('/user/feedbacks').get(getUserFeedback);
-router.route('/user/reviews').get(getUserReviews);
+router.route('/user/reviews').get(authenticateUser, authorizeRoles('user'), getUserReviews);
 
 // ADMIN ROUTES -
 router.route('/admin/user/all').get(authenticateUser, authorizeRoles('admin'), getAllUsers)
