@@ -24,6 +24,7 @@ const {
   getAllReviews,
   deleteReview,
   viewBloodBank,
+  getUserFeedback,
 } = require('../controllers/userController')
 const { authenticateUser, authorizeRoles } = require('../middlewares/auth')
 
@@ -54,6 +55,7 @@ router
   .route('/user/review/bloodBank')
   .post(authenticateUser, authorizeRoles('user'), reviewBloodBank)
 router.route('/user/bloodBank/:id').get(authenticateUser, authorizeRoles('user'), viewBloodBank)
+router.route('/user/feedbacks').get(getUserFeedback);
 
 // ADMIN ROUTES -
 router.route('/admin/user/all').get(authenticateUser, authorizeRoles('admin'), getAllUsers)

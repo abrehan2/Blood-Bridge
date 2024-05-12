@@ -595,6 +595,16 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
   })
 })
 
+// GET USER FEEDBACK -
+exports.getUserFeedback = catchAsyncErr(async (_req, res) => {
+  const feedbacks = await userModel.find().select('feedback')
+
+  res.status(200).json({
+    success: true,
+    feedbacks,
+  })
+})
+
 ///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
 
 // GET ALL USERS -
