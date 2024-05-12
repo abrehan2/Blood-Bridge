@@ -22,6 +22,7 @@ const {
   getBloodRequests,
   getBloodDonations,
   updateAccountStatus,
+  getBloodBanksForCards,
 } = require('../controllers/bloodBankController')
 const { authenticateBloodBank, authorizeRoles, authenticateUser } = require('../middlewares/auth')
 
@@ -51,6 +52,8 @@ router
 router
   .route('/bloodBank/reviews')
   .get(authenticateBloodBank, authorizeRoles('bloodBank'), getAllReviews)
+
+  router.route('/bloodBanks').get(getBloodBanksForCards);
 
 // ADMIN ROUTES -
 router

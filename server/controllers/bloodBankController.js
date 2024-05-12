@@ -469,6 +469,16 @@ exports.getAllReviews = catchAsyncErr(async (req, res) => {
   })
 })
 
+// GET BLOOD BANKS FOR CARDS -
+exports.getBloodBanksForCards = catchAsyncErr(async (_req, res) => {
+  const bloodBanks = await bloodBankModel.find().limit(3)
+
+  res.status(200).json({
+    success: true,
+    bloodBanks,
+  })
+})
+
 ///////////////////////////////////////////////// ADMIN ROUTES ///////////////////////////////////////////////////
 
 // GET ALL BLOOD BANKS -
