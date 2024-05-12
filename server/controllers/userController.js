@@ -581,7 +581,7 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
 
 // GET USER FEEDBACK -
 exports.getUserFeedback = catchAsyncErr(async (_req, res) => {
-  const feedbacks = await userModel.find().select('feedback')
+  const feedbacks = await userModel.find().select('feedback avatar firstName lastName')
 
   res.status(200).json({
     success: true,

@@ -461,7 +461,7 @@ exports.deactivateAccount = catchAsyncErr(async (req, res, next) => {
 exports.getAllReviews = catchAsyncErr(async (req, res) => {
   const reviews = await reviewModel
     .find({ bloodBank: req.authUser.id })
-    .populate('user', 'firstName lastName')
+    .populate('user', 'firstName lastName avatar')
 
   res.status(200).json({
     success: true,
