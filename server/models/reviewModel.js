@@ -20,6 +20,17 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
 
+    reqType: {
+      type: String,
+      enum: ['donate', 'request'],
+      required: true,
+    },
+
+    typeId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'bloodDonation' || 'bloodRequest',
+      required: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

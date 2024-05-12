@@ -58,6 +58,12 @@ const bloodRequestSchema = new mongoose.Schema({
     enum: ['System', 'Site'],
   },
 
+  reviewed: {
+    type: Boolean,
+    enum: [true, false],
+    default: false,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,

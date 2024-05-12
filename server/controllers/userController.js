@@ -533,7 +533,7 @@ exports.getBloodBanks = catchAsyncErr(async (req, res) => {
 
 // REVIEW A BLOOD BANK -
 exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
-  const { comment, bloodBankId } = req.body
+  const { comment, bloodBankId, typeId, typeStatus } = req.body
 
   if (!comment) {
     return next(new ErrorHandler('Please fill in all required fields', 400))
@@ -545,55 +545,39 @@ exports.reviewBloodBank = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler('Blood bank found', 404))
   }
 
-  const lastReview = await reviewModel
-    .findOne({ user: req.authUser.id, bloodBank: bloodBankId })
-    .sort({ createdAt: -1 })
+  let requestExist;
 
-  if (!lastReview) {
-    await reviewModel.create({
+  if (typeStatus === 'request') requestExist = await bloodRequestModel.findById(typeId)
+  else requestExist = await bloodDonationModel.findById(typeId)
+
+  if (!requestExist)
+    return next(new ErrorHandler('Request not found', 404))
+
+
+  if (!requestExist.reviewed) {
+    const reviewPromise = reviewModel.create({
       comment,
       user: req.authUser.id,
-      bloodBank,
-    })
+      bloodBank: bloodBankId,
+      reqType: typeStatus,
+      typeId: {
+        _id: typeId,
+        ref: typeStatus === 'request' ? 'bloodRequest' : 'bloodDonation',
+      },
+      });
 
-    return res.status(201).json({
-      success: true,
-      message: `Your first review has been submitted to ${bloodBank.name}`,
-    })
+    const updatePromise = requestExist.updateOne({ reviewed: true });
+
+    await Promise.all([reviewPromise, updatePromise]);
   }
 
-  const bloodRequest = await bloodRequestModel.findOne({
-    user: req.authUser.id,
-    createdAt: { $gte: lastReview?.createdAt.getTime() },
-  })
+  else return next(new ErrorHandler('Your review has already been recorded', 400));
 
-  const bloodDonation = await bloodDonationModel.findOne({
-    user: req.authUser.id,
-    createdAt: { $gte: lastReview?.createdAt.getTime() },
-  })
-
-  console.log(bloodDonation, bloodRequest)
-
-  if (!bloodRequest && !bloodDonation) {
-    return next(
-      new ErrorHandler(
-        'You must make a new blood request or donation before reviewing the blood bank again',
-        400,
-      ),
-    )
-  }
-
-  await reviewModel.create({
-    comment,
-    user: req.authUser.id,
-    bloodBank,
-  })
-
-  res.status(201).json({
-    success: true,
-    message: `Your review has been submitted to ${bloodBank.name}`,
-  })
-})
+  res.status(200).json({
+    status: true,
+    message: `Your review has been recorded for ${bloodBank.name}`,
+  });
+});
 
 // GET USER FEEDBACK -
 exports.getUserFeedback = catchAsyncErr(async (_req, res) => {
