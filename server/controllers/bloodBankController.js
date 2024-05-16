@@ -10,7 +10,7 @@ const crypto = require('crypto')
 const sendEmail = require('../utils/email')
 
 // PARTIALS -
-const imageBuffer = 'https://utfs.io/f/d7cfaa2b-ee7b-47eb-8963-1f41ab93b88f-nest39.webp'
+const imageBuffer = 'https://utfs.io/f/bab122ab-46a9-4d4b-b9a1-aa785bd403f6-nsycgj.webp'
 
 // REGISTER A BLOOD BANK -
 exports.registerBloodBank = catchAsyncErr(async (req, res, next) => {
