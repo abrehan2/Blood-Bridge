@@ -25,3 +25,7 @@
 {"level":"error","message":"Your review has already been recorded","service":"user-service"}
 {"level":"error","message":"Your review has already been recorded","service":"user-service"}
 {"level":"error","message":"Please login to continue","service":"user-service"}
+{"level":"error","message":"The email address you entered is already in use","service":"user-service"}
+{"level":"error","message":"The email address you entered is already in use","service":"user-service"}
+{"level":"error","message":"The email address you entered is already in use","service":"user-service"}
+{"level":"error","message":"The email address you entered is already in use","service":"user-service"}
