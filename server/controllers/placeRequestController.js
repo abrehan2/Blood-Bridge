@@ -106,7 +106,7 @@ const saveRecord = async (req, bloodBanks) => {
 
 // GET RECORDS -
 exports.getRecords = catchAsyncErr(async (req, res) => {
-  const records = await saveRequestModel.find().populate("bloodBanks", "name");
+  const records = await saveRequestModel.find().populate("bloodBanks Requester", "name name");
 
   res.status(200).json({
     success: true,
