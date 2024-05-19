@@ -29,3 +29,4 @@
 {"level":"error","message":"The email address you entered is already in use","service":"user-service"}
 {"level":"error","message":"The email address you entered is already in use","service":"user-service"}
 {"level":"error","message":"The email address you entered is already in use","service":"user-service"}
+{"level":"error","message":"Blood type not found","service":"user-service"}

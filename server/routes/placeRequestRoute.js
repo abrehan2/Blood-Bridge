@@ -14,7 +14,7 @@ router
   .post(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBy)
 
 router
-  .route('/bloodBanks')
+  .route('/bloodBanks/locate')
   .get(authenticateBloodBank, authorizeRoles('bloodBank'), getNearBloodBanks)
 
 router
