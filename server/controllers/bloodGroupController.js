@@ -66,6 +66,11 @@ exports.updateBloodType = catchAsyncErr(async (req, res, next) => {
     return next(new ErrorHandler('Stock cannot exceed 1000 units', 400))
   }
 
+  getBloodType.stockHistory.push({
+    stock: getBloodType.stock,
+    createdAt: Date.now(),
+  })
+
   getBloodType.stock = stock
   await getBloodType.save()
 
