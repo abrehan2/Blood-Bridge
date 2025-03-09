@@ -1,8 +1,6 @@
 # Blood Bridge
 
-Blood Bridge aims to connect users with local blood banks, facilitating both blood requests and donations.
-
-Blood banks maintain real-time inventories of various blood types, enabling them to respond to blood requests based on their current stock.
+Blood Bridge aims to connect users with local blood banks, facilitating both blood requests and donations. Blood banks maintain real-time inventories of various blood types, enabling them to respond to blood requests based on their current stock.
 
 Additionally, blood banks manage blood donation requests and promptly update users on the status of their requests or donations.
 
