@@ -1,6 +1,12 @@
 # Blood Bridge
 
-The system is designed to establish a connection between users and local blood banks, facilitating both blood requests and donations. Blood banks maintain real-time inventories of various blood types, allowing them to respond to blood requests based on their current stock. Additionally, blood banks handle blood donation requests and promptly update users on the status of their requests or donations. The platform supports the generation of events by blood banks to notify connected users. In cases where a blood bank faces an insufficient supply of a specific blood type, it can issue requests to nearby users and blood banks for that particular blood type. The admin panel is seamlessly integrated to monitor users and blood banks, enabling the execution of various actions as required.
+Blood Bridge aims to connect users with local blood banks, facilitating both blood requests and donations.
+
+Blood banks maintain real-time inventories of various blood types, enabling them to respond to blood requests based on their current stock.
+
+Additionally, blood banks manage blood donation requests and promptly update users on the status of their requests or donations.
+
+Furthermore, the platform allows blood banks to generate events and notify connected users. If a blood bank lacks a specific blood type, it can request it from nearby users or other blood banks.
 
 ## Table of Contents
 
